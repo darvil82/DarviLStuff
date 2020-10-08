@@ -58,7 +58,7 @@ exit /b
 
 
 
-
+::Build all the required variables for ::display. For files, set the text variable to be the content of a file.
 :build
 if "%4"=="str" (
 	call ::color-trans %2
@@ -84,7 +84,7 @@ exit /b
 
 
 
-
+::Call powershell to display the line. All the colors has been converted so write-host can read it properly.
 :display
 if "%invalid%"=="1" exit /b
 powershell write-host -back %color_bg% -fore %color_fg% %text%
@@ -93,7 +93,7 @@ exit /b
 
 
 
-
+::Transform the hex value of the color into a valid value for write-host.
 :color-trans
 if /i "%1"=="0" (
 	set color_new=Black

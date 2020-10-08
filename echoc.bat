@@ -1,0 +1,191 @@
+@echo off
+setlocal EnableDelayedExpansion
+
+set ver=1.0
+
+set parm1=%1
+set parm2=%2
+set parm3=%3
+set parm4=%4
+
+set color_fg=
+set color_bg=
+set color_new=
+
+
+
+
+if "%parm1%"=="-s" (
+	if not defined parm2 (
+		echo Parameter [CONTENT] is not defined.
+		set invalid=1
+	)
+	if not defined parm3 (
+		echo Parameter [COLOR-BG] is not defined.
+		set invalid=1
+	)
+	if not defined parm4 (
+		echo Parameter [COLOR-FG] is not defined.
+		set invalid=1
+	)
+	call ::build %parm2% %parm3% %parm4% str
+	exit /b
+)
+if "%parm1%"=="-f" (
+	if not defined parm2 (
+		echo Parameter [CONTENT] is not defined.
+		set invalid=1
+	)
+	if not defined parm3 (
+		echo Parameter [COLOR-BG] is not defined.
+		set invalid=1
+	)
+	if not defined parm4 (
+		echo Parameter [COLOR-FG] is not defined.
+		set invalid=1
+	)
+	call ::build %parm2% %parm3% %parm4% file
+	exit /b
+)
+if not defined parm1 goto help
+if /i "%parm1%"=="/?" goto help
+if /i "%parm1%"=="-?" goto help
+if /i "%parm1%"=="-h" goto help
+
+echo Unexpected "%parm1%" parameter.
+exit /b
+	
+
+
+
+
+:build
+if "%4"=="str" (
+	call ::color-trans %2
+	set color_bg=!color_new!
+	call ::color-trans %3
+	set color_fg=!color_new!
+	set text=%1
+
+	call ::display
+)
+if "%4"=="file" (
+	call ::color-trans %2
+	set color_bg=!color_new!
+	call ::color-trans %3
+	set color_fg=!color_new!
+	set /p text=<%1
+	
+	call ::display
+)
+
+exit /b
+
+
+
+
+
+:display
+if "%invalid%"=="1" exit /b
+powershell write-host -back %color_bg% -fore %color_fg% %text%
+exit /b
+
+
+
+
+
+:color-trans
+if /i "%1"=="0" (
+	set color_new=Black
+	exit /b
+)
+if /i "%1"=="1" (
+	set color_new=DarkBlue
+	exit /b
+)
+if /i "%1"=="2" (
+	set color_new=DarkGreen
+	exit /b
+)
+if /i "%1"=="3" (
+	set color_new=DarkCyan
+	exit /b
+)
+if /i "%1"=="4" (
+	set color_new=DarkRed
+	exit /b
+)
+if /i "%1"=="5" (
+	set color_new=DarkMagenta
+	exit /b
+)
+if /i "%1"=="6" (
+	set color_new=DarkYellow
+	exit /b
+)
+if /i "%1"=="7" (
+	set color_new=Gray
+	exit /b
+)
+if /i "%1"=="8" (
+	set color_new=DarkGray
+	exit /b
+)
+if /i "%1"=="9" (
+	set color_new=Blue
+	exit /b
+)
+if /i "%1"=="a" (
+	set color_new=Green
+	exit /b
+)
+if /i "%1"=="b" (
+	set color_new=Cyan
+	exit /b
+)
+if /i "%1"=="c" (
+	set color_new=Red
+	exit /b
+)
+if /i "%1"=="d" (
+	set color_new=Magenta
+	exit /b
+)
+if /i "%1"=="r" (
+	set color_new=Yellow
+	exit /b
+)
+if /i "%1"=="f" (
+	set color_new=White
+	exit /b
+)
+echo "%1" is not a valid color value.
+set invalid=1
+exit /b 1
+
+
+
+
+
+:help
+echo Displays text in one line with different colors. Can also print files.
+echo By DarviL. Using version %ver%.
+echo:
+echo ECHOC [TYPE] [CONTENT] [COLOR-BG] [COLOR-FG]
+echo:
+echo   TYPE       -s : Displays a normal string.
+echo              -f : Displays a file's content.
+echo:
+echo   CONTENT       : Select the file/string to be displayed.
+echo:
+echo   COLOR      BG : Select the color to be displayed on the background
+echo                   of the line. [0-F]
+echo              FG : Select the color to be displayed on the foreground
+echo                   of the line (color of the text). [0-F]
+echo:
+echo:
+echo   To see all the available colors, check 'color /?'.
+echo   This function uses Windows PowerShell 'write-host' module in order to work.
+echo   It is possible that at the first time it will take more time due to the delay
+echo   that PowerShell has.
+exit /b

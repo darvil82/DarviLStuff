@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.0
+set ver=1.0.1
 
 set parm1=%1
 set parm2=%2
@@ -70,6 +70,7 @@ if "%4"=="str" (
 	call ::display
 )
 if "%4"=="file" (
+	if not exist %1 set invalid=1
 	call ::color-trans %2
 	set color_bg=!color_new!
 	call ::color-trans %3

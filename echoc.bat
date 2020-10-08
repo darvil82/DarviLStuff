@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.0.1
+set ver=1.0.2
 
 set parm1=%1
 set parm2=%2
@@ -79,7 +79,6 @@ if "%4"=="file" (
 	
 	call ::display
 )
-
 exit /b
 
 
@@ -152,7 +151,7 @@ if /i "%1"=="d" (
 	set color_new=Magenta
 	exit /b
 )
-if /i "%1"=="r" (
+if /i "%1"=="e" (
 	set color_new=Yellow
 	exit /b
 )

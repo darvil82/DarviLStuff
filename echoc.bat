@@ -40,7 +40,7 @@ if "%parm1%"=="-f" (
 	if not defined parm4 (
 		call :error-parm COLOR-FG
 	)
-	call ::build %parm2% %parm3% %parm4% file
+	call :build %parm2% %parm3% %parm4% file
 	exit /b
 )
 if /i "%parm1%"=="/?" goto help
@@ -60,7 +60,7 @@ exit /b
 
 
 
-::Build all the required variables for ::display. For files, set the text variable to be the content of a file.
+::Build all the required variables for ::display. For files, set the text variable on every loop with the content of the line, then run ::display.
 :build
 if "%4"=="str" (
 	call ::color-trans %2
@@ -69,7 +69,7 @@ if "%4"=="str" (
 	set color_fg=!color_new!
 	set text=%1
 
-	call ::display
+	call :display
 )
 if "%4"=="file" (
 	if not exist %1 set invalid=1

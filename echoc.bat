@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.1
+set ver=1.1.1
 
 set parm1=%1
 set parm2=%2
@@ -205,5 +205,6 @@ echo   - This function uses Windows PowerShell 'write-host' module in order to w
 echo   - It is possible that at the first time it will take more time due to the delay
 echo     that PowerShell has.
 echo   - Remember to use 'cmd /c' before this command if used in a batch file.
+echo   - Use '`' for scaping special characters in PowerShell.
 call :display-red "-------------------------------------------------------------------------------------------"
 exit /b

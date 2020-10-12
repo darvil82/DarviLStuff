@@ -1,7 +1,9 @@
+::function to display text in one line with different colors. Can also print files. By DarviL.
+
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.0.2
+set ver=1.1
 
 set parm1=%1
 set parm2=%2
@@ -17,44 +19,44 @@ set color_new=
 
 if "%parm1%"=="-s" (
 	if not defined parm2 (
-		echo Parameter [CONTENT] is not defined.
-		set invalid=1
+		call :error-parm CONTENT
 	)
 	if not defined parm3 (
-		echo Parameter [COLOR-BG] is not defined.
-		set invalid=1
+		call :error-parm COLOR-BG
 	)
 	if not defined parm4 (
-		echo Parameter [COLOR-FG] is not defined.
-		set invalid=1
+		call :error-parm COLOR-FG
 	)
 	call ::build %parm2% %parm3% %parm4% str
 	exit /b
 )
 if "%parm1%"=="-f" (
 	if not defined parm2 (
-		echo Parameter [CONTENT] is not defined.
-		set invalid=1
+		call :error-parm CONTENT
 	)
 	if not defined parm3 (
-		echo Parameter [COLOR-BG] is not defined.
-		set invalid=1
+		call :error-parm COLOR-BG
 	)
 	if not defined parm4 (
-		echo Parameter [COLOR-FG] is not defined.
-		set invalid=1
+		call :error-parm COLOR-FG
 	)
 	call ::build %parm2% %parm3% %parm4% file
 	exit /b
 )
-if not defined parm1 goto help
 if /i "%parm1%"=="/?" goto help
 if /i "%parm1%"=="-?" goto help
 if /i "%parm1%"=="-h" goto help
+if not defined parm1 call :display-red "No parameters were defined."&exit /b
 
-echo Unexpected "%parm1%" parameter.
+call :display-red "Unexpected `'%parm1%`' parameter."
 exit /b
-	
+
+:error-parm
+call :display-red "Parameter [%1] is not defined."
+set invalid=1
+exit /b
+
+
 
 
 
@@ -75,9 +77,11 @@ if "%4"=="file" (
 	set color_bg=!color_new!
 	call ::color-trans %3
 	set color_fg=!color_new!
-	set /p text=<%1
-	
-	call ::display
+	set filename=%1
+	for /f "tokens=1* usebackq" %%G in (!filename!) do (
+		set text=%%G %%H
+		call :display
+	)
 )
 exit /b
 
@@ -89,6 +93,16 @@ exit /b
 if "%invalid%"=="1" exit /b
 powershell write-host -back %color_bg% -fore %color_fg% %text%
 exit /b
+
+::Cheap ones used for simple self calls.
+:display-red
+powershell write-host -back Black -fore Red %1
+exit /b
+
+:display-yellow
+powershell write-host -back Black -fore Yellow %1
+exit /b
+
 
 
 
@@ -159,7 +173,7 @@ if /i "%1"=="f" (
 	set color_new=White
 	exit /b
 )
-echo "%1" is not a valid color value.
+call :display-red "`'%1`' is not a valid color value."
 set invalid=1
 exit /b 1
 
@@ -168,10 +182,12 @@ exit /b 1
 
 
 :help
-echo Displays text in one line with different colors. Can also print files.
-echo By DarviL. Using version %ver%.
 echo:
-echo ECHOC [TYPE] [CONTENT] [COLOR-BG] [COLOR-FG]
+call :display-red "-------------------------------------------------------------------------------------------"
+call :display-yellow "Displays text in one line with different colors. Can also print files."
+call :display-yellow "By DarviL. Using version %ver%."
+echo:
+call :display-yellow "ECHOC [TYPE] [CONTENT] [COLOR-BG] [COLOR-FG]"
 echo:
 echo   TYPE       -s : Displays a normal string.
 echo              -f : Displays a file's content.
@@ -184,8 +200,10 @@ echo              FG : Select the color to be displayed on the foreground
 echo                   of the line (color of the text). [0-F]
 echo:
 echo:
-echo   To see all the available colors, check 'color /?'.
-echo   This function uses Windows PowerShell 'write-host' module in order to work.
-echo   It is possible that at the first time it will take more time due to the delay
-echo   that PowerShell has.
+echo   - To see all the available colors, check 'color /?'.
+echo   - This function uses Windows PowerShell 'write-host' module in order to work.
+echo   - It is possible that at the first time it will take more time due to the delay
+echo     that PowerShell has.
+echo   - Remember to use 'cmd /c' before this command if used in a batch file.
+call :display-red "-------------------------------------------------------------------------------------------"
 exit /b

@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.1.1
+set ver=1.1.2
 
 set parm1=%1
 set parm2=%2

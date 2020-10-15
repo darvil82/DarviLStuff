@@ -72,7 +72,11 @@ if "%4"=="str" (
 	call :display
 )
 if "%4"=="file" (
-	if not exist %1 set invalid=1
+	if not exist %1 (
+		set invalid=1
+		call :display-red "File `'%1`' does not exist."
+		exit /b
+	)
 	call ::color-trans %2
 	set color_bg=!color_new!
 	call ::color-trans %3

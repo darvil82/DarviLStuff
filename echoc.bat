@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.1.1
+set ver=1.2
 
 set parm1=%1
 set parm2=%2
@@ -14,10 +14,19 @@ set color_fg=
 set color_bg=
 set color_new=
 
+if not exist "%temp%/echoc_pschecked" (
+	reg query HKLM\SOFTWARE\Microsoft\PowerShell\1 /v Install | find "Install    REG_DWORD    0x1">nul
+	if !errorlevel!==1 (
+		echo PowerShell isn't installed. ECHOC requires PS to work.
+		exit /b
+	) else type nul > "%temp%/echoc_pschecked"
+)
 
 
 
-if "%parm1%"=="-s" (
+
+
+if /i "%parm1%"=="-s" (
 	if not defined parm2 (
 		call :error-parm CONTENT
 	)
@@ -30,7 +39,7 @@ if "%parm1%"=="-s" (
 	call ::build %parm2% %parm3% %parm4% str
 	exit /b
 )
-if "%parm1%"=="-f" (
+if /i "%parm1%"=="-f" (
 	if not defined parm2 (
 		call :error-parm CONTENT
 	)
@@ -92,6 +101,7 @@ exit /b
 :display
 if "%invalid%"=="1" exit /b
 powershell write-host -back %color_bg% -fore %color_fg% %text%
+
 exit /b
 
 ::Cheap ones used for simple self calls.
@@ -205,6 +215,6 @@ echo   - This function uses Windows PowerShell 'write-host' module in order to w
 echo   - It is possible that at the first time it will take more time due to the delay
 echo     that PowerShell has.
 echo   - Remember to use 'cmd /c' before this command if used in a batch file.
-echo   - Use '`' for scaping special characters in PowerShell.
+echo   - Use '`' for escaping special characters in PowerShell.
 call :display-red "-------------------------------------------------------------------------------------------"
 exit /b

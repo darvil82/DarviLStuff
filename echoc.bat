@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.2
+set ver=1.2.1
 
 set parm1=%1
 set parm2=%2
@@ -197,7 +197,7 @@ call :display-red "-------------------------------------------------------------
 call :display-yellow "Displays text in one line with different colors. Can also print files."
 call :display-yellow "By DarviL. Using version %ver%."
 echo:
-call :display-yellow "ECHOC [TYPE] [CONTENT] [COLOR-BG] [COLOR-FG]"
+call :display-yellow "ECHOC TYPE CONTENT COLOR-BG COLOR-FG"
 echo:
 echo   TYPE       -s : Displays a normal string.
 echo              -f : Displays a file's content.

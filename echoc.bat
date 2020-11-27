@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.2.1
+set ver=1.3
 
 set parm1=%1
 set parm2=%2
@@ -15,7 +15,7 @@ set color_bg=
 set color_new=
 
 if not exist "%temp%/echoc_pschecked" (
-	reg query HKLM\SOFTWARE\Microsoft\PowerShell\1 /v Install | find "Install    REG_DWORD    0x1">nul
+	reg query HKLM\SOFTWARE\Microsoft\PowerShell\1 /v Install | find "Install    REG_DWORD    0x1" >nul
 	if !errorlevel!==1 (
 		echo PowerShell isn't installed. ECHOC requires PS to work.
 		exit /b
@@ -27,31 +27,42 @@ if not exist "%temp%/echoc_pschecked" (
 
 
 if /i "%parm1%"=="-s" (
-	if not defined parm2 (
-		call :error-parm CONTENT
+	if not defined parm2 call :error-parm CONTENT
+
+	if defined parm3 (
+		call ::color-trans %parm3%
+		set color_bg=!color_new!
 	)
-	if not defined parm3 (
-		call :error-parm COLOR-BG
+	if defined parm4 (
+		call ::color-trans %parm4%
+		set color_fg=!color_new!
 	)
-	if not defined parm4 (
-		call :error-parm COLOR-FG
-	)
-	call ::build %parm2% %parm3% %parm4% str
+	set text=%parm2%
+
+	call :display
 	exit /b
 )
+
 if /i "%parm1%"=="-f" (
-	if not defined parm2 (
-		call :error-parm CONTENT
+	if not defined parm2 call :error-parm CONTENT
+	
+	if not exist "%parm2%" set invalid=1
+	if defined parm3 (
+		call ::color-trans %parm3%
+		set color_bg=!color_new!
 	)
-	if not defined parm3 (
-		call :error-parm COLOR-BG
+	if defined parm4 (
+		call ::color-trans %parm4%
+		set color_fg=!color_new!
 	)
-	if not defined parm4 (
-		call :error-parm COLOR-FG
+	set filename=%parm2%
+	for /f "tokens=1* usebackq" %%G in (!filename!) do (
+		set text=%%G %%H
+		call :display
 	)
-	call :build %parm2% %parm3% %parm4% file
 	exit /b
 )
+
 if /i "%parm1%"=="/?" goto help
 if /i "%parm1%"=="-?" goto help
 if /i "%parm1%"=="-h" goto help
@@ -69,39 +80,26 @@ exit /b
 
 
 
-::Build all the required variables for ::display. For files, set the text variable on every loop with the content of the line, then run ::display.
-:build
-if "%4"=="str" (
-	call ::color-trans %2
-	set color_bg=!color_new!
-	call ::color-trans %3
-	set color_fg=!color_new!
-	set text=%1
-
-	call :display
-)
-if "%4"=="file" (
-	if not exist %1 set invalid=1
-	call ::color-trans %2
-	set color_bg=!color_new!
-	call ::color-trans %3
-	set color_fg=!color_new!
-	set filename=%1
-	for /f "tokens=1* usebackq" %%G in (!filename!) do (
-		set text=%%G %%H
-		call :display
-	)
-)
-exit /b
-
-
-
 
 ::Call powershell to display the line. All the colors has been converted so write-host can read it properly.
 :display
 if "%invalid%"=="1" exit /b
-powershell write-host -back %color_bg% -fore %color_fg% %text%
+::Escape special characters
+set text=%text:(=`(%
+set text=%text:)=`)%
+set text=%text:'=`'%
+set text=%text:"=`"%
 
+if defined color_bg (
+	set display_color_bg=-back %color_bg%
+) else set "display_color_bg="
+
+if defined color_fg (
+	set display_color_fg=-fore %color_fg%
+) else set "display_color_fg="
+
+
+powershell write-host %display_color_bg% %display_color_fg% %text%
 exit /b
 
 ::Cheap ones used for simple self calls.
@@ -119,6 +117,10 @@ exit /b
 
 ::Transform the hex value of the color into a valid value for write-host.
 :color-trans
+if /i "%1"=="-" (
+	set color_new=
+	exit /b
+)
 if /i "%1"=="0" (
 	set color_new=Black
 	exit /b
@@ -192,12 +194,10 @@ exit /b 1
 
 
 :help
+echo Displays text in one line with different colors. Can also print files.
+echo By DarviL. Using version %ver%.
 echo:
-call :display-red "-------------------------------------------------------------------------------------------"
-call :display-yellow "Displays text in one line with different colors. Can also print files."
-call :display-yellow "By DarviL. Using version %ver%."
-echo:
-call :display-yellow "ECHOC TYPE CONTENT COLOR-BG COLOR-FG"
+echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG]
 echo:
 echo   TYPE       -s : Displays a normal string.
 echo              -f : Displays a file's content.
@@ -205,16 +205,27 @@ echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:
 echo   COLOR      BG : Select the color to be displayed on the background
-echo                   of the line. [0-F]
+echo                   of the line.
+echo                   Using "-" or nothing will display the current color of the background.
+echo:
 echo              FG : Select the color to be displayed on the foreground
-echo                   of the line (color of the text). [0-F]
+echo                   of the line. (color of the text)
+echo                   Using "-" or nothing will display the current color of the foreground.
+echo:
+echo:
+echo:
+echo   EXAMPLES      : 'echoc -s "Hello, how are you?" - 3'
+echo                   Display the string "Hello, how are you?" using the current color
+echo                   of the background, and using aquamarine color for the foreground.
+echo:
+echo                   'echoc -f "./test/notes.txt" 0 a'
+echo                   Display all the lines of the file "./test/notes.txt" using a
+echo                   black color for the background and a green color for the foreground.
 echo:
 echo:
 echo   - To see all the available colors, check 'color /?'.
 echo   - This function uses Windows PowerShell 'write-host' module in order to work.
 echo   - It is possible that at the first time it will take more time due to the delay
 echo     that PowerShell has.
-echo   - Remember to use 'cmd /c' before this command if used in a batch file.
-echo   - Use '`' for escaping special characters in PowerShell.
-call :display-red "-------------------------------------------------------------------------------------------"
+echo   - Use 'cmd /c' before this command if used in a batch file.
 exit /b

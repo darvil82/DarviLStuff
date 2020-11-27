@@ -87,8 +87,6 @@ if "%invalid%"=="1" exit /b
 ::Escape special characters
 set text=%text:(=`(%
 set text=%text:)=`)%
-set text=%text:'=`'%
-set text=%text:"=`"%
 
 if defined color_bg (
 	set display_color_bg=-back %color_bg%

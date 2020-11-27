@@ -1,9 +1,9 @@
-::function to display text in one line with different colors. Can also print files. By DarviL.
+::Function to display text in one line with different colors. Can also print lines of files. By DarviL.
 
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4
+set ver=1.4.1
 
 set parm1=%1
 set parm2=%2
@@ -88,6 +88,7 @@ exit /b
 
 
 ::Call powershell to display the line. All the colors has been converted so write-host can read it properly.
+::If no colors are defined just do "echo".
 :display
 if "%invalid%"=="1" exit /b
 ::Escape special characters
@@ -102,6 +103,7 @@ if defined color_fg (
 	set display_color_fg=-fore %color_fg%
 ) else set "display_color_fg="
 
+if not defined color_bg if not defined color_fg echo !text! & exit /b
 
 powershell write-host %display_color_bg% %display_color_fg% %text%
 exit /b

@@ -3,12 +3,13 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.3
+set ver=1.4
 
 set parm1=%1
 set parm2=%2
 set parm3=%3
 set parm4=%4
+set parm5=%5
 
 set color_fg=
 set color_bg=
@@ -55,8 +56,13 @@ if /i "%parm1%"=="-f" (
 		call ::color-trans %parm4%
 		set color_fg=!color_new!
 	)
+	if defined parm5 set /a count=0
 	set filename=%parm2%
 	for /f "tokens=1* usebackq" %%G in (!filename!) do (
+		if defined parm5 (
+			if !parm5!==!count! exit /b
+			set /a count=!count!+1
+		)
 		set text=%%G %%H
 		call :display
 	)
@@ -195,14 +201,14 @@ exit /b 1
 echo Displays text in one line with different colors. Can also print files.
 echo By DarviL. Using version %ver%.
 echo:
-echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG]
+echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG] [LINES]
 echo:
 echo   TYPE       -s : Displays a normal string.
 echo              -f : Displays a file's content.
 echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:
-echo   COLOR      BG : Select the color to be displayed on the background
+echo   [COLOR]    BG : Select the color to be displayed on the background
 echo                   of the line.
 echo                   Using "-" or nothing will display the current color of the background.
 echo:
@@ -210,14 +216,17 @@ echo              FG : Select the color to be displayed on the foreground
 echo                   of the line. (color of the text)
 echo                   Using "-" or nothing will display the current color of the foreground.
 echo:
+echo   [LINES]       : Only useful when displaying files. Select the number of text lines to be
+echo                   displayed on screen.
 echo:
 echo:
-echo   EXAMPLES      : 'echoc -s "Hello, how are you?" - 3'
+echo:
+echo   Examples      : 'echoc -s "Hello, how are you?" - 3'
 echo                   Display the string "Hello, how are you?" using the current color
 echo                   of the background, and using aquamarine color for the foreground.
 echo:
-echo                   'echoc -f "./test/notes.txt" 0 a'
-echo                   Display all the lines of the file "./test/notes.txt" using a
+echo                   'echoc -f "./test/notes.txt" 0 a 32'
+echo                   Display the first 32 lines of the file "./test/notes.txt" using a
 echo                   black color for the background and a green color for the foreground.
 echo:
 echo:

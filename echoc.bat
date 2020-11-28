@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.2
+set ver=1.4.3
 
 set parm1=%1
 set parm2=%2
@@ -45,7 +45,7 @@ if /i "%parm1%"=="-s" (
 )
 
 if /i "%parm1%"=="-f" (
-	if not defined parm2 call :error-parm CONTENT
+	if not defined parm2 call :error-parm CONTENT & exit /b
 	set filename=!parm2:"=!
 	if not exist "!filename!" set invalid=1
 	if defined parm3 (
@@ -71,10 +71,9 @@ if /i "%parm1%"=="-f" (
 if /i "%parm1%"=="/?" goto help
 if /i "%parm1%"=="-?" goto help
 if /i "%parm1%"=="-h" goto help
-if not defined parm1 echo No parameters were defined. & exit /b
 
-echo Unexpected '%parm1%' parameter.
-exit /b
+if not defined parm1 echo No parameters were defined. & echo Use "echoc /?" to read the help. & exit /b
+echo Unexpected '%parm1%' parameter. & echo Use "echoc /?" to read the help. & exit /b
 
 :error-parm
 echo Parameter [%1] is not defined.
@@ -85,11 +84,10 @@ exit /b
 
 
 
-
 ::Call powershell to display the line. All the colors has been converted so write-host can read it properly.
 ::If no colors are defined just do "echo".
 :display
-if "%invalid%"=="1" exit /b
+if "%invalid%"=="1" echo An error occurred while trying to display the line. & echo Use "echoc /?" to read the help. & exit /b
 
 if defined color_bg (
 	set display_color_bg=-back %color_bg%

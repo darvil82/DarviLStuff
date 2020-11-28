@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.3
+set ver=1.4.4
 
 set parm1=%1
 set parm2=%2
@@ -27,7 +27,7 @@ if not exist "%temp%/echoc_pschecked" (
 
 
 
-if /i "%parm1%"=="-s" (
+if /i "%parm1%"=="/s" (
 	if not defined parm2 call :error-parm CONTENT
 
 	if defined parm3 (
@@ -44,7 +44,7 @@ if /i "%parm1%"=="-s" (
 	exit /b
 )
 
-if /i "%parm1%"=="-f" (
+if /i "%parm1%"=="/f" (
 	if not defined parm2 call :error-parm CONTENT & exit /b
 	set filename=!parm2:"=!
 	if not exist "!filename!" set invalid=1
@@ -69,8 +69,6 @@ if /i "%parm1%"=="-f" (
 )
 
 if /i "%parm1%"=="/?" goto help
-if /i "%parm1%"=="-?" goto help
-if /i "%parm1%"=="-h" goto help
 
 if not defined parm1 echo No parameters were defined. & echo Use "echoc /?" to read the help. & exit /b
 echo Unexpected '%parm1%' parameter. & echo Use "echoc /?" to read the help. & exit /b
@@ -201,8 +199,8 @@ echo By DarviL. Using version %ver%.
 echo:
 echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG] [LINES]
 echo:
-echo   TYPE       -s : Displays a normal string.
-echo              -f : Displays a file's content.
+echo   TYPE       /s : Displays a normal string.
+echo              /f : Displays a file's content.
 echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:

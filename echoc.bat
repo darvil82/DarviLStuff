@@ -46,8 +46,8 @@ if /i "%parm1%"=="-s" (
 
 if /i "%parm1%"=="-f" (
 	if not defined parm2 call :error-parm CONTENT
-	set filename=%parm2:"=%
-	if not exist "%filename%" set invalid=1
+	set filename=!parm2:"=!
+	if not exist "!filename!" set invalid=1
 	if defined parm3 (
 		call ::color-trans %parm3%
 		set color_bg=!color_new!
@@ -90,10 +90,6 @@ exit /b
 ::If no colors are defined just do "echo".
 :display
 if "%invalid%"=="1" exit /b
-::Escape special characters
-set text=%text:(=`(%
-set text=%text:)=`)%
-set text=%text:#=`#%
 
 if defined color_bg (
 	set display_color_bg=-back %color_bg%
@@ -110,6 +106,11 @@ if not defined color_bg (
 		exit /b
 	)
 )
+
+::Escape special characters
+set text=%text:(=`(%
+set text=%text:)=`)%
+set text=%text:#=`#%
 
 powershell write-host %display_color_bg% %display_color_fg% %text%
 exit /b

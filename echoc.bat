@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.1
+set ver=1.4.2
 
 set parm1=%1
 set parm2=%2
@@ -46,8 +46,8 @@ if /i "%parm1%"=="-s" (
 
 if /i "%parm1%"=="-f" (
 	if not defined parm2 call :error-parm CONTENT
-	
-	if not exist "%parm2%" set invalid=1
+	set filename=%parm2:"=%
+	if not exist "%filename%" set invalid=1
 	if defined parm3 (
 		call ::color-trans %parm3%
 		set color_bg=!color_new!
@@ -57,13 +57,12 @@ if /i "%parm1%"=="-f" (
 		set color_fg=!color_new!
 	)
 	if defined parm5 set /a count=0
-	set filename=%parm2%
-	for /f "tokens=1* usebackq" %%G in (!filename!) do (
+	for /f "tokens=1* usebackq" %%G in ("!filename!") do (
 		if defined parm5 (
 			if !parm5!==!count! exit /b
 			set /a count=!count!+1
 		)
-		set text=%%G %%H
+		set "text=%%G %%H"
 		call :display
 	)
 	exit /b
@@ -72,13 +71,13 @@ if /i "%parm1%"=="-f" (
 if /i "%parm1%"=="/?" goto help
 if /i "%parm1%"=="-?" goto help
 if /i "%parm1%"=="-h" goto help
-if not defined parm1 call :display-red "No parameters were defined."&exit /b
+if not defined parm1 echo No parameters were defined. & exit /b
 
-call :display-red "Unexpected `'%parm1%`' parameter."
+echo Unexpected '%parm1%' parameter.
 exit /b
 
 :error-parm
-call :display-red "Parameter [%1] is not defined."
+echo Parameter [%1] is not defined.
 set invalid=1
 exit /b
 
@@ -94,6 +93,7 @@ if "%invalid%"=="1" exit /b
 ::Escape special characters
 set text=%text:(=`(%
 set text=%text:)=`)%
+set text=%text:#=`#%
 
 if defined color_bg (
 	set display_color_bg=-back %color_bg%
@@ -103,18 +103,15 @@ if defined color_fg (
 	set display_color_fg=-fore %color_fg%
 ) else set "display_color_fg="
 
-if not defined color_bg if not defined color_fg echo !text! & exit /b
+if not defined color_bg (
+	if not defined color_fg (
+		set text=!text:"=!
+		echo !text!
+		exit /b
+	)
+)
 
 powershell write-host %display_color_bg% %display_color_fg% %text%
-exit /b
-
-::Cheap ones used for simple self calls.
-:display-red
-powershell write-host -back Black -fore Red %1
-exit /b
-
-:display-yellow
-powershell write-host -back Black -fore Yellow %1
 exit /b
 
 
@@ -191,7 +188,7 @@ if /i "%1"=="f" (
 	set color_new=White
 	exit /b
 )
-call :display-red "`'%1`' is not a valid color value."
+echo '%1' is not a valid color value.
 set invalid=1
 exit /b 1
 

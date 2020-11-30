@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.4
+set ver=1.4.5
 
 set parm1=%1
 set parm2=%2
@@ -117,74 +117,24 @@ exit /b
 
 ::Transform the hex value of the color into a valid value for write-host.
 :color-trans
-if /i "%1"=="-" (
-	set color_new=
-	exit /b
-)
-if /i "%1"=="0" (
-	set color_new=Black
-	exit /b
-)
-if /i "%1"=="1" (
-	set color_new=DarkBlue
-	exit /b
-)
-if /i "%1"=="2" (
-	set color_new=DarkGreen
-	exit /b
-)
-if /i "%1"=="3" (
-	set color_new=DarkCyan
-	exit /b
-)
-if /i "%1"=="4" (
-	set color_new=DarkRed
-	exit /b
-)
-if /i "%1"=="5" (
-	set color_new=DarkMagenta
-	exit /b
-)
-if /i "%1"=="6" (
-	set color_new=DarkYellow
-	exit /b
-)
-if /i "%1"=="7" (
-	set color_new=Gray
-	exit /b
-)
-if /i "%1"=="8" (
-	set color_new=DarkGray
-	exit /b
-)
-if /i "%1"=="9" (
-	set color_new=Blue
-	exit /b
-)
-if /i "%1"=="a" (
-	set color_new=Green
-	exit /b
-)
-if /i "%1"=="b" (
-	set color_new=Cyan
-	exit /b
-)
-if /i "%1"=="c" (
-	set color_new=Red
-	exit /b
-)
-if /i "%1"=="d" (
-	set color_new=Magenta
-	exit /b
-)
-if /i "%1"=="e" (
-	set color_new=Yellow
-	exit /b
-)
-if /i "%1"=="f" (
-	set color_new=White
-	exit /b
-)
+if /i "%1"=="-" set color_new=&				exit /b
+if /i "%1"=="0" set color_new=Black&		exit /b
+if /i "%1"=="1" set color_new=DarkBlue&		exit /b
+if /i "%1"=="2" set color_new=DarkGreen&	exit /b
+if /i "%1"=="3" set color_new=DarkCyan&		exit /b
+if /i "%1"=="4" set color_new=DarkRed&		exit /b
+if /i "%1"=="5" set color_new=DarkMagenta&	exit /b
+if /i "%1"=="6" set color_new=DarkYellow&	exit /b
+if /i "%1"=="7" set color_new=Gray&			exit /b
+if /i "%1"=="8" set color_new=DarkGray&		exit /b
+if /i "%1"=="9" set color_new=Blue&			exit /b
+if /i "%1"=="a" set color_new=Green&		exit /b
+if /i "%1"=="b" set color_new=Cyan&			exit /b
+if /i "%1"=="c" set color_new=Red&			exit /b
+if /i "%1"=="d" set color_new=Magenta&		exit /b
+if /i "%1"=="e" set color_new=Yellow&		exit /b
+if /i "%1"=="f" set color_new=White&		exit /b
+
 echo '%1' is not a valid color value.
 set invalid=1
 exit /b 1

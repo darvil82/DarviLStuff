@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.5
+set ver=1.4.6
 
 set parm1=%1
 set parm2=%2
@@ -107,6 +107,8 @@ if not defined color_bg (
 set text=%text:(=`(%
 set text=%text:)=`)%
 set text=%text:#=`#%
+set text=%text:,=`,%
+set text=%text:'=`'%
 
 powershell write-host %display_color_bg% %display_color_fg% %text%
 exit /b
@@ -167,11 +169,11 @@ echo                   displayed on screen.
 echo:
 echo:
 echo:
-echo   Examples      : 'echoc -s "Hello, how are you?" - 3'
+echo   Examples      : 'echoc /s "What's up?" - 3'
 echo                   Display the string "Hello, how are you?" using the current color
 echo                   of the background, and using aquamarine color for the foreground.
 echo:
-echo                   'echoc -f "./test/notes.txt" 0 a 32'
+echo                   'echoc /f "./test/notes.txt" 0 a 32'
 echo                   Display the first 32 lines of the file "./test/notes.txt" using a
 echo                   black color for the background and a green color for the foreground.
 echo:

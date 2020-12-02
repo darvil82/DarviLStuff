@@ -3,7 +3,7 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.6
+set ver=1.4.7
 
 set parm1=%1
 set parm2=%2
@@ -60,7 +60,7 @@ if /i "%parm1%"=="/f" (
 	for /f "tokens=1* usebackq" %%G in ("!filename!") do (
 		if defined parm5 (
 			if !parm5!==!count! exit /b
-			set /a count=!count!+1
+			set /a count+=1
 		)
 		set "text=%%G %%H"
 		call :display

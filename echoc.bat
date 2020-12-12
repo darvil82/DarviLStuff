@@ -1,9 +1,9 @@
-::Function to display text in one line with different colors. Can also print lines of files. By DarviL.
+::Function to display text in one line with different colors. Can also print lines of files. Written by DarviL. (David Losantos)
 
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.7
+set ver=1.4.8
 
 set parm1=%1
 set parm2=%2
@@ -147,7 +147,7 @@ exit /b 1
 
 :help
 echo Displays text in one line with different colors. Can also print files.
-echo By DarviL. Using version %ver%.
+echo Written by DarviL. (David Losantos) Using version %ver%.
 echo:
 echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG] [LINES]
 echo:
@@ -156,12 +156,10 @@ echo              /f : Displays a file's content.
 echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:
-echo   [COLOR]    BG : Select the color to be displayed on the background
-echo                   of the line.
+echo   [COLOR]    BG : Select the color to be displayed on the background of the line.
 echo                   Using "-" or nothing will display the current color of the background.
 echo:
-echo              FG : Select the color to be displayed on the foreground
-echo                   of the line. (color of the text)
+echo              FG : Select the color to be displayed on the foreground of the line. (color of the text)
 echo                   Using "-" or nothing will display the current color of the foreground.
 echo:
 echo   [LINES]       : Only useful when displaying files. Select the number of text lines to be
@@ -170,7 +168,7 @@ echo:
 echo:
 echo:
 echo   Examples      : 'echoc /s "What's up?" - 3'
-echo                   Display the string "Hello, how are you?" using the current color
+echo                   Display the string "What's up?" using the current color
 echo                   of the background, and using aquamarine color for the foreground.
 echo:
 echo                   'echoc /f "./test/notes.txt" 0 a 32'

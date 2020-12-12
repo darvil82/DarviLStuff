@@ -3,7 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=1.4.8
+set ver=1.5
+set /a build=1
 
 set parm1=%1
 set parm2=%2
@@ -67,6 +68,39 @@ if /i "%parm1%"=="/f" (
 	)
 	exit /b
 )
+
+if /i "%parm1%"=="/CHKUP" (
+	echo Checking for new updates...
+	ping github.com /n 1 >nul
+	if %errorlevel% == 1 (
+		echo Unable to connect to GitHub.
+		exit /b
+	)
+	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\versions" > nul
+	find "echoc" "%temp%\versions" > "%temp%\versions_s"
+	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\versions_s") do set /a build_gh=%%G
+	if !build_gh! GTR !build! (
+		echo Found a new version.
+		echo   Using build: !build!
+		echo   Latest build: !build_gh!
+		echo:
+		choice /c yn /n /m "Download the latest version automatically to '%cd%'? (Y/N)"
+		if !errorlevel!==1 (
+			echo Downloading...
+			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "%cd%\echoc.bat" > nul
+			if not exist "%cd%\echoc.bat" (
+				echo An error occurred while trying to download echoc.
+				exit /b
+			)
+			echo Downloaded echoc succesfully as '%cd%\echoc.bat'.
+			exit /b
+		) else echo Download cancelled.
+	) else echo Using latest version.
+	exit /b
+)
+	
+	
+	
 
 if /i "%parm1%"=="/?" goto help
 
@@ -151,8 +185,8 @@ echo Written by DarviL. (David Losantos) Using version %ver%.
 echo:
 echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG] [LINES]
 echo:
-echo   TYPE       /s : Displays a normal string.
-echo              /f : Displays a file's content.
+echo   TYPE       /S : Displays a normal string.
+echo              /F : Displays a file's content.
 echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:
@@ -175,7 +209,8 @@ echo                   'echoc /f "./test/notes.txt" 0 a 32'
 echo                   Display the first 32 lines of the file "./test/notes.txt" using a
 echo                   black color for the background and a green color for the foreground.
 echo:
-echo:
+echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask to download it
+echo     in the current directory.
 echo   - To see all the available colors, check 'color /?'.
 echo   - This function uses Windows PowerShell 'write-host' module in order to work.
 echo   - It is possible that at the first time it will take more time due to the delay

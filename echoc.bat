@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.0
-set /a build=2
+set ver=2.0.1
+set /a build=3
 
 set parm1=%1
 set parm2=%2
@@ -78,8 +78,9 @@ if /i "%parm1%"=="/CHKUP" (
 		choice /c yn /n /m "Download the latest version automatically to '%cd%'? (Y/N)"
 		if !errorlevel!==1 (
 			echo Downloading...
-			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "%cd%\echoc.bat" > nul
-			if not exist "%cd%\echoc.bat" (
+			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "%temp%\echoc.bat" > nul
+			copy "%temp%\echoc.bat" "%cd%" > nul
+			if not !errorlevel! == 0 (
 				call :display red "An error occurred while trying to download echoc."
 				exit /b
 			)

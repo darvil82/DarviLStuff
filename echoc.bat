@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.0.1
-set /a build=3
+set ver=2.0.2
+set /a build=4
 
 set parm1=%1
 set parm2=%2
@@ -118,10 +118,12 @@ if "%invalid%"=="1" (
 if "%1"=="red" (
 	set text=%2
 	set color_fg=[91m
+	set color_bg=
 )
 if "%1"=="green" (
 	set text=%2
 	set color_fg=[92m
+	set color_bg=
 )
 
 ::Escape special characters.

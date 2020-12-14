@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.2.1
-set /a build=7
+set ver=2.2.2
+set /a build=8
 
 set parm1=%1
 set parm2=%2
@@ -192,13 +192,13 @@ exit /b 1
 
 
 :help
-echo Displays text in one line with different colors. Can also print files.
-echo Written by DarviL. (David Losantos) Using version %ver%.
+echo Script that displays text in one line with different colors. Can also print the content of files.
+echo Written by DarviL. (David Losantos) Using version %ver% (Build !build!)
 echo:
-echo ECHOC TYPE CONTENT [COLOR-BG] [COLOR-FG] [LINES]
+echo ECHOC /S string ^| /F filename [COLOR-BG] [COLOR-FG] [LINES]
 echo:
-echo   TYPE       /S : Displays a normal string.
-echo              /F : Displays a file's content.
+echo              /S : Displays the following selected string.
+echo              /F : Displays the content of the following file specified.
 echo:
 echo   CONTENT       : Select the file/string to be displayed.
 echo:
@@ -227,4 +227,5 @@ echo     [40m[30mXX[44m[34mXX[42m[32mXX[46m[36mXX[41m[31mXX[45m[35mX
 echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask to download it
 echo     in the current directory.
 echo   - Use 'cmd /c' before this command if used in a batch file.
+echo   - Special characters like '^|' or '^&' must be escaped.
 exit /b

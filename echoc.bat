@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.0.2
-set /a build=4
+set ver=2.1
+set /a build=5
 
 set parm1=%1
 set parm2=%2
@@ -75,18 +75,22 @@ if /i "%parm1%"=="/CHKUP" (
 		echo   Using build: !build!
 		echo   Latest build: !build_gh!
 		echo:
-		choice /c yn /n /m "Download the latest version automatically to '%cd%'? (Y/N)"
-		if !errorlevel!==1 (
+		cmd /c set /p "chkup_in=Select a destination folder to download ECHOC in. (ENTER to select the current directory) "
+		if not defined chkup_in set chkup_in=%cd%
+		set chkup_in=!chkup_in:"=!
+		if not exist "!chkup_in!\" (
+			call :display red "The folder '!chkup_in!' doesn't exist. Download aborted."
+			exit /b
+		) else (
 			echo Downloading...
-			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "%temp%\echoc.bat" > nul
-			copy "%temp%\echoc.bat" "%cd%" > nul
+			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "!chkup_in!\echoc.bat" > nul
 			if not !errorlevel! == 0 (
-				call :display red "An error occurred while trying to download echoc."
+				call :display red "An error occurred while trying to download ECHOC."
 				exit /b
 			)
-			call :display green "Downloaded echoc succesfully as '%cd%\echoc.bat'."
+			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."
 			exit /b
-		) else call :display red "Download cancelled."
+		)
 	) else call :display green "Using latest version."
 	exit /b
 )

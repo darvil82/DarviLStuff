@@ -3,5 +3,5 @@ Some kind of useless scripts I made. Don't expect all of this fully functioning 
 
 | Script | Description | Usage | Type |
 | ------ | ----------- | ----- | ---- |
-| Autobackup | Copy a file that you dragged every n minutes in a backup folder. | As a new instance | Batch |
 | echoc | Print lines in different colors for the foreground and background. Can display strings and the content of simple files. | Called from instance | Batch |
+| Autobackup | Copy a file that you dragged every n minutes in a backup folder. | As a new instance | Batch |

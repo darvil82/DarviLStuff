@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.2.3
-set /a build=9
+set ver=2.2.4
+set /a build=10
 
 set parm1=%1
 set parm2=%2
@@ -220,8 +220,8 @@ echo                   Display the first 32 lines of the file "./test/notes.txt"
 echo                   black color for the background and a green color for the foreground.
 echo:
 echo   - Available color values:
-echo     0 1 2 3 4 5 6 7 8 9 a b c d e f
-echo     [40m[30mXX[44m[34mXX[42m[32mXX[46m[36mXX[41m[31mXX[45m[35mXX[43m[33mXX[47m[37mXX[100m[90mXX[94m[104mXX[102m[92mXX[96m[106mXX[101m[91mXX[105m[95mXX[103m[93mXX[107m[97mXX[40m[30mXX [0m
+echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
+echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
 echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask to download it
 echo     in the current directory.
 echo   - Use 'cmd /c' before this command if used in a batch file.

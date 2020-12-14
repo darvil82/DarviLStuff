@@ -1,10 +1,10 @@
-::Function to display text in one line with different colors. Can also print lines of files. Written by DarviL. (David Losantos)
+::Script to display text in one line with different colors. Can also print lines of files. Written by DarviL. (David Losantos)
 
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.1
-set /a build=5
+set ver=2.2
+set /a build=6
 
 set parm1=%1
 set parm2=%2
@@ -49,7 +49,7 @@ if /i "%parm1%"=="/f" (
 		set color_fg=!color_new!
 	)
 	if defined parm5 set /a count=0
-	for /f "tokens=1* usebackq" %%G in ("!filename!") do (
+	for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 		if defined parm5 (
 			if !parm5!==!count! exit /b
 			set /a count+=1

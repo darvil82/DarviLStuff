@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.2.2
-set /a build=8
+set ver=2.2.3
+set /a build=9
 
 set parm1=%1
 set parm2=%2
@@ -199,8 +199,6 @@ echo ECHOC /S string ^| /F filename [COLOR-BG] [COLOR-FG] [LINES]
 echo:
 echo              /S : Displays the following selected string.
 echo              /F : Displays the content of the following file specified.
-echo:
-echo   CONTENT       : Select the file/string to be displayed.
 echo:
 echo   [COLOR]    BG : Select the color to be displayed on the background of the line in hex.
 echo                   Using "-" or nothing will display the current color of the background.

@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.3
-set /a build=11
+set ver=2.3.1
+set /a build=12
 
 set parm1=%1
 set parm2=%2
@@ -62,7 +62,7 @@ if /i "%parm1%"=="/f" (
 
 if /i "%parm1%"=="/t" (
 	if defined parm2 (
-		if /i "%parm2%"=="/r" echo [0m & exit /b
+		if /i "%parm2%"=="/r" <nul set /p"=[0m" & exit /b
 		call ::color-trans %parm2% bg
 		set color_bg=!color_new!
 	) else call :error-parm color-bg
@@ -71,8 +71,8 @@ if /i "%parm1%"=="/t" (
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
-		if defined color_bg echo !color_bg!!color_fg! & exit /b
-		if defined color_fg echo !color_bg!!color_fg! & exit /b
+		if defined color_bg <nul set /p"=!color_bg!!color_fg!" & exit /b
+		if defined color_fg <nul set /p"=!color_bg!!color_fg!" & exit /b
 	)
 	exit /b
 )

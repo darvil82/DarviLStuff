@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.2.4
-set /a build=10
+set ver=2.3
+set /a build=11
 
 set parm1=%1
 set parm2=%2
@@ -20,7 +20,7 @@ set color_new=
 
 
 if /i "%parm1%"=="/s" (
-	if not defined parm2 call :error-parm CONTENT
+	if not defined parm2 call :error-parm string
 
 	if defined parm3 (
 		call ::color-trans %parm3% bg
@@ -37,7 +37,7 @@ if /i "%parm1%"=="/s" (
 )
 
 if /i "%parm1%"=="/f" (
-	if not defined parm2 call :error-parm CONTENT & exit /b
+	if not defined parm2 call :error-parm filename & exit /b
 	set filename=!parm2:"=!
 	if not exist "!filename!" set invalid=1
 	if defined parm3 (
@@ -56,6 +56,23 @@ if /i "%parm1%"=="/f" (
 		)
 		set "text=%%G %%H"
 		call :display
+	)
+	exit /b
+)
+
+if /i "%parm1%"=="/t" (
+	if defined parm2 (
+		if /i "%parm2%"=="/r" echo [0m & exit /b
+		call ::color-trans %parm2% bg
+		set color_bg=!color_new!
+	) else call :error-parm color-bg
+	if defined parm3 (
+		call ::color-trans %parm3% fg
+		set color_fg=!color_new!
+	) else call :error-parm color-fg
+	if not !invalid!==1 (
+		if defined color_bg echo !color_bg!!color_fg! & exit /b
+		if defined color_fg echo !color_bg!!color_fg! & exit /b
 	)
 	exit /b
 )
@@ -193,16 +210,19 @@ exit /b 1
 
 :help
 echo Script that displays text in one line with different colors. Can also print the content of files.
-echo Written by DarviL. (David Losantos) Using version %ver% (Build !build!)
+echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
+echo Written by DarviL (David Losantos) in batch. Using version %ver% (Build !build!)
 echo:
-echo ECHOC /S string ^| /F filename [COLOR-BG] [COLOR-FG] [LINES]
+echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] ^| /T COLOR [/R]
 echo:
-echo              /S : Displays the following selected string.
-echo              /F : Displays the content of the following file specified.
+echo   /S : Displays the following selected string.
+echo   /F : Displays the content of the following file specified.
+echo   /T : Toggles the color that is being used at the moment. Not recommended for the background.
+echo        Following this parameter with '/R' will reset the current colors back to normal.
 echo:
-echo   [COLOR]    BG : Select the color to be displayed on the background of the line in hex.
+echo:
+echo   COLOR      BG : Select the color to be displayed on the background of the line in hex.
 echo                   Using "-" or nothing will display the current color of the background.
-echo:
 echo              FG : Select the color to be displayed on the foreground of the line in hex. (color of the text)
 echo                   Using "-" or nothing will display the current color of the foreground.
 echo:
@@ -214,16 +234,16 @@ echo:
 echo   Examples      : 'echoc /s "What's up?" - 3'
 echo                   Display the string "What's up?" using the current color
 echo                   of the background, and using aquamarine color for the foreground.
-echo:
-echo                   'echoc /f "./test/notes.txt" 0 a 32'
+echo                 : 'echoc /f "./test/notes.txt" 0 a 32'
 echo                   Display the first 32 lines of the file "./test/notes.txt" using a
 echo                   black color for the background and a green color for the foreground.
+echo                 : 'echoc /t - b'
+echo                   Toggles the color of the text in the CLI to bright aquamarine.
 echo:
 echo   - Available color values:
 echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
 echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
-echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask to download it
-echo     in the current directory.
+echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a
+echo     folder to download it in.
 echo   - Use 'cmd /c' before this command if used in a batch file.
-echo   - Special characters like '^|' or '^&' must be escaped.
 exit /b

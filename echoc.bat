@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.3.1
-set /a build=12
+set ver=2.3.2
+set /a build=13
 
 set parm1=%1
 set parm2=%2
@@ -19,33 +19,33 @@ set color_new=
 
 
 
-if /i "%parm1%"=="/s" (
+if /i "!parm1!"=="/s" (
 	if not defined parm2 call :error-parm string
 
 	if defined parm3 (
-		call ::color-trans %parm3% bg
+		call ::color-trans !parm3! bg
 		set color_bg=!color_new!
 	)
 	if defined parm4 (
-		call ::color-trans %parm4% fg
+		call ::color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
-	set text=%parm2%
+	set text=!parm2!
 
 	call :display
 	exit /b
 )
 
-if /i "%parm1%"=="/f" (
+if /i "!parm1!"=="/f" (
 	if not defined parm2 call :error-parm filename & exit /b
 	set filename=!parm2:"=!
 	if not exist "!filename!" set invalid=1
 	if defined parm3 (
-		call ::color-trans %parm3% bg
+		call ::color-trans !parm3! bg
 		set color_bg=!color_new!
 	)
 	if defined parm4 (
-		call ::color-trans %parm4% fg
+		call ::color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
 	if defined parm5 set /a count=0
@@ -60,14 +60,14 @@ if /i "%parm1%"=="/f" (
 	exit /b
 )
 
-if /i "%parm1%"=="/t" (
+if /i "!parm1!"=="/t" (
 	if defined parm2 (
-		if /i "%parm2%"=="/r" <nul set /p"=[0m" & exit /b
-		call ::color-trans %parm2% bg
+		if /i "!parm2!"=="/r" <nul set /p"=[0m" & exit /b
+		call ::color-trans !parm2! bg
 		set color_bg=!color_new!
 	) else call :error-parm color-bg
 	if defined parm3 (
-		call ::color-trans %parm3% fg
+		call ::color-trans !parm3! fg
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
@@ -77,7 +77,7 @@ if /i "%parm1%"=="/t" (
 	exit /b
 )
 
-if /i "%parm1%"=="/CHKUP" (
+if /i "!parm1!"=="/CHKUP" (
 	echo Checking for new updates...
 	ping github.com /n 1 > nul
 	if %errorlevel% == 1 (
@@ -93,7 +93,7 @@ if /i "%parm1%"=="/CHKUP" (
 		echo   Latest build: !build_gh!
 		echo:
 		set /p "chkup_in=Select a destination folder to download ECHOC in. (ENTER to select the current directory) "
-		if not defined chkup_in set chkup_in=%cd%
+		if not defined chkup_in set chkup_in=!cd!
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
 		if not exist "!chkup_in!\" (
@@ -113,10 +113,10 @@ if /i "%parm1%"=="/CHKUP" (
 	exit /b
 )
 
-if /i "%parm1%"=="/?" goto help
+if /i "!parm1!"=="/?" goto help
 
 if not defined parm1 call :display red "No parameters were defined." & echo Use "echoc /?" to read the help. & exit /b
-call :display red "Unexpected '%parm1%' parameter." & echo Use "echoc /?" to read the help. & exit /b
+call :display red "Unexpected '!parm1!' parameter." & echo Use "echoc /?" to read the help. & exit /b
 
 :error-parm
 call :display red "Parameter [%1] is not defined."
@@ -128,7 +128,7 @@ exit /b
 
 ::Build the echo command to display the formatted text line. 'red' and 'green' conditionals are just for self calls.
 :display
-if "%invalid%"=="1" (
+if "!invalid!"=="1" (
 	if not defined err_shown (
 		echo An error occurred while trying to display the line. & echo Use "echoc /?" to read the help.
 		set err_shown=1
@@ -153,7 +153,7 @@ set text=%text:"=%
 set text=%text:(=^(%
 set text=%text:)=^)%
 
-echo %color_bg%%color_fg%%text%[0m
+echo !color_bg!!color_fg!!text![0m
 exit /b
 
 
@@ -211,7 +211,7 @@ exit /b 1
 :help
 echo Script that displays text in one line with different colors. Can also print the content of files.
 echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
-echo Written by DarviL (David Losantos) in batch. Using version %ver% (Build !build!)
+echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo:
 echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] ^| /T COLOR [/R]
 echo:

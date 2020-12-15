@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.3.2
-set /a build=13
+set ver=2.4
+set /a build=14
 
 set parm1=%1
 set parm2=%2
@@ -21,7 +21,6 @@ set color_new=
 
 if /i "!parm1!"=="/s" (
 	if not defined parm2 call :error-parm string
-
 	if defined parm3 (
 		call ::color-trans !parm3! bg
 		set color_bg=!color_new!
@@ -74,6 +73,22 @@ if /i "!parm1!"=="/t" (
 		if defined color_bg <nul set /p"=!color_bg!!color_fg!" & exit /b
 		if defined color_fg <nul set /p"=!color_bg!!color_fg!" & exit /b
 	)
+	exit /b
+)
+
+if /i "!parm1!"=="/p" (
+	if not defined parm2 call :error-parm string
+	if defined parm3 (
+		call ::color-trans !parm3! ps
+		set color_bg=!color_new!
+	)
+	if defined parm4 (
+		call ::color-trans !parm4! ps
+		set color_fg=!color_new!
+	)
+	set text=!parm2!
+
+	call :display ps
 	exit /b
 )
 
@@ -137,6 +152,17 @@ if "!invalid!"=="1" (
 	exit /b
 )
 
+if "%1"=="ps" (
+	if not defined color_bg (
+		set cfg1=
+	) else set cfg1=-back !color_bg!
+	if not defined color_fg (
+		set cfg2=
+	) else set cfg2=-fore !color_fg!
+	powershell write-host !cfg1! !cfg2! !text!
+	exit /b
+)
+
 if "%1"=="red" (
 	set text=%2
 	set color_fg=[91m
@@ -147,6 +173,7 @@ if "%1"=="green" (
 	set color_fg=[92m
 	set color_bg=
 )
+
 
 ::Escape special characters.
 set text=%text:"=%
@@ -180,7 +207,7 @@ if "%2"=="fg" (
 	if /i "%1"=="d" set color_new=[95m&		exit /b
 	if /i "%1"=="e" set color_new=[93m&		exit /b
 	if /i "%1"=="f" set color_new=[97m&		exit /b
-) else (
+) else if "%2"=="bg" (
 	if /i "%1"=="-" set color_new=&				exit /b
 	if /i "%1"=="0" set color_new=[40m&		exit /b
 	if /i "%1"=="1" set color_new=[44m&		exit /b
@@ -198,6 +225,24 @@ if "%2"=="fg" (
 	if /i "%1"=="d" set color_new=[105m&		exit /b
 	if /i "%1"=="e" set color_new=[103m&		exit /b
 	if /i "%1"=="f" set color_new=[107m&		exit /b
+) else if "%2"=="ps" (
+	if /i "%1"=="-" set color_new=&				exit /b
+	if /i "%1"=="0" set color_new=Black&		exit /b
+	if /i "%1"=="1" set color_new=DarkBlue&		exit /b
+	if /i "%1"=="2" set color_new=DarkGreen&	exit /b
+	if /i "%1"=="3" set color_new=DarkCyan&		exit /b
+	if /i "%1"=="4" set color_new=DarkRed&		exit /b
+	if /i "%1"=="5" set color_new=DarkMagenta&	exit /b
+	if /i "%1"=="6" set color_new=DarkYellow&	exit /b
+	if /i "%1"=="7" set color_new=Gray&			exit /b
+	if /i "%1"=="8" set color_new=DarkGray&		exit /b
+	if /i "%1"=="9" set color_new=Blue&			exit /b
+	if /i "%1"=="a" set color_new=Green&		exit /b
+	if /i "%1"=="b" set color_new=Cyan&			exit /b
+	if /i "%1"=="c" set color_new=Red&			exit /b
+	if /i "%1"=="d" set color_new=Magenta&		exit /b
+	if /i "%1"=="e" set color_new=Yellow&		exit /b
+	if /i "%1"=="f" set color_new=White&		exit /b
 )
 
 call :display red "'%1' is not a valid color value."
@@ -213,12 +258,13 @@ echo Script that displays text in one line with different colors. Can also print
 echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo:
-echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] ^| /T COLOR [/R]
+echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] ^| /T COLOR [/R] ^| /P string [COLOR]
 echo:
 echo   /S : Displays the following selected string.
 echo   /F : Displays the content of the following file specified.
 echo   /T : Toggles the color that is being used at the moment. Not recommended for the background.
 echo        Following this parameter with '/R' will reset the current colors back to normal.
+echo   /P : Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
 echo:
 echo:
 echo   COLOR      BG : Select the color to be displayed on the background of the line in hex.

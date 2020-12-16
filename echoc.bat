@@ -3,14 +3,15 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.4.1
-set /a build=15
+set ver=2.5
+set /a build=16
 
 set parm1=%1
 set parm2=%2
 set parm3=%3
 set parm4=%4
 set parm5=%5
+set parm6=%6
 
 set color_fg=
 set color_bg=
@@ -47,21 +48,46 @@ if /i "!parm1!"=="/f" (
 		call ::color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
-	if defined parm5 set /a count=0
-	for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-		if defined parm5 (
-			if !parm5!==!count! exit /b
-			set /a count+=1
+	if defined parm5 (
+		if /i "!parm5!"=="/a" (
+			< nul set /p"=!color_bg!!color_fg!" > "%temp%\.tmp"
+			type "!filename!" >> "%temp%\.tmp"
+			< nul set /p"=[0m" >> "%temp%\.tmp"
+			type "%temp%\.tmp"
+		) else (
+			if /i "!parm6!"=="/a" (
+				< nul set /p"=!color_bg!!color_fg!" > "!temp!\.tmp"
+				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+					if !parm5!==!count! (
+						<nul set /p"=[0m" >> "!temp!\.tmp"
+						type "!temp!\.tmp"
+						exit /b 0
+					)
+					set /a count+=1
+					echo %%G >> "%temp%\.tmp"
+				)
+			) else (
+				set /a count=0
+				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+					if !parm5!==!count! exit /b 0
+					set /a count+=1
+					set "text=%%G"
+					call :display
+				)
+			)
 		)
-		set "text=%%G %%H"
-		call :display
+	) else (
+		for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+			set "text=%%G"
+			call :display
+		)
 	)
 	exit /b
 )
 
 if /i "!parm1!"=="/t" (
 	if defined parm2 (
-		if /i "!parm2!"=="/r" <nul set /p"=[0m" & exit /b 0
+		if /i "!parm2!"=="/r" < nul set /p"=[0m" & exit /b 0
 		call ::color-trans !parm2! bg
 		set color_bg=!color_new!
 	) else call :error-parm color-bg
@@ -70,8 +96,8 @@ if /i "!parm1!"=="/t" (
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
-		if defined color_bg <nul set /p"=!color_bg!!color_fg!" & exit /b 0
-		if defined color_fg <nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
 	)
 	exit /b 1
 )
@@ -252,10 +278,12 @@ echo Script that displays text in one line with different colors. Can also print
 echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo:
-echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] ^| /T COLOR [/R] ^| /P string [COLOR]
+echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] [/A] ^| /T COLOR [/R] ^| /P string [COLOR]
 echo:
 echo   /S : Displays the following selected string.
-echo   /F : Displays the content of the following file specified.
+echo   /F : Displays the content of the following file specified. Specifying the [LINES] value will select
+echo        the number of lines that will be displayed. If '/A' is specified, all lines of the displayed
+echo        content will be colored.
 echo   /T : Toggles the color that is being used at the moment. Not recommended for the background.
 echo        Following this parameter with '/R' will reset the current colors back to normal.
 echo   /P : Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
@@ -265,9 +293,6 @@ echo   COLOR      BG : Select the color to be displayed on the background of the
 echo                   Using "-" or nothing will display the current color of the background.
 echo              FG : Select the color to be displayed on the foreground of the line in hex. (color of the text)
 echo                   Using "-" or nothing will display the current color of the foreground.
-echo:
-echo   [LINES]       : Only useful when displaying files. Select the number of text lines to be
-echo                   displayed on screen.
 echo:
 echo:
 echo:

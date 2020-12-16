@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.4
-set /a build=14
+set ver=2.4.1
+set /a build=15
 
 set parm1=%1
 set parm2=%2
@@ -38,7 +38,7 @@ if /i "!parm1!"=="/s" (
 if /i "!parm1!"=="/f" (
 	if not defined parm2 call :error-parm filename & exit /b
 	set filename=!parm2:"=!
-	if not exist "!filename!" set invalid=1
+	if not exist "!filename!" call :display red "The file '!filename!' doesn't exist." & exit /b 1
 	if defined parm3 (
 		call ::color-trans !parm3! bg
 		set color_bg=!color_new!
@@ -61,7 +61,7 @@ if /i "!parm1!"=="/f" (
 
 if /i "!parm1!"=="/t" (
 	if defined parm2 (
-		if /i "!parm2!"=="/r" <nul set /p"=[0m" & exit /b
+		if /i "!parm2!"=="/r" <nul set /p"=[0m" & exit /b 0
 		call ::color-trans !parm2! bg
 		set color_bg=!color_new!
 	) else call :error-parm color-bg
@@ -70,10 +70,10 @@ if /i "!parm1!"=="/t" (
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
-		if defined color_bg <nul set /p"=!color_bg!!color_fg!" & exit /b
-		if defined color_fg <nul set /p"=!color_bg!!color_fg!" & exit /b
+		if defined color_bg <nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		if defined color_fg <nul set /p"=!color_bg!!color_fg!" & exit /b 0
 	)
-	exit /b
+	exit /b 1
 )
 
 if /i "!parm1!"=="/p" (
@@ -95,10 +95,7 @@ if /i "!parm1!"=="/p" (
 if /i "!parm1!"=="/CHKUP" (
 	echo Checking for new updates...
 	ping github.com /n 1 > nul
-	if %errorlevel% == 1 (
-		call :display red "Unable to connect to GitHub."
-		exit /b
-	)
+	if %errorlevel% == 1 call :display red "Unable to connect to GitHub." & exit /b 1
 	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\versions" > nul
 	find "echoc" "%temp%\versions" > "%temp%\versions_s"
 	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\versions_s") do set /a build_gh=%%G
@@ -113,30 +110,27 @@ if /i "!parm1!"=="/CHKUP" (
 		set chkup_in=!chkup_in:/=\!
 		if not exist "!chkup_in!\" (
 			call :display red "The folder '!chkup_in!' doesn't exist. Download aborted."
-			exit /b
+			exit /b 1
 		) else (
 			echo Downloading...
 			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "!chkup_in!\echoc.bat" > nul
-			if not !errorlevel! == 0 (
-				call :display red "An error occurred while trying to download ECHOC."
-				exit /b
-			)
+			if not !errorlevel! == 0 call :display red "An error occurred while trying to download ECHOC." & exit /b 1
 			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."
-			exit /b
+			exit /b 0
 		)
 	) else call :display green "Using latest version."
-	exit /b
+	exit /b 0
 )
 
 if /i "!parm1!"=="/?" goto help
 
-if not defined parm1 call :display red "No parameters were defined." & echo Use "echoc /?" to read the help. & exit /b
-call :display red "Unexpected '!parm1!' parameter." & echo Use "echoc /?" to read the help. & exit /b
+if not defined parm1 call :display red "No parameters were defined." & echo Use "echoc /?" to read the help. & exit /b 1
+call :display red "Unexpected '!parm1!' parameter." & echo Use "echoc /?" to read the help. & exit /b 1
 
 :error-parm
 call :display red "Parameter [%1] is not defined."
 set invalid=1
-exit /b
+exit /b 1
 
 
 
@@ -147,9 +141,9 @@ if "!invalid!"=="1" (
 	if not defined err_shown (
 		echo An error occurred while trying to display the line. & echo Use "echoc /?" to read the help.
 		set err_shown=1
-		exit /b
+		exit /b 1
 	)
-	exit /b
+	exit /b 1
 )
 
 if "%1"=="ps" (
@@ -160,7 +154,7 @@ if "%1"=="ps" (
 		set cfg2=
 	) else set cfg2=-fore !color_fg!
 	powershell write-host !cfg1! !cfg2! !text!
-	exit /b
+	exit /b 0
 )
 
 if "%1"=="red" (
@@ -181,7 +175,7 @@ set text=%text:(=^(%
 set text=%text:)=^)%
 
 echo !color_bg!!color_fg!!text![0m
-exit /b
+exit /b 0
 
 
 
@@ -292,4 +286,4 @@ echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35
 echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a
 echo     folder to download it in.
 echo   - Use 'cmd /c' before this command if used in a batch file.
-exit /b
+exit /b 0

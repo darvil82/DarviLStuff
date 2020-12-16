@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.5
-set /a build=16
+set ver=2.5.1
+set /a build=17
 
 set parm1=%1
 set parm2=%2
@@ -77,6 +77,7 @@ if /i "!parm1!"=="/f" (
 			)
 		)
 	) else (
+		if not defined color_bg if not defined color_fg type "!filename!" & exit /b 0
 		for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 			set "text=%%G"
 			call :display

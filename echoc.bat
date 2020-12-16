@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.5.1-1
-set /a build=18
+set ver=2.5.1-2
+set /a build=19
 
 set parm1=%1
 set parm2=%2
@@ -66,16 +66,10 @@ if /i "!parm1!"=="/f" (
 						call :display
 					)
 				) else (
-					< nul set /p"=!color_bg!!color_fg!" > "!temp!\.tmp"
-					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-						if !parm5!==!count! (
-							<nul set /p"=[0m" >> "!temp!\.tmp"
-							type "!temp!\.tmp"
-							exit /b 0
-						)
-						set /a count+=1
-						echo %%G >> "%temp%\.tmp"
-					)
+					< nul set /p"=!color_bg!!color_fg!" > "%temp%\.tmp"
+					type "!filename!" >> "%temp%\.tmp"
+					< nul set /p"=[0m" >> "%temp%\.tmp"
+					type "%temp%\.tmp"
 				)
 			)
 		) else (

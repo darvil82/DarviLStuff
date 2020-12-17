@@ -1,5 +1,5 @@
 # DarviLStuff
-Some kind of useless scripts I made. Don't expect all of this fully functioning properly. This is what I have at the moment:
+This is the repository that contains some scripts that I do when I'm bored or when I have nothing else to do. This is what I have at the moment:
 
 | Script | Description | Usage | Type |
 | ------ | ----------- | ----- | ---- |

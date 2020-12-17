@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.6
-set /a build=21
+set ver=2.6-1
+set /a build=22
 
 set parm1=%1
 set parm2=%2
@@ -118,8 +118,9 @@ if /i "!parm1!"=="/p" (
 if /i "!parm1!"=="/z" (
 	if not defined parm2 call :error-parm string & exit /b 1
 	set text=!parm2:"=!
-	set text=!text:\r=[0m!
 	set text=!text:\\={BACKSLASH}!
+	set text=!text:\r=[0m!
+	
 	::Parse foreground
 	set text=!text:\f0=[30m!
 	set text=!text:\f1=[34m!

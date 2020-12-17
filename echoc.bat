@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.5.2
-set /a build=20
+set ver=2.6
+set /a build=21
 
 set parm1=%1
 set parm2=%2
@@ -115,6 +115,53 @@ if /i "!parm1!"=="/p" (
 	exit /b
 )
 
+if /i "!parm1!"=="/z" (
+	if not defined parm2 call :error-parm string & exit /b 1
+	set text=!parm2:"=!
+	set text=!text:\r=[0m!
+	set text=!text:\\={BACKSLASH}!
+	::Parse foreground
+	set text=!text:\f0=[30m!
+	set text=!text:\f1=[34m!
+	set text=!text:\f2=[32m!
+	set text=!text:\f3=[36m!
+	set text=!text:\f4=[31m!
+	set text=!text:\f5=[35m!
+	set text=!text:\f6=[33m!
+	set text=!text:\f7=[37m!
+	set text=!text:\f8=[90m!
+	set text=!text:\f9=[94m!
+	set text=!text:\fa=[92m!
+	set text=!text:\fb=[96m!
+	set text=!text:\fc=[91m!
+	set text=!text:\fd=[95m!
+	set text=!text:\fe=[93m!
+	set text=!text:\ff=[97m!
+	::Parse background
+	set text=!text:\b0=[40m!
+	set text=!text:\b1=[44m!
+	set text=!text:\b2=[42m!
+	set text=!text:\b3=[46m!
+	set text=!text:\b4=[41m!
+	set text=!text:\b5=[45m!
+	set text=!text:\b6=[43m!
+	set text=!text:\b7=[47m!
+	set text=!text:\b8=[100m!
+	set text=!text:\b9=[104m!
+	set text=!text:\ba=[102m!
+	set text=!text:\bb=[106m!
+	set text=!text:\bc=[101m!
+	set text=!text:\bd=[105m!
+	set text=!text:\be=[103m!
+	set text=!text:\bf=[107m!
+	
+	set text=!text:{BACKSLASH}=\!
+	
+	echo !text![0m
+	exit /b 0
+)
+	
+
 if /i "!parm1!"=="/CHKUP" (
 	echo Checking for new updates...
 	ping github.com /n 1 > nul
@@ -148,6 +195,7 @@ if /i "!parm1!"=="/CHKUP" (
 if /i "!parm1!"=="/?" goto help
 
 if not defined parm1 call :display red "No parameters were defined." & echo Use "echoc /?" to read the help. & exit /b 1
+set parm1=!parm1:"=!
 call :display red "Unexpected '!parm1!' parameter." & echo Use "echoc /?" to read the help. & exit /b 1
 
 :error-parm
@@ -268,7 +316,8 @@ echo Script that displays text in one line with different colors. Can also print
 echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo:
-echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] [/A] ^| /T COLOR [/R] ^| /P string [COLOR]
+echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] [/A] ^| /T COLOR [/R] ^| /P string [COLOR] ^|
+echo       /Z string
 echo:
 echo   /S : Displays the following selected string.
 echo   /F : Displays the content of the following file specified. Specifying the [LINES] value will select
@@ -278,6 +327,10 @@ echo        and not empty characters. Mostly useful when displaying background c
 echo   /T : Toggles the color that is being used at the moment. Not recommended for the background.
 echo        Following this parameter with '/R' will reset the current colors back to normal.
 echo   /P : Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
+echo   /Z : Use the advanced formatted mode for displaying strings. In order to change the colors, use the
+echo        custom escape character like so: '\f^<fg_HEX^>' or '\b^<gb_HEX^>'. You can also use '\r' to reset it,
+echo        although, it is automatically resetted at the end. Use a double backslash ^(\\^) in case it is needed
+echo        to escape it. This mode allows the use of multi-colored lines.
 echo:
 echo:
 echo   COLOR      BG : Select the color to be displayed on the background of the line in hex.
@@ -288,19 +341,20 @@ echo:
 echo:
 echo:
 echo   Examples      : 'echoc /s "What's up?" - 3'
-echo                   Display the string "What's up?" using the current color
-echo                   of the background, and using aquamarine color for the foreground.
+echo                      Display the string "What's up?" using the current color
+echo                      of the background, and using aquamarine color for the foreground.
 echo                 : 'echoc /f "./test/notes.txt" 0 a 32'
-echo                   Display the first 32 lines of the file "./test/notes.txt" using a
-echo                   black color for the background and a green color for the foreground.
-echo                 : 'echoc /t - b'
-echo                   Toggles the color of the text in the CLI to bright aquamarine.
+echo                      Display the first 32 lines of the file "./test/notes.txt" using a black color 
+echo                      for the background and a green color for the foreground.
+echo                 : 'echoc /z "\fcThis text is red, \b1and this background is blue."'
+echo                      Display "This text is red," with a red foreground, and "and this background is blue."
+echo                      with a dark blue background.
 echo:
 echo   - Available color values:
 echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
 echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
 echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a folder to
-echo     download ECHOC in. Pressing enter without entering a path will select the default option, wich is the
+echo     download ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the
 echo     folder that contains the currently running script, overriding the old version.
 echo   - Use 'cmd /c' before this command if used in a batch file.
 exit /b 0

@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.5.1-2
-set /a build=19
+set ver=2.5.2
+set /a build=20
 
 set parm1=%1
 set parm2=%2
@@ -79,7 +79,7 @@ if /i "!parm1!"=="/f" (
 			type "%temp%\.tmp"
 		)
 	)
-	exit /b
+	exit /b 0
 )
 
 if /i "!parm1!"=="/t" (
@@ -127,8 +127,8 @@ if /i "!parm1!"=="/CHKUP" (
 		echo   Using build: !build!
 		echo   Latest build: !build_gh!
 		echo:
-		set /p "chkup_in=Select a destination folder to download ECHOC in. (ENTER to select the current directory) "
-		if not defined chkup_in set chkup_in=!cd!
+		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d1%~p0'] "
+		if not defined chkup_in set chkup_in=%~d1%~p0
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
 		if not exist "!chkup_in!\" (
@@ -299,7 +299,8 @@ echo:
 echo   - Available color values:
 echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
 echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
-echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a
-echo     folder to download it in.
+echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a folder to
+echo     download ECHOC in. Pressing enter without entering a path will select the default option, wich is the
+echo     folder that contains the currently running script, overriding the old version.
 echo   - Use 'cmd /c' before this command if used in a batch file.
 exit /b 0

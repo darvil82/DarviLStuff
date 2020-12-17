@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.6-1
-set /a build=22
+set ver=2.6.1
+set /a build=23
 
 set parm1=%1
 set parm2=%2
@@ -39,6 +39,7 @@ if /i "!parm1!"=="/s" (
 if /i "!parm1!"=="/f" (
 	if not defined parm2 call :error-parm filename & exit /b
 	set filename=!parm2:"=!
+	set /a count=0
 	if not exist "!filename!" call :display red "The file '!filename!' doesn't exist." & exit /b 1
 	if defined parm3 (
 		call ::color-trans !parm3! bg
@@ -58,7 +59,6 @@ if /i "!parm1!"=="/f" (
 				)
 			) else (
 				if /i "!parm6!"=="/a" (
-					set /a count=0
 					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 						if !parm5!==!count! exit /b 0
 						set /a count+=1
@@ -67,9 +67,15 @@ if /i "!parm1!"=="/f" (
 					)
 				) else (
 					< nul set /p"=!color_bg!!color_fg!" > "%temp%\.tmp"
-					type "!filename!" >> "%temp%\.tmp"
-					< nul set /p"=[0m" >> "%temp%\.tmp"
-					type "%temp%\.tmp"
+					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+						if !parm5!==!count! (
+							< nul set /p"=[0m" >> "%temp%\.tmp"
+							type "%temp%\.tmp"
+							exit /b
+						)
+						set /a count+=1
+						echo %%G >> "%temp%\.tmp"
+					)
 				)
 			)
 		) else (

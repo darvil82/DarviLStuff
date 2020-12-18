@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.7.2
-set /a build=28
+set ver=2.7.2-1
+set /a build=29
 
 set parm1=%1
 set parm2=%2
@@ -75,6 +75,7 @@ if /i "!parm1!"=="/F" (
 						set /a count+=1
 						echo %%G >> "%temp%\.tmp"
 					)
+					< nul set /p"=[0m" >> "%temp%\.tmp"
 					type "%temp%\.tmp"
 				)
 			)

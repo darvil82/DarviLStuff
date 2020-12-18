@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.6.1
-set /a build=23
+set ver=2.6.1-1
+set /a build=24
 
 set parm1=%1
 set parm2=%2
@@ -20,7 +20,7 @@ set color_new=
 
 
 
-if /i "!parm1!"=="/s" (
+if /i "!parm1!"=="/S" (
 	if not defined parm2 call :error-parm string
 	if defined parm3 (
 		call ::color-trans !parm3! bg
@@ -31,12 +31,11 @@ if /i "!parm1!"=="/s" (
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
-
 	call :display
 	exit /b
 )
 
-if /i "!parm1!"=="/f" (
+if /i "!parm1!"=="/F" (
 	if not defined parm2 call :error-parm filename & exit /b
 	set filename=!parm2:"=!
 	set /a count=0
@@ -88,7 +87,7 @@ if /i "!parm1!"=="/f" (
 	exit /b 0
 )
 
-if /i "!parm1!"=="/t" (
+if /i "!parm1!"=="/T" (
 	if defined parm2 (
 		if /i "!parm2!"=="/r" < nul set /p"=[0m" & exit /b 0
 		call ::color-trans !parm2! bg
@@ -105,7 +104,7 @@ if /i "!parm1!"=="/t" (
 	exit /b 1
 )
 
-if /i "!parm1!"=="/p" (
+if /i "!parm1!"=="/P" (
 	if not defined parm2 call :error-parm string
 	if defined parm3 (
 		call ::color-trans !parm3! ps
@@ -116,12 +115,11 @@ if /i "!parm1!"=="/p" (
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
-
 	call :display ps
 	exit /b
 )
 
-if /i "!parm1!"=="/z" (
+if /i "!parm1!"=="/Z" (
 	if not defined parm2 call :error-parm string & exit /b 1
 	set text=!parm2:"=!
 	set text=!text:\\={BACKSLASH}!
@@ -319,49 +317,50 @@ exit /b 1
 
 
 :help
-echo Script that displays text in one line with different colors. Can also print the content of files.
-echo This is done by using ANSI color escape codes, and using them in various ways for displaying content.
-echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
+echo Script that allows the user to display more than 2 different colors on the screen
+echo ^(foreground and background^), supporting displaying normal strings, content of files, and also changing
+echo the colors that the CLI is using at the moment.
+echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)[0m
 echo:
-echo ECHOC /S string [COLOR] ^| /F filename [COLOR] [LINES] [/A] ^| /T COLOR [/R] ^| /P string [COLOR] ^|
-echo       /Z string
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F filename [93m[COLOR] [LINES] [/A] [0m^| [33m/T [93mCOLOR [/R] [0m^| [33m/P [93mstring [COLOR] [0m^|
+echo       [33m/Z [93mstring[0m
 echo:
-echo   /S : Displays the following selected string.
-echo   /F : Displays the content of the following file specified. Specifying the [LINES] value will select
-echo        the number of lines that will be displayed. If '/A' is specified, every line of the file will be
+echo   [33m/S :[0m Displays the following selected string.
+echo   [33m/F :[0m Displays the content of the following file specified. Specifying the [93m[LINES][0m value will select
+echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors.
-echo   /T : Toggles the color that is being used at the moment. Not recommended for the background.
-echo        Following this parameter with '/R' will reset the current colors back to normal.
-echo   /P : Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
-echo   /Z : Use the advanced formatted mode for displaying strings. In order to change the colors, use the
-echo        custom escape character like so: '\f^<fg_HEX^>' or '\b^<gb_HEX^>'. You can also use '\r' to reset it,
-echo        although, it is automatically resetted at the end. Use a double backslash ^(\\^) in case it is needed
-echo        to escape it. This mode allows the use of multi-colored lines.
+echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background.
+echo        Following this parameter with '[93m/R[0m' will reset the current colors back to normal.
+echo   [33m/P :[0m Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
+echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings. In order to change the colors, use the
+echo        custom escape character like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or '[93m\b^<bg_HEX^>[0m' ^(background^). You can
+echo        also use '[93m\R[0m' to reset it, although, it is automatically resetted at the end. Use a double
+echo        backslash ^(\\^) in case it is needed to escape it. This mode allows the use of multi-colored lines.
 echo:
 echo:
-echo   COLOR      BG : Select the color to be displayed on the background of the line in hex.
+echo   [93mCOLOR      BG :[0m Select the color to be displayed on the background of the line in hex.
 echo                   Using "-" or nothing will display the current color of the background.
-echo              FG : Select the color to be displayed on the foreground of the line in hex. (color of the text)
+echo              [93mFG :[0m Select the color to be displayed on the foreground of the line in hex. (color of the text)
 echo                   Using "-" or nothing will display the current color of the foreground.
 echo:
 echo:
 echo:
-echo   Examples      : 'echoc /s "What's up?" - 3'
+echo   Examples      : '[96mECHOC [33m/S [93m"What's up?" - 3'[0m
 echo                      Display the string "What's up?" using the current color
 echo                      of the background, and using aquamarine color for the foreground.
-echo                 : 'echoc /f "./test/notes.txt" 0 a 32'
+echo                 : '[96mECHOC [33m/F [93m"./test/notes.txt" 0 a 32'[0m
 echo                      Display the first 32 lines of the file "./test/notes.txt" using a black color 
 echo                      for the background and a green color for the foreground.
-echo                 : 'echoc /z "\fcThis text is red, \b1and this background is blue."'
+echo                 : '[96mECHOC [33m/Z [93m"\fcThis text is red, \b1and this background is blue."'[0m
 echo                      Display "This text is red," with a red foreground, and "and this background is blue."
 echo                      with a dark blue background.
 echo:
 echo   - Available color values:
 echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
 echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
-echo   - 'echoc /CHKUP' will check for updates. If it finds a newer version, it will ask for a folder to
+echo   - '[96mECHOC [33m/CHKUP[0m' will check for updates. If it finds a newer version, it will ask for a folder to
 echo     download ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the
 echo     folder that contains the currently running script, overriding the old version.
-echo   - Use 'cmd /c' before this command if used in a batch file.
+echo   - Use 'CMD /C' before this script if used in a batch file.
 exit /b 0

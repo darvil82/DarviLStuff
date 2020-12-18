@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.6.1-1
-set /a build=24
+set ver=2.6.1-2
+set /a build=25
 
 set parm1=%1
 set parm2=%2
@@ -322,7 +322,7 @@ echo ^(foreground and background^), supporting displaying normal strings, conten
 echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F filename [93m[COLOR] [LINES] [/A] [0m^| [33m/T [93mCOLOR [/R] [0m^| [33m/P [93mstring [COLOR] [0m^|
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93mCOLOR [/R] [0m^| [33m/P [93mstring [COLOR] [0m^|
 echo       [33m/Z [93mstring[0m
 echo:
 echo   [33m/S :[0m Displays the following selected string.

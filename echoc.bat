@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.7
-set /a build=26
+set ver=2.7.1
+set /a build=27
 
 set parm1=%1
 set parm2=%2
@@ -261,63 +261,68 @@ exit /b 0
 
 ::Transform the hex value of the color into the corresponding ANSI escape code.
 :color-trans
-if "%2"=="fg" (
-	if /i "%1"=="-" set color_new=&				exit /b
-	if /i "%1"=="0" set color_new=[30m&		exit /b
-	if /i "%1"=="1" set color_new=[34m&		exit /b
-	if /i "%1"=="2" set color_new=[32m&		exit /b
-	if /i "%1"=="3" set color_new=[36m&		exit /b
-	if /i "%1"=="4" set color_new=[31m&		exit /b
-	if /i "%1"=="5" set color_new=[35m&		exit /b
-	if /i "%1"=="6" set color_new=[33m&		exit /b
-	if /i "%1"=="7" set color_new=[37m&		exit /b
-	if /i "%1"=="8" set color_new=[90m&		exit /b
-	if /i "%1"=="9" set color_new=[94m&		exit /b
-	if /i "%1"=="a" set color_new=[92m&		exit /b
-	if /i "%1"=="b" set color_new=[96m&		exit /b
-	if /i "%1"=="c" set color_new=[91m&		exit /b
-	if /i "%1"=="d" set color_new=[95m&		exit /b
-	if /i "%1"=="e" set color_new=[93m&		exit /b
-	if /i "%1"=="f" set color_new=[97m&		exit /b
-) else if "%2"=="bg" (
-	if /i "%1"=="-" set color_new=&				exit /b
-	if /i "%1"=="0" set color_new=[40m&		exit /b
-	if /i "%1"=="1" set color_new=[44m&		exit /b
-	if /i "%1"=="2" set color_new=[42m&		exit /b
-	if /i "%1"=="3" set color_new=[46m&		exit /b
-	if /i "%1"=="4" set color_new=[41m&		exit /b
-	if /i "%1"=="5" set color_new=[45m&		exit /b
-	if /i "%1"=="6" set color_new=[43m&		exit /b
-	if /i "%1"=="7" set color_new=[47m&		exit /b
-	if /i "%1"=="8" set color_new=[100m&		exit /b
-	if /i "%1"=="9" set color_new=[104m&		exit /b
-	if /i "%1"=="a" set color_new=[102m&		exit /b
-	if /i "%1"=="b" set color_new=[106m&		exit /b
-	if /i "%1"=="c" set color_new=[101m&		exit /b
-	if /i "%1"=="d" set color_new=[105m&		exit /b
-	if /i "%1"=="e" set color_new=[103m&		exit /b
-	if /i "%1"=="f" set color_new=[107m&		exit /b
-) else if "%2"=="ps" (
-	if /i "%1"=="-" set color_new=&				exit /b
-	if /i "%1"=="0" set color_new=Black&		exit /b
-	if /i "%1"=="1" set color_new=DarkBlue&		exit /b
-	if /i "%1"=="2" set color_new=DarkGreen&	exit /b
-	if /i "%1"=="3" set color_new=DarkCyan&		exit /b
-	if /i "%1"=="4" set color_new=DarkRed&		exit /b
-	if /i "%1"=="5" set color_new=DarkMagenta&	exit /b
-	if /i "%1"=="6" set color_new=DarkYellow&	exit /b
-	if /i "%1"=="7" set color_new=Gray&			exit /b
-	if /i "%1"=="8" set color_new=DarkGray&		exit /b
-	if /i "%1"=="9" set color_new=Blue&			exit /b
-	if /i "%1"=="a" set color_new=Green&		exit /b
-	if /i "%1"=="b" set color_new=Cyan&			exit /b
-	if /i "%1"=="c" set color_new=Red&			exit /b
-	if /i "%1"=="d" set color_new=Magenta&		exit /b
-	if /i "%1"=="e" set color_new=Yellow&		exit /b
-	if /i "%1"=="f" set color_new=White&		exit /b
+set ct_P1=%1
+set ct_P2=%2
+set ct_P1=!ct_P1:"=!
+set ct_P2=!ct_P2:"=!
+
+if "!ct_P2!"=="fg" (
+	if /i "!ct_P1!"=="-" set color_new=&				exit /b
+	if /i "!ct_P1!"=="0" set color_new=[30m&			exit /b
+	if /i "!ct_P1!"=="1" set color_new=[34m&			exit /b
+	if /i "!ct_P1!"=="2" set color_new=[32m&			exit /b
+	if /i "!ct_P1!"=="3" set color_new=[36m&			exit /b
+	if /i "!ct_P1!"=="4" set color_new=[31m&			exit /b
+	if /i "!ct_P1!"=="5" set color_new=[35m&			exit /b
+	if /i "!ct_P1!"=="6" set color_new=[33m&			exit /b
+	if /i "!ct_P1!"=="7" set color_new=[37m&			exit /b
+	if /i "!ct_P1!"=="8" set color_new=[90m&			exit /b
+	if /i "!ct_P1!"=="9" set color_new=[94m&			exit /b
+	if /i "!ct_P1!"=="a" set color_new=[92m&			exit /b
+	if /i "!ct_P1!"=="b" set color_new=[96m&			exit /b
+	if /i "!ct_P1!"=="c" set color_new=[91m&			exit /b
+	if /i "!ct_P1!"=="d" set color_new=[95m&			exit /b
+	if /i "!ct_P1!"=="e" set color_new=[93m&			exit /b
+	if /i "!ct_P1!"=="f" set color_new=[97m&			exit /b
+) else if "!ct_P2!"=="bg" (
+	if /i "!ct_P1!"=="-" set color_new=&				exit /b
+	if /i "!ct_P1!"=="0" set color_new=[40m&			exit /b
+	if /i "!ct_P1!"=="1" set color_new=[44m&			exit /b
+	if /i "!ct_P1!"=="2" set color_new=[42m&			exit /b
+	if /i "!ct_P1!"=="3" set color_new=[46m&			exit /b
+	if /i "!ct_P1!"=="4" set color_new=[41m&			exit /b
+	if /i "!ct_P1!"=="5" set color_new=[45m&			exit /b
+	if /i "!ct_P1!"=="6" set color_new=[43m&			exit /b
+	if /i "!ct_P1!"=="7" set color_new=[47m&			exit /b
+	if /i "!ct_P1!"=="8" set color_new=[100m&		exit /b
+	if /i "!ct_P1!"=="9" set color_new=[104m&		exit /b
+	if /i "!ct_P1!"=="a" set color_new=[102m&		exit /b
+	if /i "!ct_P1!"=="b" set color_new=[106m&		exit /b
+	if /i "!ct_P1!"=="c" set color_new=[101m&		exit /b
+	if /i "!ct_P1!"=="d" set color_new=[105m&		exit /b
+	if /i "!ct_P1!"=="e" set color_new=[103m&		exit /b
+	if /i "!ct_P1!"=="f" set color_new=[107m&		exit /b
+) else if "!ct_P2!"=="ps" (
+	if /i "!ct_P1!"=="-" set color_new=&				exit /b
+	if /i "!ct_P1!"=="0" set color_new=Black&			exit /b
+	if /i "!ct_P1!"=="1" set color_new=DarkBlue&		exit /b
+	if /i "!ct_P1!"=="2" set color_new=DarkGreen&		exit /b
+	if /i "!ct_P1!"=="3" set color_new=DarkCyan&		exit /b
+	if /i "!ct_P1!"=="4" set color_new=DarkRed&			exit /b
+	if /i "!ct_P1!"=="5" set color_new=DarkMagenta&		exit /b
+	if /i "!ct_P1!"=="6" set color_new=DarkYellow&		exit /b
+	if /i "!ct_P1!"=="7" set color_new=Gray&			exit /b
+	if /i "!ct_P1!"=="8" set color_new=DarkGray&		exit /b
+	if /i "!ct_P1!"=="9" set color_new=Blue&			exit /b
+	if /i "!ct_P1!"=="a" set color_new=Green&			exit /b
+	if /i "!ct_P1!"=="b" set color_new=Cyan&			exit /b
+	if /i "!ct_P1!"=="c" set color_new=Red&				exit /b
+	if /i "!ct_P1!"=="d" set color_new=Magenta&			exit /b
+	if /i "!ct_P1!"=="e" set color_new=Yellow&			exit /b
+	if /i "!ct_P1!"=="f" set color_new=White&			exit /b
 )
 
-call :display red "'%1' is not a valid color value."
+call :display red "'!ct_P1!' is not a valid color value."
 set invalid=1
 exit /b 1
 

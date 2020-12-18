@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.6.1-2
-set /a build=25
+set ver=2.7
+set /a build=26
 
 set parm1=%1
 set parm2=%2
@@ -31,7 +31,7 @@ if /i "!parm1!"=="/S" (
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
-	call :display
+	if /i "!parm5!"=="/u" ( call :display add [4m ) else ( call :display )
 	exit /b
 )
 
@@ -98,8 +98,13 @@ if /i "!parm1!"=="/T" (
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
-		if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
-		if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		if /i "!parm4!"=="/u" (
+			if defined color_bg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
+			if defined color_fg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
+		) else (
+			if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
+			if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		)
 	)
 	exit /b 1
 )
@@ -124,6 +129,8 @@ if /i "!parm1!"=="/Z" (
 	set text=!parm2:"=!
 	set text=!text:\\={BACKSLASH}!
 	set text=!text:\r=[0m!
+	set text=!text:\u=[4m!
+	set text=!text:\nu=[24m!
 	
 	::Parse foreground
 	set text=!text:\f0=[30m!
@@ -199,9 +206,9 @@ if /i "!parm1!"=="/CHKUP" (
 
 if /i "!parm1!"=="/?" goto help
 
-if not defined parm1 call :display red "No parameters were defined." & echo Use "echoc /?" to read the help. & exit /b 1
+if not defined parm1 call :display red "No parameters were defined." & echo Use "ECHOC /?" to read the help. & exit /b 1
 set parm1=!parm1:"=!
-call :display red "Unexpected '!parm1!' parameter." & echo Use "echoc /?" to read the help. & exit /b 1
+call :display red "Unexpected '!parm1!' parameter." & echo Use "ECHOC /?" to read the help. & exit /b 1
 
 :error-parm
 call :display red "Parameter [%1] is not defined."
@@ -236,6 +243,8 @@ if "%1"=="green" (
 	set color_fg=[92m
 	set color_bg=
 )
+
+if "%1"=="add" set text=%2!text!
 
 
 ::Escape special characters.
@@ -320,23 +329,29 @@ exit /b 1
 echo Script that allows the user to display more than 2 different colors on the screen
 echo ^(foreground and background^), supporting displaying normal strings, content of files, and also changing
 echo the colors that the CLI is using at the moment.
-echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)[0m
+echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
+echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93mCOLOR [/R] [0m^| [33m/P [93mstring [COLOR] [0m^|
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
 echo       [33m/Z [93mstring[0m
 echo:
-echo   [33m/S :[0m Displays the following selected string.
+echo   [33m/S :[0m Displays the following selected string. If '[93m/U[0m' is specified after selecting the color, an underline
+echo        will be applied.
 echo   [33m/F :[0m Displays the content of the following file specified. Specifying the [93m[LINES][0m value will select
 echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors.
-echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background.
-echo        Following this parameter with '[93m/R[0m' will reset the current colors back to normal.
+echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
+echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
+echo        current colors back to normal.
 echo   [33m/P :[0m Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
-echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings. In order to change the colors, use the
-echo        custom escape character like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or '[93m\b^<bg_HEX^>[0m' ^(background^). You can
-echo        also use '[93m\R[0m' to reset it, although, it is automatically resetted at the end. Use a double
-echo        backslash ^(\\^) in case it is needed to escape it. This mode allows the use of multi-colored lines.
+echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings, wich allows multi-colored lines. In order
+echo        to change the colors, use the custom escape character set like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or
+echo        '[93m\b^<bg_HEX^>[0m' ^(background^). More special characters:
+echo            [93m\u  =[0m Starts drawing an underline.
+echo            [93m\nu =[0m Stops drawing an underline.
+echo            [93m\r  =[0m Resets all the colors in the string. (They are automatically resetted at the end)
+echo            [93m\\  =[0m Escape a backslash.
 echo:
 echo:
 echo   [93mCOLOR      BG :[0m Select the color to be displayed on the background of the line in hex.

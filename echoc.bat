@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.8
-set /a build=30
+set ver=2.8.1
+set /a build=31
 
 set parm1=%1
 set parm2=%2
@@ -188,8 +188,8 @@ if /i "!parm1!"=="/CHKUP" (
 		echo   Using build: !build!
 		echo   Latest build: !build_gh!
 		echo:
-		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d1%~p0'] "
-		if not defined chkup_in set chkup_in=%~d1%~p0
+		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d0%~p0'] "
+		if not defined chkup_in set chkup_in=%~d0%~p0
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
 		if not exist "!chkup_in!\" (

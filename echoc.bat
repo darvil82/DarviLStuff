@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.8.1
-set /a build=31
+set ver=2.8.2
+set /a build=32
 
 set parm1=%1
 set parm2=%2
@@ -23,14 +23,15 @@ set color_new=
 if /i "!parm1!"=="/S" (
 	if not defined parm2 call :error-parm string
 	if defined parm3 (
-		call ::color-trans !parm3! bg
+		call :color-trans !parm3! bg
 		set color_bg=!color_new!
 	)
 	if defined parm4 (
-		call ::color-trans !parm4! fg
+		call :color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
+	call :display
 	exit /b
 )
 
@@ -40,11 +41,11 @@ if /i "!parm1!"=="/F" (
 	set /a count=0
 	if not exist "!filename!" call :display red "The file '!filename!' doesn't exist." & exit /b 1
 	if defined parm3 (
-		call ::color-trans !parm3! bg
+		call :color-trans !parm3! bg
 		set color_bg=!color_new!
 	)
 	if defined parm4 (
-		call ::color-trans !parm4! fg
+		call :color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
 	if not !invalid!==1 (
@@ -91,21 +92,16 @@ if /i "!parm1!"=="/F" (
 if /i "!parm1!"=="/T" (
 	if defined parm2 (
 		if /i "!parm2!"=="/r" < nul set /p"=[0m" & exit /b 0
-		call ::color-trans !parm2! bg
+		call :color-trans !parm2! bg
 		set color_bg=!color_new!
 	) else call :error-parm color-bg
 	if defined parm3 (
-		call ::color-trans !parm3! fg
+		call :color-trans !parm3! fg
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
 	if not !invalid!==1 (
-		if /i "!parm4!"=="/u" (
-			if defined color_bg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
-			if defined color_fg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
-		) else (
-			if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
-			if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
-		)
+		if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
+		if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
 	)
 	exit /b 1
 )
@@ -113,11 +109,11 @@ if /i "!parm1!"=="/T" (
 if /i "!parm1!"=="/P" (
 	if not defined parm2 call :error-parm string
 	if defined parm3 (
-		call ::color-trans !parm3! ps
+		call :color-trans !parm3! ps
 		set color_bg=!color_new!
 	)
 	if defined parm4 (
-		call ::color-trans !parm4! ps
+		call :color-trans !parm4! ps
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
@@ -246,7 +242,6 @@ if "%1"=="green" (
 	set color_bg=
 )
 
-if "%1"=="add" set text=%2!text!
 
 
 ::Escape special characters.
@@ -339,7 +334,7 @@ echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
 echo       [33m/Z [93mstring[0m
 echo:
 echo   [33m/S :[0m Displays the following selected string.
@@ -347,9 +342,8 @@ echo   [33m/F :[0m Displays the content of the following file specified. Speci
 echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors.
-echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
-echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
-echo        current colors back to normal.
+echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background.
+echo        Using '[93m/R[0m' instead of a color will reset the current colors back to normal.
 echo   [33m/P :[0m Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
 echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings, wich allows multi-colored lines. In order
 echo        to change the colors, use the custom escape character set like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or

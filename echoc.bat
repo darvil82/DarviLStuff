@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.7.2-1
-set /a build=29
+set ver=2.8
+set /a build=30
 
 set parm1=%1
 set parm2=%2
@@ -31,7 +31,6 @@ if /i "!parm1!"=="/S" (
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
-	if /i "!parm5!"=="/u" ( call :display add [4m ) else ( call :display )
 	exit /b
 )
 
@@ -133,6 +132,7 @@ if /i "!parm1!"=="/Z" (
 	set text=!text:\r=[0m!
 	set text=!text:\u=[4m!
 	set text=!text:\nu=[24m!
+	set text=!text:\b=[1m!
 	
 	::Parse foreground
 	set text=!text:\f0=[30m!
@@ -339,11 +339,10 @@ echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
 echo       [33m/Z [93mstring[0m
 echo:
-echo   [33m/S :[0m Displays the following selected string. If '[93m/U[0m' is specified after selecting the color, an underline
-echo        will be applied.
+echo   [33m/S :[0m Displays the following selected string.
 echo   [33m/F :[0m Displays the content of the following file specified. Specifying the [93m[LINES][0m value will select
 echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
@@ -357,6 +356,7 @@ echo        to change the colors, use the custom escape character set like so: '
 echo        '[93m\b^<bg_HEX^>[0m' ^(background^). More special characters:
 echo            [93m\u  =[0m Starts drawing an underline.
 echo            [93m\nu =[0m Stops drawing an underline.
+echo            [93m\b  =[0m Starts drawing bold text.
 echo            [93m\r  =[0m Resets all the colors in the string. (They are automatically resetted at the end)
 echo            [93m\\  =[0m Escape a backslash.
 echo:

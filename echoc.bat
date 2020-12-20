@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.9
-set /a build=33
+set ver=2.9-1
+set /a build=34
 
 set parm1=%1
 set parm2=%2
@@ -376,7 +376,7 @@ echo                   Using "-" will display the current color of the backgroun
 echo              [93mFG :[0m Select the color to be displayed on the foreground of the line in hex. (color of the text)
 echo                   Using "-" will display the current color of the foreground.
 echo              [93mAvailable color values:[0m
-echo              - 0 1 2 3 4 5 6 7 8 9 a b c d e f
+echo              0 1 2 3 4 5 6 7 8 9 a b c d e f -
 echo              [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
 echo:
 echo:

@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.10
-set /a build=35
+set ver=2.10-1
+set /a build=36
 
 set parm1=%1
 set parm2=%2
@@ -202,7 +202,7 @@ if /i "!parm1!"=="/CHKUP" (
 	for /f "skip=1 tokens=1* usebackq" %%G in ("%temp%\.tmp") do set /a build_windows=%%G 2> nul
 	if !build_windows! LSS 1909 (
 		echo "Using Windows build !build_windows!, Windows 1909 or higher is required for using this script."
-	) else call :display green "Using build !build_windows!, wich has support for colors."
+	) else call :display green "Using build !build_windows!, which has support for colors."
 	
 	
 	::Check if the user has PowerShell installed.
@@ -387,7 +387,7 @@ echo   [33m/T :[0m Toggles the color that is being used at the moment. Not rec
 echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
 echo        current colors back to normal.
 echo   [33m/P :[0m Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
-echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings, wich allows multi-colored lines. In order
+echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings, which allows multi-colored lines. In order
 echo        to change the colors, use the custom escape character set like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or
 echo        '[93m\b^<bg_HEX^>[0m' ^(background^). More special characters:
 echo            [93m\u  =[0m Starts drawing an underline.
@@ -417,7 +417,7 @@ echo                      with a dark blue background.
 echo:
 echo   - '[96mECHOC [33m/CHKUP[0m' will check if you are using the minimun necessary Windows build, your PowerShell installation,
 echo     and the newest versions of ECHOC. If it finds a newer version of it, it will ask for a folder to download
-echo     ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the folder that
+echo     ECHOC in. Pressing ENTER without entering a path will select the default option, which is the folder that
 echo     contains the currently running script, overriding the old version.
 echo   - Use 'CMD /C' before this script if used in a batch file.
 exit /b 0

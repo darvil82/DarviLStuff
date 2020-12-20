@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.9-1
-set /a build=34
+set ver=2.10
+set /a build=35
 
 set parm1=%1
 set parm2=%2
@@ -52,6 +52,7 @@ if /i "!parm1!"=="/F" (
 		for %%G in (!parm5! !parm6! !parm7!) do (
 			if /i "%%G"=="/u" set t_extra=[4m
 			if /i "%%G"=="/a" set process_all=1
+			if /i "%%G"=="/v" set verbose=1
 			
 			set /a file_lines=%%G 2> nul
 		)
@@ -75,16 +76,23 @@ if /i "!parm1!"=="/F" (
 			)
 		) else (
 			if defined file_lines (
+				if defined verbose < nul set /p"=Processing lines"
 				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 					if !file_lines!==!count! (
+						if defined verbose < nul set /p"=Done" & echo: & echo:
+						
 						< nul set /p"=[0m" >> "%temp%\.tmp"
 						type "%temp%\.tmp"
 						exit /b 0
 					)
 					set /a count+=1
 					echo !t_extra!%%G >> "%temp%\.tmp"
+					
+					if defined verbose < nul set /p"=."
 				)
+				if defined verbose < nul set /p"=Done" & echo: & echo:
+				
 				< nul set /p"=[0m" >> "%temp%\.tmp"
 				type "%temp%\.tmp"
 				exit /b 0
@@ -188,16 +196,32 @@ if /i "!parm1!"=="/Z" (
 	
 
 if /i "!parm1!"=="/CHKUP" (
-	echo Checking for new updates...
+	::Check if the user is using windows 1909 at least
+	<nul set /p =Checking Windows build... 
+	wmic os get BuildNumber | sort /r > "%temp%\.tmp"
+	for /f "skip=1 tokens=1* usebackq" %%G in ("%temp%\.tmp") do set /a build_windows=%%G 2> nul
+	if !build_windows! LSS 1909 (
+		echo "Using Windows build !build_windows!, Windows 1909 or higher is required for using this script."
+	) else call :display green "Using build !build_windows!, wich has support for colors."
+	
+	
+	::Check if the user has PowerShell installed.
+	<nul set /p =Checking PowerShell... 
+	reg query HKLM\SOFTWARE\Microsoft\PowerShell\1 /v Install 1> "%temp%/.tmp" 2>&1 & find "Install    REG_DWORD    0x1" "%temp%/.tmp" > nul
+	if !errorlevel!==1 (
+		call :display red "PowerShell isn't installed. Altough, it isn't required."
+	) else call :display green "PowerShell is installed."
+	
+
+	::Check for updates of ECHOC.
+	<nul set /p =Checking for new versions of ECHOC... 
 	ping github.com /n 1 > nul
 	if %errorlevel% == 1 call :display red "Unable to connect to GitHub." & exit /b 1
-	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\versions" > nul
-	find "echoc" "%temp%\versions" > "%temp%\versions_s"
-	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\versions_s") do set /a build_gh=%%G
+	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
+	find "echoc" "%temp%\.tmp" > "%temp%\.tmp2"
+	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
 	if !build_gh! GTR !build! (
-		call :display green "Found a new version."
-		echo   Using build: !build!
-		echo   Latest build: !build_gh!
+		call :display red "Found a new version. (Using build: !build!. Latest build: !build_gh!)"
 		echo:
 		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d0%~p0'] "
 		if not defined chkup_in set chkup_in=%~d0%~p0
@@ -213,7 +237,7 @@ if /i "!parm1!"=="/CHKUP" (
 			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."
 			exit /b 0
 		)
-	) else call :display green "Using latest version."
+	) else call :display green "Using latest build."
 	exit /b 0
 )
 
@@ -260,9 +284,9 @@ if "%1"=="green" (
 
 
 ::Escape special characters.
-set text=%text:"=%
-set text=%text:(=^(%
-set text=%text:)=^)%
+set text=!text:"=!
+set text=!text:(=^(!
+set text=!text:)=^)!
 
 echo !color_bg!!color_fg!!text![0m
 exit /b 0
@@ -349,15 +373,16 @@ echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] ([LINES] [/A] [/U])[0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
-echo       [33m/Z [93mstring[0m
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [/U] [/V] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m^| 
+echo       [33m/P [93mstring [COLOR] [0m^| [33m/Z [93mstring[0m 
 echo:
 echo   [33m/S :[0m Displays the following selected string. If '[93m/U[0m' is specified after selecting the color, an underline
 echo        will be applied.
 echo   [33m/F :[0m Displays the content of the following file specified. Specifying the [93m[LINES][0m value will select
 echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
-echo        and not empty characters. Mostly useful when displaying background colors.
+echo        and not empty characters. Mostly useful when displaying background colors. If '[93m/V[0m' is specified when
+echo        having a [93m[LINES][0m value set, a dot will appear for every line of the file that has been processed.
 echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
 echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
 echo        current colors back to normal.
@@ -390,8 +415,9 @@ echo                 : '[96mECHOC [33m/Z [93m"\fcThis text is red, \b1and thi
 echo                      Display "This text is red," with a red foreground, and "and this background is blue."
 echo                      with a dark blue background.
 echo:
-echo   - '[96mECHOC [33m/CHKUP[0m' will check for updates. If it finds a newer version, it will ask for a folder to
-echo     download ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the
-echo     folder that contains the currently running script, overriding the old version.
+echo   - '[96mECHOC [33m/CHKUP[0m' will check if you are using the minimun necessary Windows build, your PowerShell installation,
+echo     and the newest versions of ECHOC. If it finds a newer version of it, it will ask for a folder to download
+echo     ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the folder that
+echo     contains the currently running script, overriding the old version.
 echo   - Use 'CMD /C' before this script if used in a batch file.
 exit /b 0

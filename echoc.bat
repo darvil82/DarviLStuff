@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.10.1
-set /a build=39
+set ver=2.11
+set /a build=40
 
 set parm1=%1
 set parm2=%2
@@ -49,8 +49,10 @@ if /i "!parm1!"=="/F" (
 	
 	
 	if not !invalid!==1 (
+		set t_extra=
 		for %%G in (!parm5! !parm6! !parm7!) do (
-			if /i "%%G"=="/u" set t_extra=[4m
+			if /i "%%G"=="/u" set t_extra=[4m!t_extra!
+			if /i "%%G"=="/l" set show_lines=1
 			if /i "%%G"=="/a" set process_all=1
 			if /i "%%G"=="/v" set verbose=1
 			
@@ -62,14 +64,15 @@ if /i "!parm1!"=="/F" (
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 					if !file_lines!==!count! exit /b 0
 					set /a count+=1
-					set "text=!t_extra!%%G"
+					if defined show_lines (set "text=!count!: !t_extra!%%G") else (set "text=!t_extra!%%G")
 					call :display
 				)
 				exit /b 0
 				
 			) else (
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-					set "text=!t_extra!%%G"
+					set /a count+=1
+					if defined show_lines (set "text=!count!: !t_extra!%%G") else (set "text=!t_extra!%%G")
 					call :display
 				)
 				exit /b 0
@@ -87,7 +90,7 @@ if /i "!parm1!"=="/F" (
 						exit /b 0
 					)
 					set /a count+=1
-					echo !t_extra!%%G >> "%temp%\.tmp"
+					if defined show_lines (echo !count!: !t_extra!%%G >> "%temp%\.tmp") else (echo !t_extra!%%G >> "%temp%\.tmp")
 					
 					if defined verbose < nul set /p"=."
 				)
@@ -281,8 +284,6 @@ if "%1"=="green" (
 
 ::Escape special characters.
 set text=!text:"=!
-set text=!text:(=^(!
-set text=!text:)=^)!
 
 echo !color_bg!!color_fg!!text![0m
 exit /b 0
@@ -369,7 +370,7 @@ echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [/U] [/V] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m^| 
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [/U] [/V] [/L] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m^| 
 echo       [33m/P [93mstring [COLOR] [0m^| [33m/Z [93mstring[0m 
 echo:
 echo   [33m/S :[0m Displays the following selected string. If '[93m/U[0m' is specified after selecting the color, an underline
@@ -379,6 +380,7 @@ echo        the number of lines that will be displayed. If '[93m/A[0m' is spec
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors. If '[93m/V[0m' is specified when
 echo        having a [93m[LINES][0m value set, a dot will appear for every line of the file that has been processed.
+echo        '[93m/L[0m' will show the number of every line displayed, only supported when counting lines.
 echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
 echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
 echo        current colors back to normal.

@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.10-2
-set /a build=37
+set ver=2.10-3
+set /a build=38
 
 set parm1=%1
 set parm2=%2
@@ -220,7 +220,7 @@ if /i "!parm1!"=="/CHKUP" (
 	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
 	find "echoc" "%temp%\.tmp" > "%temp%\.tmp2"
 	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
-	if !build_gh! GTR 0 (
+	if !build_gh! GTR !build! (
 		call :display red "Found a new version. (Using build: !build!. Latest build: !build_gh!)"
 		echo:
 		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d0%~p0'] "

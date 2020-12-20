@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.10-1
-set /a build=36
+set ver=2.10-2
+set /a build=37
 
 set parm1=%1
 set parm2=%2
@@ -220,18 +220,19 @@ if /i "!parm1!"=="/CHKUP" (
 	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
 	find "echoc" "%temp%\.tmp" > "%temp%\.tmp2"
 	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
-	if !build_gh! GTR !build! (
+	if !build_gh! GTR 0 (
 		call :display red "Found a new version. (Using build: !build!. Latest build: !build_gh!)"
 		echo:
 		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~d0%~p0'] "
 		if not defined chkup_in set chkup_in=%~d0%~p0
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
+		
+		<nul set /p =Downloading... 
 		if not exist "!chkup_in!\" (
 			call :display red "The folder '!chkup_in!' doesn't exist. Download aborted."
 			exit /b 1
 		) else (
-			echo Downloading...
 			bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat" "!chkup_in!\echoc.bat" > nul
 			if not !errorlevel! == 0 call :display red "An error occurred while trying to download ECHOC." & exit /b 1
 			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."

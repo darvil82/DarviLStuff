@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.8.2
-set /a build=32
+set ver=2.9
+set /a build=33
 
 set parm1=%1
 set parm2=%2
@@ -12,10 +12,7 @@ set parm3=%3
 set parm4=%4
 set parm5=%5
 set parm6=%6
-
-set color_fg=
-set color_bg=
-set color_new=
+set parm7=%7
 
 
 
@@ -31,6 +28,7 @@ if /i "!parm1!"=="/S" (
 		set color_fg=!color_new!
 	)
 	set text=!parm2!
+	if /i "!parm5!"=="/u" set text=[4m!text!
 	call :display
 	exit /b
 )
@@ -48,45 +46,59 @@ if /i "!parm1!"=="/F" (
 		call :color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
+	
+	
 	if not !invalid!==1 (
-		if defined parm5 (
-			if /i "!parm5!"=="/a" (
-				if not defined color_bg if not defined color_fg type "!filename!" & exit /b 0
+		for %%G in (!parm5! !parm6! !parm7!) do (
+			if /i "%%G"=="/u" set t_extra=[4m
+			if /i "%%G"=="/a" set process_all=1
+			
+			set /a file_lines=%%G 2> nul
+		)
+		
+		if defined process_all (
+			if defined file_lines (
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-					set "text=%%G"
+					if !file_lines!==!count! exit /b 0
+					set /a count+=1
+					set "text=!t_extra!%%G"
 					call :display
 				)
+				exit /b 0
+				
 			) else (
-				if /i "!parm6!"=="/a" (
-					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-						if !parm5!==!count! exit /b 0
-						set /a count+=1
-						set "text=%%G"
-						call :display
-					)
-				) else (
-					< nul set /p"=!color_bg!!color_fg!" > "%temp%\.tmp"
-					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
-						if !parm5!==!count! (
-							< nul set /p"=[0m" >> "%temp%\.tmp"
-							type "%temp%\.tmp"
-							exit /b
-						)
-						set /a count+=1
-						echo %%G >> "%temp%\.tmp"
-					)
-					< nul set /p"=[0m" >> "%temp%\.tmp"
-					type "%temp%\.tmp"
+				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+					set "text=!t_extra!%%G"
+					call :display
 				)
+				exit /b 0
 			)
 		) else (
-			< nul set /p"=!color_bg!!color_fg!" > "%temp%\.tmp"
-			type "!filename!" >> "%temp%\.tmp"
-			< nul set /p"=[0m" >> "%temp%\.tmp"
-			type "%temp%\.tmp"
+			if defined file_lines (
+				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+					if !file_lines!==!count! (
+						< nul set /p"=[0m" >> "%temp%\.tmp"
+						type "%temp%\.tmp"
+						exit /b 0
+					)
+					set /a count+=1
+					echo !t_extra!%%G >> "%temp%\.tmp"
+				)
+				< nul set /p"=[0m" >> "%temp%\.tmp"
+				type "%temp%\.tmp"
+				exit /b 0
+				
+			) else (
+				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+				type "!filename!" >> "%temp%\.tmp"
+				< nul set /p"=[0m" >> "%temp%\.tmp"
+				type "%temp%\.tmp"
+				exit /b 0
+			)
 		)
 	)
-	exit /b 0
+	exit /b 1
 )
 
 if /i "!parm1!"=="/T" (
@@ -99,7 +111,11 @@ if /i "!parm1!"=="/T" (
 		call :color-trans !parm3! fg
 		set color_fg=!color_new!
 	) else call :error-parm color-fg
-	if not !invalid!==1 (
+	
+	if /i "!parm4!"=="/u" (
+		if defined color_bg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
+		if defined color_fg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
+	) else (
 		if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
 		if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
 	)
@@ -128,7 +144,6 @@ if /i "!parm1!"=="/Z" (
 	set text=!text:\r=[0m!
 	set text=!text:\u=[4m!
 	set text=!text:\nu=[24m!
-	set text=!text:\b=[1m!
 	
 	::Parse foreground
 	set text=!text:\f0=[30m!
@@ -334,47 +349,47 @@ echo the colors that the CLI is using at the moment.
 echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 echo:
-echo [96mECHOC[0m [33m/S [93mstring [COLOR] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [0m^| [33m/T [93m(COLOR ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
+echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] ([LINES] [/A] [/U])[0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m ^| [33m/P [93mstring [COLOR] [0m^|
 echo       [33m/Z [93mstring[0m
 echo:
-echo   [33m/S :[0m Displays the following selected string.
+echo   [33m/S :[0m Displays the following selected string. If '[93m/U[0m' is specified after selecting the color, an underline
+echo        will be applied.
 echo   [33m/F :[0m Displays the content of the following file specified. Specifying the [93m[LINES][0m value will select
 echo        the number of lines that will be displayed. If '[93m/A[0m' is specified, every line of the file will be
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors.
-echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background.
-echo        Using '[93m/R[0m' instead of a color will reset the current colors back to normal.
+echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
+echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
+echo        current colors back to normal.
 echo   [33m/P :[0m Uses PowerShell instead of ANSI escape codes. Especial characters must be escaped.
 echo   [33m/Z :[0m Use the advanced formatted mode for displaying strings, wich allows multi-colored lines. In order
 echo        to change the colors, use the custom escape character set like so: '[93m\f^<fg_HEX^>[0m' ^(foreground^) or
 echo        '[93m\b^<bg_HEX^>[0m' ^(background^). More special characters:
 echo            [93m\u  =[0m Starts drawing an underline.
 echo            [93m\nu =[0m Stops drawing an underline.
-echo            [93m\b  =[0m Starts drawing bold text.
 echo            [93m\r  =[0m Resets all the colors in the string. (They are automatically resetted at the end)
 echo            [93m\\  =[0m Escape a backslash.
 echo:
 echo:
 echo   [93mCOLOR      BG :[0m Select the color to be displayed on the background of the line in hex.
-echo                   Using "-" or nothing will display the current color of the background.
+echo                   Using "-" will display the current color of the background.
 echo              [93mFG :[0m Select the color to be displayed on the foreground of the line in hex. (color of the text)
-echo                   Using "-" or nothing will display the current color of the foreground.
+echo                   Using "-" will display the current color of the foreground.
+echo              [93mAvailable color values:[0m
+echo              - 0 1 2 3 4 5 6 7 8 9 a b c d e f
+echo              [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
 echo:
 echo:
-echo:
-echo   Examples      : '[96mECHOC [33m/S [93m"What's up?" - 3'[0m
-echo                      Display the string "What's up?" using the current color
-echo                      of the background, and using aquamarine color for the foreground.
-echo                 : '[96mECHOC [33m/F [93m"./test/notes.txt" 0 a 32'[0m
+echo   Examples      : '[96mECHOC [33m/S [93m"What's up?" - 3 /u'[0m
+echo                      Display the string "What's up?" using the current color of the background, 
+echo                      using aquamarine color for the foreground, and drawing an underline.
+echo                 : '[96mECHOC [33m/F [93m"./test/notes.txt" 0 a /a 32 /u'[0m
 echo                      Display the first 32 lines of the file "./test/notes.txt" using a black color 
-echo                      for the background and a green color for the foreground.
+echo                      for the background of the lines, a green color for the foreground, and an underline.
 echo                 : '[96mECHOC [33m/Z [93m"\fcThis text is red, \b1and this background is blue."'[0m
 echo                      Display "This text is red," with a red foreground, and "and this background is blue."
 echo                      with a dark blue background.
 echo:
-echo   - Available color values:
-echo     - 0 1 2 3 4 5 6 7 8 9 a b c d e f
-echo       [40m[30m  [44m[34m  [42m[32m  [46m[36m  [41m[31m  [45m[35m  [43m[33m  [47m[37m  [100m[90m  [94m[104m  [102m[92m  [96m[106m  [101m[91m  [105m[95m  [103m[93m  [107m[97m  [40m[30m[0m
 echo   - '[96mECHOC [33m/CHKUP[0m' will check for updates. If it finds a newer version, it will ask for a folder to
 echo     download ECHOC in. Pressing ENTER without entering a path will select the default option, wich is the
 echo     folder that contains the currently running script, overriding the old version.

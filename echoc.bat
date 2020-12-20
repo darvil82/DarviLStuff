@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11
-set /a build=40
+set ver=2.11-1
+set /a build=41
 
 set parm1=%1
 set parm2=%2
@@ -64,7 +64,7 @@ if /i "!parm1!"=="/F" (
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 					if !file_lines!==!count! exit /b 0
 					set /a count+=1
-					if defined show_lines (set "text=!count!: !t_extra!%%G") else (set "text=!t_extra!%%G")
+					if defined show_lines (set "text=!count!:	!t_extra!%%G") else (set "text=!t_extra!%%G")
 					call :display
 				)
 				exit /b 0
@@ -72,7 +72,7 @@ if /i "!parm1!"=="/F" (
 			) else (
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 					set /a count+=1
-					if defined show_lines (set "text=!count!: !t_extra!%%G") else (set "text=!t_extra!%%G")
+					if defined show_lines (set "text=!count!:	!t_extra!%%G") else (set "text=!t_extra!%%G")
 					call :display
 				)
 				exit /b 0
@@ -90,7 +90,7 @@ if /i "!parm1!"=="/F" (
 						exit /b 0
 					)
 					set /a count+=1
-					if defined show_lines (echo !count!: !t_extra!%%G >> "%temp%\.tmp") else (echo !t_extra!%%G >> "%temp%\.tmp")
+					if defined show_lines (echo !count!:	!t_extra!%%G >> "%temp%\.tmp") else (echo !t_extra!%%G >> "%temp%\.tmp")
 					
 					if defined verbose < nul set /p"=."
 				)

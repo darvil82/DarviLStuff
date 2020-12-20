@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.10-3
-set /a build=38
+set ver=2.10.1
+set /a build=39
 
 set parm1=%1
 set parm2=%2
@@ -114,19 +114,14 @@ if /i "!parm1!"=="/T" (
 		if /i "!parm2!"=="/r" < nul set /p"=[0m" & exit /b 0
 		call :color-trans !parm2! bg
 		set color_bg=!color_new!
-	) else call :error-parm color-bg
+	) else call :error-parm color-bg & exit /b 1
 	if defined parm3 (
 		call :color-trans !parm3! fg
 		set color_fg=!color_new!
-	) else call :error-parm color-fg
+	) else call :error-parm color-fg & exit /b 1
 	
-	if /i "!parm4!"=="/u" (
-		if defined color_bg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
-		if defined color_fg < nul set /p"=[4m!color_bg!!color_fg!" & exit /b 0
-	) else (
-		if defined color_bg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
-		if defined color_fg < nul set /p"=!color_bg!!color_fg!" & exit /b 0
-	)
+	if /i "!parm4!"=="/u" set t_extra=[4m
+	< nul set /p"=!t_extra!!color_bg!!color_fg!" & exit /b 0
 	exit /b 1
 )
 

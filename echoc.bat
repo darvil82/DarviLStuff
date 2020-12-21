@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11-2
-set /a build=42
+set ver=2.11-3
+set /a build=43
 
 set parm1=%1
 set parm2=%2
@@ -102,11 +102,27 @@ if /i "!parm1!"=="/F" (
 				exit /b 0
 				
 			) else (
-				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
-				type "!filename!" >> "%temp%\.tmp"
-				< nul set /p"=[0m" >> "%temp%\.tmp"
-				type "%temp%\.tmp"
-				exit /b 0
+				if defined show_lines (
+					if defined verbose < nul set /p"=Processing lines"
+					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
+						set /a count+=1
+						echo !count!:	!t_extra!%%G >> "%temp%\.tmp"
+						
+						if defined verbose < nul set /p"=."
+					)
+					if defined verbose < nul set /p"=Done" & echo: & echo:
+				
+					< nul set /p"=[0m" >> "%temp%\.tmp"
+					type "%temp%\.tmp"
+					exit /b 0
+				) else (
+					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+					type "!filename!" >> "%temp%\.tmp"
+					< nul set /p"=[0m" >> "%temp%\.tmp"
+					type "%temp%\.tmp"
+					exit /b 0
+				)
 			)
 		)
 	)
@@ -381,7 +397,7 @@ echo        the number of lines that will be displayed. If '[93m/A[0m' is spec
 echo        processed, meaning that it will take more time to process, but it will apply colors to only text,
 echo        and not empty characters. Mostly useful when displaying background colors. If '[93m/V[0m' is specified when
 echo        having a [93m[LINES][0m value set, a dot will appear for every line of the file that has been processed.
-echo        '[93m/L[0m' will show the number of every line displayed, only supported when counting lines.
+echo        '[93m/L[0m' will show the number of every line displayed.
 echo   [33m/T :[0m Toggles the color that is being used at the moment. Not recommended for the background. If '[93m/U[0m' is
 echo        specified after the color value, an underline will be applied. Using '[93m/R[0m' instead a color will reset the
 echo        current colors back to normal.

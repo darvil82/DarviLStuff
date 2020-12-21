@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11-1
-set /a build=41
+set ver=2.11-2
+set /a build=42
 
 set parm1=%1
 set parm2=%2
@@ -13,6 +13,7 @@ set parm4=%4
 set parm5=%5
 set parm6=%6
 set parm7=%7
+set parm8=%8
 
 
 
@@ -50,7 +51,7 @@ if /i "!parm1!"=="/F" (
 	
 	if not !invalid!==1 (
 		set t_extra=
-		for %%G in (!parm5! !parm6! !parm7!) do (
+		for %%G in (!parm5! !parm6! !parm7! !parm8!) do (
 			if /i "%%G"=="/u" set t_extra=[4m!t_extra!
 			if /i "%%G"=="/l" set show_lines=1
 			if /i "%%G"=="/a" set process_all=1

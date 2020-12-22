@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.1
-set /a build=44
+set ver=2.11.1-1
+set /a build=45
 
 set parm1=%1
 set parm2=%2
@@ -287,12 +287,14 @@ if "%1"=="ps" (
 )
 
 if "%1"=="red" (
-	set text=%2
+	set "text=%2"
+	set text=!text:"=!
 	set color_fg=[91m
 	set color_bg=
 )
 if "%1"=="green" (
-	set text=%2
+	set "text=%2"
+	set text=!text:"=!
 	set color_fg=[92m
 	set color_bg=
 )

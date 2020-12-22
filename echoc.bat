@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11-3
-set /a build=43
+set ver=2.11.1
+set /a build=44
 
 set parm1=%1
 set parm2=%2
@@ -28,7 +28,7 @@ if /i "!parm1!"=="/S" (
 		call :color-trans !parm4! fg
 		set color_fg=!color_new!
 	)
-	set text=!parm2!
+	set "text=!parm2:"=!"
 	if /i "!parm5!"=="/u" set text=[4m!text!
 	call :display
 	exit /b
@@ -155,7 +155,7 @@ if /i "!parm1!"=="/P" (
 		call :color-trans !parm4! ps
 		set color_fg=!color_new!
 	)
-	set text=!parm2!
+	set "text=!parm2!"
 	call :display ps
 	exit /b
 )
@@ -299,8 +299,6 @@ if "%1"=="green" (
 
 
 
-::Escape special characters.
-set text=!text:"=!
 
 echo !color_bg!!color_fg!!text![0m
 exit /b 0

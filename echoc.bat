@@ -3,15 +3,14 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.4
-set /a build=48
+set ver=2.11.4-1
+set /a build=49
 
 if /i "%1"=="/?" goto help
 
 set /a parm_count=1
 for %%G in (%*) do (
 	set parm!parm_count!=%%G
-	echo parm!parm_count!=%%G
 	set /a parm_count+=1
 )
 

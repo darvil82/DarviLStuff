@@ -3,12 +3,15 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.3
-set /a build=47
+set ver=2.11.4
+set /a build=48
+
+if /i "%1"=="/?" goto help
 
 set /a parm_count=1
 for %%G in (%*) do (
 	set parm!parm_count!=%%G
+	echo parm!parm_count!=%%G
 	set /a parm_count+=1
 )
 
@@ -254,7 +257,6 @@ if /i "!parm1!"=="/CHKUP" (
 	exit /b 0
 )
 
-if /i "!parm1!"=="/?" goto help
 
 if not defined parm1 call :display red "No parameters were defined." & echo Use "ECHOC /?" to read the help. & exit /b 1
 set parm1=!parm1:"=!

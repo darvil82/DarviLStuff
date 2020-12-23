@@ -3,17 +3,14 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.1-1
-set /a build=45
+set ver=2.11.2
+set /a build=46
 
-set parm1=%1
-set parm2=%2
-set parm3=%3
-set parm4=%4
-set parm5=%5
-set parm6=%6
-set parm7=%7
-set parm8=%8
+set /a parm_count=1
+for %%G in (%*) do (
+	set parm!parm_count!=%%G
+	set /a parm_count+=1
+)
 
 
 

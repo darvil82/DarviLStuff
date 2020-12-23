@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.2
-set /a build=46
+set ver=2.11.3
+set /a build=47
 
 set /a parm_count=1
 for %%G in (%*) do (
@@ -284,13 +284,13 @@ if "%1"=="ps" (
 )
 
 if "%1"=="red" (
-	set "text=%2"
+	set text=%2
 	set text=!text:"=!
 	set color_fg=[91m
 	set color_bg=
 )
 if "%1"=="green" (
-	set "text=%2"
+	set text=%2
 	set text=!text:"=!
 	set color_fg=[92m
 	set color_bg=

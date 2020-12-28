@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.5
-set /a build=50
+set ver=2.11.5-1
+set /a build=51
 
 if /i "%1"=="/?" goto help
 
@@ -226,8 +226,8 @@ if /i "!parm1!"=="/CHKUP" (
 	
 	::Check if the user has PowerShell installed.
 	<nul set /p =Checking PowerShell... 
-	reg query HKLM\SOFTWARE\Microsoft\PowerShell\1 /v Install 1> "%temp%/.tmp" 2>&1 & find "Install    REG_DWORD    0x1" "%temp%/.tmp" > nul
-	if !errorlevel!==1 (
+	powershell $PSVersionTable.PSVersion > nul
+	if not !errorlevel!==0 (
 		call :display red "PowerShell isn't installed. Altough, it isn't required."
 	) else call :display green "PowerShell is installed."
 	
@@ -301,8 +301,6 @@ if "%1"=="green" (
 	set color_fg=[92m
 	set color_bg=
 )
-
-
 
 
 echo !color_bg!!color_fg!!text![0m

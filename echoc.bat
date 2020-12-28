@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.4-1
-set /a build=49
+set ver=2.11.5
+set /a build=50
 
 if /i "%1"=="/?" goto help
 
@@ -212,11 +212,16 @@ if /i "!parm1!"=="/Z" (
 if /i "!parm1!"=="/CHKUP" (
 	::Check if the user is using windows 1909 at least
 	<nul set /p =Checking Windows build... 
+	ver > "%temp%\.tmp"
+	for /f "usebackq skip=1 tokens=4 delims=[]. " %%G in ("%temp%\.tmp") do set /a ver_windows=%%G
 	wmic os get BuildNumber | sort /r > "%temp%\.tmp"
 	for /f "skip=1 tokens=1* usebackq" %%G in ("%temp%\.tmp") do set /a build_windows=%%G 2> nul
-	if !build_windows! LSS 1909 (
-		echo "Using Windows build !build_windows!, Windows 1909 or higher is required for using this script."
-	) else call :display green "Using build !build_windows!, which has support for colors."
+	
+	if !ver_windows!==10 (
+		if !build_windows! GEQ 1909 (
+			call :display green "Using Windows 10 !build_windows!, with color support."
+		) else echo Windows 10 1909 or higher is required for using this script.
+	) else echo Windows 10 1909 or higher is required for using this script.
 	
 	
 	::Check if the user has PowerShell installed.

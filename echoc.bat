@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.5-1
-set /a build=51
+set ver=2.11.5-2
+set /a build=52
 
 if /i "%1"=="/?" goto help
 
@@ -261,13 +261,12 @@ if /i "!parm1!"=="/CHKUP" (
 	exit /b 0
 )
 
-
-if not defined parm1 call :display red "No parameters were defined." & echo Use "ECHOC /?" to read the help. & exit /b 1
+if not defined parm1 call :display red "No arguments were defined." & echo Use "ECHOC /?" to read the help. & exit /b 1
 set parm1=!parm1:"=!
-call :display red "Unexpected '!parm1!' parameter." & echo Use "ECHOC /?" to read the help. & exit /b 1
+call :display red "Unexpected '!parm1!' argument." & echo Use "ECHOC /?" to read the help. & exit /b 1
 
 :error-parm
-call :display red "Parameter [%1] is not defined."
+call :display red "Argument [%1] is not defined."
 set invalid=1
 exit /b 1
 

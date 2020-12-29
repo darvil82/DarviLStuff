@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.5-2
-set /a build=52
+set ver=2.11.5-3
+set /a build=53
 
 if /i "%1"=="/?" goto help
 
@@ -213,10 +213,10 @@ if /i "!parm1!"=="/CHKUP" (
 	::Check if the user is using windows 1909 at least
 	<nul set /p =Checking Windows build... 
 	ver > "%temp%\.tmp"
-	for /f "usebackq skip=1 tokens=4 delims=[]. " %%G in ("%temp%\.tmp") do set /a ver_windows=%%G
-	wmic os get BuildNumber | sort /r > "%temp%\.tmp"
-	for /f "skip=1 tokens=1* usebackq" %%G in ("%temp%\.tmp") do set /a build_windows=%%G 2> nul
-	
+	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("%temp%\.tmp") do (
+		set /a ver_windows=%%G
+		set /a build_windows=%%H
+	)
 	if !ver_windows!==10 (
 		if !build_windows! GEQ 1909 (
 			call :display green "Using Windows 10 !build_windows!, with color support."

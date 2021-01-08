@@ -4,8 +4,8 @@
 setlocal EnableDelayedExpansion
 chcp 65001 > nul
 
-set ver=0.1.4-1
-set /a build=6
+set ver=0.2
+set /a build=7
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -25,6 +25,7 @@ for %%G in (%*) do (
 		if /i "%%G"=="/y" set tknxt=style
 		if /i "%%G"=="/n" set no_percent=1
 		if /i "%%G"=="/o" set overwrite=1
+		if /i "%%G"=="/p" set show_steps=1
 	)
 )
 
@@ -79,17 +80,27 @@ if !style!==1 (
 	set "bar_draw_vert=│"
 	set "bar_draw_horiz=─"
 	set "bar_draw_overwrite=4"
+	
 ) else if !style!==2 (
 	set "bar_draw_empty=-"
 	set "bar_draw_full=X"
 	set "bar_draw_vert=|"
 	set "bar_draw_overwrite=2"
+	
 ) else if !style!==3 (
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
 	set "bar_draw_overwrite=2"
+	
 ) else set "bar_draw_overwrite=2"
 
+
+set bar_info=
+if not defined no_percent set "bar_info=!bar_info!!percent!%% "
+if defined show_steps set "bar_info=!bar_info!!val1!/!val2! "
+if defined text set "bar_info=!bar_info!!text![0K"
+
+::Draw it.
 set "space= "
 if defined overwrite echo [!bar_draw_overwrite!A
 
@@ -101,7 +112,7 @@ if defined bar_draw_corner2 echo !bar_draw_corner2!
 for /l %%G in (1,1,!segments!) do < nul set /p "=!bar_draw_full!"
 for /l %%G in (1,1,!segments2!) do < nul set /p "=!bar_draw_empty!"
 
-if not defined no_percent (echo !space!!bar_draw_vert! !percent!%% !text!) else (echo !space!!bar_draw_vert! !text!)
+echo !space!!bar_draw_vert! !bar_info!
 
 if defined bar_draw_corner3 < nul set /p "=!bar_draw_corner3!"
 if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
@@ -158,7 +169,7 @@ echo   /T : Select a string to be displayed at the end of the progress bar.
 echo   /S : Select the horizontal size of the progress bar. Default is 2.
 echo   /Y : Select one of the 3 styles for the progress bar. Default is 1.
 echo   /N : Do not display the percentage at the end of the progress bar.
-echo   /O : Overwrite content when displaying the bar, use this in scripts. Requires Windows 10 build 1909.
+echo   /O : Overwrite content when displaying the bar, use this in scripts.
 echo:
 echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes,
 echo     and the newest versions of PBAR.

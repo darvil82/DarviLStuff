@@ -8,8 +8,8 @@ chcp 65001 > nul
 set "temp1=%temp%\pbar.tmp"
 
 
-set ver=0.3
-set /a build=8
+set ver=0.3-1
+set /a build=9
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -130,8 +130,8 @@ exit /b 0
 :chkup
 ::Check if the user is using windows 1909 at least
 <nul set /p =Checking Windows build... 
-ver > "%temp%\.tmp"
-for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("%temp%\.tmp") do (
+ver > "!temp1!"
+for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
 	set /a ver_windows=%%G
 	set /a build_windows=%%H
 )
@@ -146,9 +146,9 @@ if !ver_windows!==10 (
 <nul set /p =Checking for new versions of PBAR... 
 ping github.com /n 1 > nul
 if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
-bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
-find "pbar" "%temp%\.tmp" > "%temp%\.tmp2"
-for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
+bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "!temp1!" > nul
+find "pbar" "!temp1!" > "!temp1!2"
+for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
 if !build_gh! GTR !build! (
 	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 	echo:

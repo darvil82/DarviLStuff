@@ -4,8 +4,12 @@
 setlocal EnableDelayedExpansion
 chcp 65001 > nul
 
-set ver=0.2
-set /a build=7
+::::::Config:::::::
+set "temp1=%temp%\pbar.tmp"
+
+
+set ver=0.3
+set /a build=8
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -25,14 +29,14 @@ for %%G in (%*) do (
 		if /i "%%G"=="/y" set tknxt=style
 		if /i "%%G"=="/n" set no_percent=1
 		if /i "%%G"=="/o" set overwrite=1
-		if /i "%%G"=="/p" set show_steps=1
+		if /i "%%G"=="/p" set show_segments=1
 	)
 )
 
 ::Get the range value formatted as "n1-n2" and separate it into two different variables.
 if defined range (
-	echo !range! > "!temp!/.tmp"
-	for /f "usebackq tokens=1,2 delims=-" %%G in ("%temp%/.tmp") do (
+	echo !range! > "!temp1!"
+	for /f "usebackq tokens=1,2 delims=-" %%G in ("!temp1!") do (
 		set /a val1=%%G 2> nul
 		set /a val2=%%H 2> nul
 	)
@@ -97,7 +101,7 @@ if !style!==1 (
 
 set bar_info=
 if not defined no_percent set "bar_info=!bar_info!!percent!%% "
-if defined show_steps set "bar_info=!bar_info!!val1!/!val2! "
+if defined show_segments set "bar_info=!bar_info!!val1!/!val2! "
 if defined text set "bar_info=!bar_info!!text![0K"
 
 ::Draw it.

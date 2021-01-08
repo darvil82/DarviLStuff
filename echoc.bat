@@ -3,8 +3,12 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=2.11.5-5
-set /a build=55
+::::::Config:::::::
+set "temp1=%temp%/echoc.tmp"
+
+
+set ver=2.11.6
+set /a build=56
 
 if /i "%1"=="/?" goto help
 
@@ -80,46 +84,46 @@ if /i "!parm1!"=="/F" (
 		) else (
 			if defined file_lines (
 				if defined verbose < nul set /p"=Processing lines"
-				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+				< nul set /p"=!t_extra!!color_bg!!color_fg!" > "!temp1!"
 				for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 					if !file_lines!==!count! (
 						if defined verbose < nul set /p"=Done" & echo: & echo:
 						
-						< nul set /p"=[0m" >> "%temp%\.tmp"
-						type "%temp%\.tmp"
+						< nul set /p"=[0m" >> "!temp1!"
+						type "!temp1!"
 						exit /b 0
 					)
 					set /a count+=1
-					if defined show_lines (echo !count!:	!t_extra!%%G >> "%temp%\.tmp") else (echo !t_extra!%%G >> "%temp%\.tmp")
+					if defined show_lines (echo !count!:	!t_extra!%%G >> "!temp1!") else (echo !t_extra!%%G >> "!temp1!")
 					
 					if defined verbose < nul set /p"=."
 				)
 				if defined verbose < nul set /p"=Done" & echo: & echo:
 				
-				< nul set /p"=[0m" >> "%temp%\.tmp"
-				type "%temp%\.tmp"
+				< nul set /p"=[0m" >> "!temp1!"
+				type "!temp1!"
 				exit /b 0
 				
 			) else (
 				if defined show_lines (
 					if defined verbose < nul set /p"=Processing lines"
-					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
+					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "!temp1!"
 					for /f "delims= tokens=1* usebackq" %%G in ("!filename!") do (
 						set /a count+=1
-						echo !count!:	!t_extra!%%G >> "%temp%\.tmp"
+						echo !count!:	!t_extra!%%G >> "!temp1!"
 						
 						if defined verbose < nul set /p"=."
 					)
 					if defined verbose < nul set /p"=Done" & echo: & echo:
 				
-					< nul set /p"=[0m" >> "%temp%\.tmp"
-					type "%temp%\.tmp"
+					< nul set /p"=[0m" >> "!temp1!"
+					type "!temp1!"
 					exit /b 0
 				) else (
-					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "%temp%\.tmp"
-					type "!filename!" >> "%temp%\.tmp"
-					< nul set /p"=[0m" >> "%temp%\.tmp"
-					type "%temp%\.tmp"
+					< nul set /p"=!t_extra!!color_bg!!color_fg!" > "!temp1!"
+					type "!filename!" >> "!temp1!"
+					< nul set /p"=[0m" >> "!temp1!"
+					type "!temp1!"
 					exit /b 0
 				)
 			)
@@ -212,8 +216,8 @@ if /i "!parm1!"=="/Z" (
 if /i "!parm1!"=="/CHKUP" (
 	::Check if the user is using windows 1909 at least
 	<nul set /p =Checking Windows build... 
-	ver > "%temp%\.tmp"
-	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("%temp%\.tmp") do (
+	ver > "!temp1!"
+	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
 		set /a ver_windows=%%G
 		set /a build_windows=%%H
 	)
@@ -236,9 +240,9 @@ if /i "!parm1!"=="/CHKUP" (
 	<nul set /p =Checking for new versions of ECHOC... 
 	ping github.com /n 1 > nul
 	if %errorlevel% == 1 call :display red "Unable to connect to GitHub." & exit /b 1
-	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
-	find "echoc" "%temp%\.tmp" > "%temp%\.tmp2"
-	for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
+	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "!temp1!" > nul
+	find "echoc" "!temp1!" > "!temp1!2"
+	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
 	if !build_gh! GTR !build! (
 		call :display red "Found a new version. (Using build: !build!. Latest build: !build_gh!)"
 		echo:

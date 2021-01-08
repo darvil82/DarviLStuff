@@ -2,9 +2,10 @@
 
 @echo off
 setlocal EnableDelayedExpansion
+chcp 65001 > nul
 
-set ver=0.1.2
-set /a build=3
+set ver=0.1.3
+set /a build=4
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -39,7 +40,9 @@ if defined range (
 if not defined val1 set /a val1=0
 if not defined val2 set /a val2=1
 if not defined size set /a size=2
+if not defined style set style=1
 if defined text set text=!text:"=!
+
 if !val1! LSS 0 echo First value in range is below 0 & exit /b 1
 if !val2! LSS 0 echo Second value in range is below 0 & exit /b 1
 if !val1!==0 if !val2!==0 echo Both values in range are 0 & exit /b 1
@@ -67,7 +70,6 @@ set /a percent=(val1*100/val2)
 ::bar_draw_overwrite
 
 if !style!==1 (
-	chcp 65001 > nul
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
 	set "bar_draw_corner1=┌"
@@ -83,7 +85,6 @@ if !style!==1 (
 	set "bar_draw_vert=|"
 	set "bar_draw_overwrite=2"
 ) else if !style!==3 (
-	chcp 65001 > nul
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
 	set "bar_draw_overwrite=2"

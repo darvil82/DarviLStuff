@@ -4,8 +4,8 @@
 setlocal EnableDelayedExpansion
 chcp 65001 > nul
 
-set ver=0.1.3
-set /a build=4
+set ver=0.1.4
+set /a build=5
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -134,24 +134,12 @@ if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
 bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
 find "pbar" "%temp%\.tmp" > "%temp%\.tmp2"
 for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
-if !build_gh! GTR !build! (
+if !build_gh! GTR 1 (
 	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 	echo:
-	set /p "chkup_in=Select a destination folder to download PBAR in. ['%~d0%~p0'] "
-	if not defined chkup_in set "chkup_in=%~d0%~p0"
-	set chkup_in=!chkup_in:"=!
-	set chkup_in=!chkup_in:/=\!
-	
-	<nul set /p =Downloading... 
-	if not exist "!chkup_in!\" (
-		echo The folder '!chkup_in!' doesn't exist. Download aborted.
-		exit /b 1
-	) else (
-		bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/pbar.bat" "!chkup_in!\pbar.bat" > nul
-		if not !errorlevel! == 0 echo An error occurred while trying to download PBAR. & exit /b 1
-		echo Downloaded PBAR succesfully in '!chkup_in!'.
-		exit /b 0
-	)
+	choice /c YN /m "Do you want to open the repository where PBAR is located?"
+	if !errorlevel!==1 start https://github.com/L89David/DarviLStuff/blob/master/pbar.bat
+	if !errorlevel!==2 exit /b
 ) else echo Using latest build.
 exit /b 0
 
@@ -173,9 +161,7 @@ echo   /N : Do not display the percentage at the end of the progress bar.
 echo   /O : Overwrite content when displaying the bar, use this in scripts. Requires Windows 10 build 1909.
 echo:
 echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes,
-echo     and the newest versions of PBAR. If it finds a newer version of it, it will ask for a folder to download
-echo     PBAR in. Pressing ENTER without entering a path will select the default option, which is the folder that
-echo     contains the currently running script, overriding the old version.
+echo     and the newest versions of PBAR.
 echo   - Use 'CMD /C' before this script if used in a batch file.
 
 exit /b 0

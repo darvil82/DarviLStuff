@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=0.1
-set /a build=1
+set ver=0.1.1
+set /a build=2
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -135,10 +135,10 @@ bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviL
 find "pbar" "%temp%\.tmp" > "%temp%\.tmp2"
 for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
 if !build_gh! GTR !build! (
-	echo Found a new version. (Using build: !build!. Latest build: !build_gh!)
+	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 	echo:
 	set /p "chkup_in=Select a destination folder to download PBAR in. ['%~d0%~p0'] "
-	if not defined chkup_in set chkup_in=%~d0%~p0
+	if not defined chkup_in set "chkup_in=%~d0%~p0"
 	set chkup_in=!chkup_in:"=!
 	set chkup_in=!chkup_in:/=\!
 	

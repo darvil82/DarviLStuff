@@ -3,8 +3,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set ver=0.1.1
-set /a build=2
+set ver=0.1.2
+set /a build=3
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -39,7 +39,6 @@ if defined range (
 if not defined val1 set /a val1=0
 if not defined val2 set /a val2=1
 if not defined size set /a size=2
-if not defined style set style=1
 if defined text set text=!text:"=!
 if !val1! LSS 0 echo First value in range is below 0 & exit /b 1
 if !val2! LSS 0 echo Second value in range is below 0 & exit /b 1

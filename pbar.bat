@@ -4,8 +4,8 @@
 setlocal EnableDelayedExpansion
 chcp 65001 > nul
 
-set ver=0.1.4
-set /a build=5
+set ver=0.1.4-1
+set /a build=6
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -134,7 +134,7 @@ if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
 bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "%temp%\.tmp" > nul
 find "pbar" "%temp%\.tmp" > "%temp%\.tmp2"
 for /f "skip=2 tokens=3* usebackq" %%G in ("%temp%\.tmp2") do set /a build_gh=%%G
-if !build_gh! GTR 1 (
+if !build_gh! GTR !build! (
 	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 	echo:
 	choice /c YN /m "Do you want to open the repository where PBAR is located?"

@@ -7,8 +7,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%/echoc.tmp"
 
 
-set ver=2.11.6
-set /a build=56
+set ver=2.11.7
+set /a build=57
 
 if /i "%1"=="/?" goto help
 
@@ -222,7 +222,7 @@ if /i "!parm1!"=="/CHKUP" (
 		set /a build_windows=%%H
 	)
 	if !ver_windows!==10 (
-		if !build_windows! GEQ 1909 (
+		if !build_windows! GEQ 17763 (
 			call :display green "Using Windows 10 !build_windows!, with color support."
 		) else echo Windows 10 1909 or higher is required for using this script.
 	) else echo Windows 10 1909 or higher is required for using this script.

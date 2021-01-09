@@ -8,8 +8,8 @@ chcp 65001 > nul
 set "temp1=%temp%\pbar.tmp"
 
 
-set ver=0.3-1
-set /a build=9
+set ver=0.3.1
+set /a build=10
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -136,7 +136,7 @@ for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
 	set /a build_windows=%%H
 )
 if !ver_windows!==10 (
-	if !build_windows! GEQ 1909 (
+	if !build_windows! GEQ 17763 (
 		echo Using Windows 10 !build_windows!, with ANSI escape codes support.
 	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
 ) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.

@@ -6,19 +6,25 @@ chcp 65001 > nul
 
 ::::::Config:::::::
 set "temp1=%temp%\pbar.tmp"
+set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=0.3.1
-set /a build=10
+set ver=1.0
+set /a build=11
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
-
+if /i "%1"=="/load" (
+	if not exist "!save1!" echo There's no content to load. & exit /b 1
+	set /p "parms_array="<"!save1!"
+	set parms_array=!parms_array! %*
+)
 
 ::Process all parameters that the user entered. The parameters that require another value next to them will define the "tknxt" variable with the
 ::name of the parameter itself, then, in the next loop, we will check if "tknxt" is defined, if so, set a variable with the name of the parameter
 ::that we set before, with the value that we got in the current loop.
-for %%G in (%*) do (
+if not defined parms_array set "parms_array=%*"
+for %%G in (!parms_array!) do (
 	if defined tknxt (
 		set "!tknxt!=%%G"
 		set tknxt=
@@ -28,9 +34,17 @@ for %%G in (%*) do (
 		if /i "%%G"=="/s" set tknxt=size
 		if /i "%%G"=="/y" set tknxt=style
 		if /i "%%G"=="/n" set no_percent=1
-		if /i "%%G"=="/o" set overwrite=1
+		if /i "%%G"=="/o" set override=1
 		if /i "%%G"=="/p" set show_segments=1
+		if /i "%%G"=="/save" set save=1
 	)
+)
+
+if defined save (
+	set save_data=%*
+	set save_data=!save_data:/save=!
+	echo !save_data! > "!save1!"
+	exit /b 1
 )
 
 ::Get the range value formatted as "n1-n2" and separate it into two different variables.
@@ -72,7 +86,7 @@ set /a percent=(val1*100/val2)
 ::bar_draw_corner4
 ::bar_draw_vert
 ::bar_draw_horiz
-::bar_draw_overwrite
+::bar_draw_override
 
 if !style!==1 (
 	set "bar_draw_empty=░"
@@ -83,30 +97,31 @@ if !style!==1 (
 	set "bar_draw_corner4=┘"
 	set "bar_draw_vert=│"
 	set "bar_draw_horiz=─"
-	set "bar_draw_overwrite=4"
+	set "bar_draw_override=4"
 	
 ) else if !style!==2 (
 	set "bar_draw_empty=-"
 	set "bar_draw_full=X"
 	set "bar_draw_vert=|"
-	set "bar_draw_overwrite=2"
+	set "bar_draw_override=2"
 	
 ) else if !style!==3 (
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
-	set "bar_draw_overwrite=2"
+	set "bar_draw_override=2"
 	
-) else set "bar_draw_overwrite=2"
+) else set "bar_draw_override=2"
 
 
 set bar_info=
 if not defined no_percent set "bar_info=!bar_info!!percent!%% "
 if defined show_segments set "bar_info=!bar_info!!val1!/!val2! "
-if defined text set "bar_info=!bar_info!!text![0K"
+if defined text set "bar_info=!bar_info!!text!"
+if defined override set "bar_info=!bar_info![0K"
 
 ::Draw it.
 set "space= "
-if defined overwrite echo [!bar_draw_overwrite!A
+if defined override echo [!bar_draw_override!A
 
 if defined bar_draw_corner1 < nul set /p "=!bar_draw_corner1!"
 if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
@@ -166,16 +181,24 @@ echo Script that allows the user to display progress bars easily.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "https://github.com/L89David/DarviLStuff"
 echo:
-echo PBAR [/R value1-value2] [/T "string"] [/S number] [/Y number] [/N] [/O]
+echo PBAR [/LOAD] [/R value1-value2] [/T "string"] [/S number] [/Y number] [/N] [/O] [/SAVE]
 echo:
 echo   /R : Select a range of two values separated by "-" to display in the progress bar.
 echo   /T : Select a string to be displayed at the end of the progress bar.
 echo   /S : Select the horizontal size of the progress bar. Default is 2.
 echo   /Y : Select one of the 3 styles for the progress bar. Default is 1.
 echo   /N : Do not display the percentage at the end of the progress bar.
-echo   /O : Overwrite content when displaying the bar, use this in scripts.
+echo   /O : Override content when displaying the bar, use this in scripts. Requires Windows 10 1909.
+echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
+echo   /LOAD : Load all the parameters stored previusly with '/SAVE'. If being used, this parameter must
+echo           be the first one in use. If another parameter of the ones above is specified, it will be added
+echo           to the current bar, and if it is already defined by the save, it will be overrided.
 echo:
-echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes,
+echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /s 1 /y 3'
+echo                      Display a progress bar with a range of 4-13, with the custom text 'Loading...'
+echo                      With a size of 1 (10 segments), and with the third style.
+echo:
+echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes
 echo     and the newest versions of PBAR.
 echo   - Use 'CMD /C' before this script if used in a batch file.
 

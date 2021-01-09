@@ -4,11 +4,11 @@
 setlocal EnableDelayedExpansion
 
 ::::::Config:::::::
-set "temp1=%temp%/echoc.tmp"
+set "temp1=%temp%\echoc.tmp"
 
 
-set ver=2.11.7
-set /a build=57
+set ver=2.11.8
+set /a build=58
 
 if /i "%1"=="/?" goto help
 

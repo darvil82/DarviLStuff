@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.0
-set /a build=11
+set ver=1.1.0
+set /a build=12
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -31,8 +31,7 @@ for %%G in (!parms_array!) do (
 	) else (
 		if /i "%%G"=="/r" set tknxt=range
 		if /i "%%G"=="/t" set tknxt=text
-		if /i "%%G"=="/s" set tknxt=size
-		if /i "%%G"=="/y" set tknxt=style
+		if /i "%%G"=="/y" set tknxt=drawmode
 		if /i "%%G"=="/n" set no_percent=1
 		if /i "%%G"=="/o" set override=1
 		if /i "%%G"=="/p" set show_segments=1
@@ -56,9 +55,21 @@ if defined range (
 	)
 )
 
+::Get the drawmode value formatted as "n1-n2-n3" and separate it into two different variables.
+if defined drawmode (
+	echo !drawmode! > "!temp1!"
+	for /f "usebackq tokens=1,2,3 delims=-" %%G in ("!temp1!") do (
+		set /a style=%%G 2> nul
+		set /a theme=%%H 2> nul
+		set /a size=%%I 2> nul
+	)
+)
+
+
 if not defined val1 set /a val1=0
 if not defined val2 set /a val2=1
 if not defined size set /a size=2
+if not defined theme set theme=1
 if not defined style set style=1
 if defined text set text=!text:"=!
 
@@ -69,6 +80,7 @@ if !val1! GTR !val2! echo The first value in range is bigger than the second val
 if !size! LSS 1 echo The size is below 1 & exit /b 1
 
 
+::Arithmetic operations to get the correct number of segments to display and the percentage.
 set /a size2=size*10
 set /a segments=(val1*100/val2)*(size)
 set segments=!segments:~0,-1!
@@ -76,7 +88,7 @@ set /a segments2=size2-segments
 set /a percent=(val1*100/val2)
 
 
-::Display the progress bar. Set the elements to draw depending on the selected style.
+::Set the elements to draw depending on the selected theme.
 
 ::bar_draw_empty
 ::bar_draw_full
@@ -88,7 +100,7 @@ set /a percent=(val1*100/val2)
 ::bar_draw_horiz
 ::bar_draw_override
 
-if !style!==1 (
+if !theme!==1 (
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
 	set "bar_draw_corner1=┌"
@@ -99,18 +111,23 @@ if !style!==1 (
 	set "bar_draw_horiz=─"
 	set "bar_draw_override=4"
 	
-) else if !style!==2 (
-	set "bar_draw_empty=-"
-	set "bar_draw_full=X"
+) else if !theme!==2 (
+	set "bar_draw_empty=​"
+	set "bar_draw_full=#"
 	set "bar_draw_vert=|"
 	set "bar_draw_override=2"
 	
-) else if !style!==3 (
+) else if !theme!==3 (
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
 	set "bar_draw_override=2"
+
+) else if !theme!==4 (
+	set "bar_draw_empty=○"
+	set "bar_draw_full=●"
+	set "bar_draw_override=2"
 	
-) else set "bar_draw_override=2"
+) else echo Theme '!theme!' doesn't exist. & exit /b 1
 
 
 set bar_info=
@@ -119,25 +136,45 @@ if defined show_segments set "bar_info=!bar_info!!val1!/!val2! "
 if defined text set "bar_info=!bar_info!!text!"
 if defined override set "bar_info=!bar_info![0K"
 
-::Draw it.
-set "space= "
-if defined override echo [!bar_draw_override!A
 
-if defined bar_draw_corner1 < nul set /p "=!bar_draw_corner1!"
-if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
-if defined bar_draw_corner2 echo !bar_draw_corner2!
-< nul set /p "=!bar_draw_vert! "
+::Draw the progress bar.
+set "space=​"
 
-for /l %%G in (1,1,!segments!) do < nul set /p "=!bar_draw_full!"
-for /l %%G in (1,1,!segments2!) do < nul set /p "=!bar_draw_empty!"
 
-echo !space!!bar_draw_vert! !bar_info!
+::The style 1 will draw the bar horizontally.
+if !style!==1 (
+	if defined override echo [!bar_draw_override!A
+	if defined bar_draw_corner1 < nul set /p "=!bar_draw_corner1!"
+	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
+	if defined bar_draw_corner2 echo !bar_draw_corner2!
+	< nul set /p "=!bar_draw_vert! "
 
-if defined bar_draw_corner3 < nul set /p "=!bar_draw_corner3!"
-if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
-if defined bar_draw_corner4 echo !bar_draw_corner4!
+	for /l %%G in (1,1,!segments!) do < nul set /p "=!bar_draw_full!"
+	for /l %%G in (1,1,!segments2!) do < nul set /p "=!bar_draw_empty!"
 
-exit /b 0
+	echo !space!!bar_draw_vert! !bar_info!
+
+	if defined bar_draw_corner3 < nul set /p "=!bar_draw_corner3!"
+	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
+	if defined bar_draw_corner4 echo !bar_draw_corner4!
+	
+	exit /b 0
+
+	rem The style 2 will draw the bar vertically.
+) else if !style!==2 (
+	set /a override=size2+4
+	if defined override echo [!override!A
+	echo !bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
+	for /l %%G in (1,1,!segments2!) do echo !bar_draw_vert!!bar_draw_empty!!bar_draw_empty!!bar_draw_vert!
+	for /l %%G in (1,1,!segments!) do echo !bar_draw_vert!!bar_draw_full!!bar_draw_full!!bar_draw_vert!
+	echo !bar_draw_corner3!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner4!!space!
+	if defined bar_info echo !bar_info!
+	
+	exit /b 0
+	
+) else echo Style '!style!' doesn't exist. & exit /b 1
+
+
 
 
 
@@ -181,12 +218,13 @@ echo Script that allows the user to display progress bars easily.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "https://github.com/L89David/DarviLStuff"
 echo:
-echo PBAR [/LOAD] [/R value1-value2] [/T "string"] [/S number] [/Y number] [/N] [/O] [/SAVE]
+echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/N] [/O] [/SAVE]
 echo:
 echo   /R : Select a range of two values separated by "-" to display in the progress bar.
 echo   /T : Select a string to be displayed at the end of the progress bar.
-echo   /S : Select the horizontal size of the progress bar. Default is 2.
-echo   /Y : Select one of the 3 styles for the progress bar. Default is 1.
+echo   /Y : Select the draw mode of the progress bar. The first number indicates the style of the bar,
+echo        (horizontal or vertical). The second number sets the set of characters to use for it.
+echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
 echo   /N : Do not display the percentage at the end of the progress bar.
 echo   /O : Override content when displaying the bar, use this in scripts. Requires Windows 10 1909.
 echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
@@ -194,9 +232,9 @@ echo   /LOAD : Load all the parameters stored previusly with '/SAVE'. If being u
 echo           be the first one in use. If another parameter of the ones above is specified, it will be added
 echo           to the current bar, and if it is already defined by the save, it will be overrided.
 echo:
-echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /s 1 /y 3'
-echo                      Display a progress bar with a range of 4-13, with the custom text 'Loading...'
-echo                      With a size of 1 (10 segments), and with the third style.
+echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-1'
+echo                      Display a horizontal progress bar with a range of 4-13, with the custom text
+echo                      'Loading...', with a size of 1 (10 segments), and with the third theme.
 echo:
 echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes
 echo     and the newest versions of PBAR.

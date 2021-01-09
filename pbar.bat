@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.0
-set /a build=12
+set ver=1.1.0-1
+set /a build=13
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -162,8 +162,10 @@ if !style!==1 (
 
 	rem The style 2 will draw the bar vertically.
 ) else if !style!==2 (
-	set /a override=size2+4
-	if defined override echo [!override!A
+	if defined override (
+		set /a override=size2+4
+		echo [!override!A
+	)
 	echo !bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
 	for /l %%G in (1,1,!segments2!) do echo !bar_draw_vert!!bar_draw_empty!!bar_draw_empty!!bar_draw_vert!
 	for /l %%G in (1,1,!segments!) do echo !bar_draw_vert!!bar_draw_full!!bar_draw_full!!bar_draw_vert!

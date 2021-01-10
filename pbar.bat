@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.0-1
-set /a build=13
+set ver=1.1.1
+set /a build=14
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -33,7 +33,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/t" set tknxt=text
 		if /i "%%G"=="/y" set tknxt=drawmode
 		if /i "%%G"=="/n" set no_percent=1
-		if /i "%%G"=="/o" set override=1
+		if /i "%%G"=="/o" set overwrite=1
 		if /i "%%G"=="/p" set show_segments=1
 		if /i "%%G"=="/save" set save=1
 	)
@@ -98,7 +98,7 @@ set /a percent=(val1*100/val2)
 ::bar_draw_corner4
 ::bar_draw_vert
 ::bar_draw_horiz
-::bar_draw_override
+::bar_draw_overwrite
 
 if !theme!==1 (
 	set "bar_draw_empty=░"
@@ -109,23 +109,29 @@ if !theme!==1 (
 	set "bar_draw_corner4=┘"
 	set "bar_draw_vert=│"
 	set "bar_draw_horiz=─"
-	set "bar_draw_override=4"
+	set "bar_draw_overwrite=4"
 	
 ) else if !theme!==2 (
 	set "bar_draw_empty=​"
 	set "bar_draw_full=#"
 	set "bar_draw_vert=|"
-	set "bar_draw_override=2"
+	set "bar_draw_overwrite=2"
 	
 ) else if !theme!==3 (
 	set "bar_draw_empty=░"
 	set "bar_draw_full=█"
-	set "bar_draw_override=2"
+	set "bar_draw_overwrite=2"
 
 ) else if !theme!==4 (
 	set "bar_draw_empty=○"
 	set "bar_draw_full=●"
-	set "bar_draw_override=2"
+	set "bar_draw_overwrite=2"
+	
+) else if !theme!==5 (
+	set "bar_draw_empty=[31m█"
+	set "bar_draw_full=[92m█"
+	set "bar_draw_vert=[0m"
+	set "bar_draw_overwrite=2"
 	
 ) else echo Theme '!theme!' doesn't exist. & exit /b 1
 
@@ -134,7 +140,7 @@ set bar_info=
 if not defined no_percent set "bar_info=!bar_info!!percent!%% "
 if defined show_segments set "bar_info=!bar_info!!val1!/!val2! "
 if defined text set "bar_info=!bar_info!!text!"
-if defined override set "bar_info=!bar_info![0K"
+if defined overwrite set "bar_info=!bar_info![0K"
 
 
 ::Draw the progress bar.
@@ -143,7 +149,7 @@ set "space=​"
 
 ::The style 1 will draw the bar horizontally.
 if !style!==1 (
-	if defined override echo [!bar_draw_override!A
+	if defined overwrite echo [!bar_draw_overwrite!A
 	if defined bar_draw_corner1 < nul set /p "=!bar_draw_corner1!"
 	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner2 echo !bar_draw_corner2!
@@ -162,9 +168,9 @@ if !style!==1 (
 
 	rem The style 2 will draw the bar vertically.
 ) else if !style!==2 (
-	if defined override (
-		set /a override=size2+4
-		echo [!override!A
+	if defined overwrite (
+		set /a overwrite=size2+4
+		echo [!overwrite!A
 	)
 	echo !bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
 	for /l %%G in (1,1,!segments2!) do echo !bar_draw_vert!!bar_draw_empty!!bar_draw_empty!!bar_draw_vert!
@@ -228,11 +234,11 @@ echo   /Y : Select the draw mode of the progress bar. The first number indicates
 echo        (horizontal or vertical). The second number sets the set of characters to use for it.
 echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
 echo   /N : Do not display the percentage at the end of the progress bar.
-echo   /O : Override content when displaying the bar, use this in scripts. Requires Windows 10 1909.
+echo   /O : Overwrite content when displaying the bar, use this in scripts. Requires Windows 10 1909.
 echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
 echo   /LOAD : Load all the parameters stored previusly with '/SAVE'. If being used, this parameter must
 echo           be the first one in use. If another parameter of the ones above is specified, it will be added
-echo           to the current bar, and if it is already defined by the save, it will be overrided.
+echo           to the current bar, and if it is already defined by the save, it will be overwritten.
 echo:
 echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-1'
 echo                      Display a horizontal progress bar with a range of 4-13, with the custom text

@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.2-1
-set /a build=16
+set ver=1.1.3
+set /a build=17
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -237,7 +237,7 @@ echo   /N : Do not display the percentage at the end of the progress bar.
 echo   /O : Overwrite content when displaying the bar, use this in scripts.
 echo   /P : Display the range specified with '/R' at the end of the progress bar.
 echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
-echo   /LOAD : Load all the parameters stored previusly with '/SAVE'. If being used, this parameter must
+echo   /LOAD : Load all the parameters previously stored with '/SAVE'. If being used, this parameter must
 echo           be the first one in use. If another parameter of the ones above is specified, it will be added
 echo           to the current bar, and if it is already defined by the save, it will be overwritten.
 echo:
@@ -245,8 +245,9 @@ echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-1'
 echo                      Display a horizontal progress bar with a range of 4-13, with the custom text
 echo                      'Loading...', with a size of 1 (10 segments), and with the third theme.
 echo:
-echo   - 'PBAR /CHKUP' will check if you are using the minimun necessary Windows build for ANSI escape codes
+echo   - 'PBAR /CHKUP' will check if you are using the minimum necessary Windows build for ANSI escape codes
 echo     and the newest versions of PBAR.
 echo   - Use 'CMD /C' before this script if used in a batch file.
+echo   - More help available at 'https://github.com/L89David/DarviLStuff/wiki/PBAR'
 
 exit /b 0

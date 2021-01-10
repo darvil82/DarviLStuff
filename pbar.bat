@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.2
-set /a build=15
+set ver=1.1.2-1
+set /a build=16
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -226,7 +226,7 @@ echo Script that allows the user to display progress bars easily.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "https://github.com/L89David/DarviLStuff"
 echo:
-echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/N] [/O] [/SAVE]
+echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/N] [/O] [/P] [/SAVE]
 echo:
 echo   /R : Select a range of two values separated by "-" to display in the progress bar.
 echo   /T : Select a string to be displayed at the end of the progress bar.

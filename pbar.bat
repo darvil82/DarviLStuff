@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.1
-set /a build=14
+set ver=1.1.2
+set /a build=15
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -186,7 +186,6 @@ if !style!==1 (
 
 
 
-
 :chkup
 ::Check if the user is using windows 1909 at least
 <nul set /p =Checking Windows build... 
@@ -221,6 +220,7 @@ exit /b 0
 
 
 
+
 :help
 echo Script that allows the user to display progress bars easily.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
@@ -234,7 +234,8 @@ echo   /Y : Select the draw mode of the progress bar. The first number indicates
 echo        (horizontal or vertical). The second number sets the set of characters to use for it.
 echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
 echo   /N : Do not display the percentage at the end of the progress bar.
-echo   /O : Overwrite content when displaying the bar, use this in scripts. Requires Windows 10 1909.
+echo   /O : Overwrite content when displaying the bar, use this in scripts.
+echo   /P : Display the range specified with '/R' at the end of the progress bar.
 echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
 echo   /LOAD : Load all the parameters stored previusly with '/SAVE'. If being used, this parameter must
 echo           be the first one in use. If another parameter of the ones above is specified, it will be added

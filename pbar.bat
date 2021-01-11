@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.2
-set /a build=18
+set ver=1.2-1
+set /a build=19
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -236,7 +236,7 @@ echo   /T : Select a string to be displayed at the end of the progress bar.
 echo   /Y : Select the draw mode of the progress bar. The first number indicates the style of the bar,
 echo        (horizontal or vertical). The second number sets the set of characters to use for it.
 echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
-echo   /S : Shift the progress bar to the number of characters selected. Using negative numbers will
+echo   /S : Shift the progress bar the number of characters specified. Using negative numbers will
 echo        shift it to the left.
 echo   /N : Do not display the percentage at the end of the progress bar.
 echo   /O : Overwrite content when displaying the bar, use this in scripts.

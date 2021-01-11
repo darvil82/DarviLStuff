@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.2-2
-set /a build=20
+set ver=1.2.1
+set /a build=21
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -73,7 +73,7 @@ if not defined size set /a size=2
 if not defined theme set theme=1
 if not defined style set style=1
 if not defined shift set shift=1
-set /a shift=!shift!
+set /a shift=!shift! 2> nul
 if defined text set text=!text:"=!
 
 if !val1! LSS 0 echo First value in range is below 0 & exit /b 1

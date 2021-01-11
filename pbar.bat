@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.1.3
-set /a build=17
+set ver=1.2
+set /a build=18
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -32,6 +32,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/r" set tknxt=range
 		if /i "%%G"=="/t" set tknxt=text
 		if /i "%%G"=="/y" set tknxt=drawmode
+		if /i "%%G"=="/s" set tknxt=shift
 		if /i "%%G"=="/n" set no_percent=1
 		if /i "%%G"=="/o" set overwrite=1
 		if /i "%%G"=="/p" set show_segments=1
@@ -71,6 +72,8 @@ if not defined val2 set /a val2=1
 if not defined size set /a size=2
 if not defined theme set theme=1
 if not defined style set style=1
+if not defined shift set shift=1
+set /a shift=!shift!
 if defined text set text=!text:"=!
 
 if !val1! LSS 0 echo First value in range is below 0 & exit /b 1
@@ -145,22 +148,22 @@ if defined overwrite set "bar_info=!bar_info![0K"
 
 ::Draw the progress bar.
 set "space=​"
-
+set draw_bar_shift=[!shift!C
 
 ::The style 1 will draw the bar horizontally.
 if !style!==1 (
 	if defined overwrite echo [!bar_draw_overwrite!A
-	if defined bar_draw_corner1 < nul set /p "=!bar_draw_corner1!"
+	if defined bar_draw_corner1 < nul set /p "=!draw_bar_shift!!bar_draw_corner1!"
 	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner2 echo !bar_draw_corner2!
-	< nul set /p "=!bar_draw_vert! "
+	< nul set /p "=!draw_bar_shift!!bar_draw_vert! "
 
 	for /l %%G in (1,1,!segments!) do < nul set /p "=!bar_draw_full!"
 	for /l %%G in (1,1,!segments2!) do < nul set /p "=!bar_draw_empty!"
 
 	echo !space!!bar_draw_vert! !bar_info!
 
-	if defined bar_draw_corner3 < nul set /p "=!bar_draw_corner3!"
+	if defined bar_draw_corner3 < nul set /p "=!draw_bar_shift!!bar_draw_corner3!"
 	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner4 echo !bar_draw_corner4!
 	
@@ -172,11 +175,11 @@ if !style!==1 (
 		set /a overwrite=size2+4
 		echo [!overwrite!A
 	)
-	echo !bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
-	for /l %%G in (1,1,!segments2!) do echo !bar_draw_vert!!bar_draw_empty!!bar_draw_empty!!bar_draw_vert!
-	for /l %%G in (1,1,!segments!) do echo !bar_draw_vert!!bar_draw_full!!bar_draw_full!!bar_draw_vert!
-	echo !bar_draw_corner3!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner4!!space!
-	if defined bar_info echo !bar_info!
+	echo !draw_bar_shift!!bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
+	for /l %%G in (1,1,!segments2!) do echo !draw_bar_shift!!bar_draw_vert!!bar_draw_empty!!bar_draw_empty!!bar_draw_vert!
+	for /l %%G in (1,1,!segments!) do echo !draw_bar_shift!!bar_draw_vert!!bar_draw_full!!bar_draw_full!!bar_draw_vert!
+	echo !draw_bar_shift!!bar_draw_corner3!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner4!!space!
+	if defined bar_info echo !draw_bar_shift!!bar_info!
 	
 	exit /b 0
 	
@@ -226,13 +229,15 @@ echo Script that allows the user to display progress bars easily.
 echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
 echo Repository available at: "https://github.com/L89David/DarviLStuff"
 echo:
-echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/N] [/O] [/P] [/SAVE]
+echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/S number] [/N] [/O] [/P] [/SAVE]
 echo:
 echo   /R : Select a range of two values separated by "-" to display in the progress bar.
 echo   /T : Select a string to be displayed at the end of the progress bar.
 echo   /Y : Select the draw mode of the progress bar. The first number indicates the style of the bar,
 echo        (horizontal or vertical). The second number sets the set of characters to use for it.
 echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
+echo   /S : Shift the progress bar to the number of characters selected. Using negative numbers will
+echo        shift it to the left.
 echo   /N : Do not display the percentage at the end of the progress bar.
 echo   /O : Overwrite content when displaying the bar, use this in scripts.
 echo   /P : Display the range specified with '/R' at the end of the progress bar.

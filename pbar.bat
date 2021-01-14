@@ -4,13 +4,13 @@
 setlocal EnableDelayedExpansion
 chcp 65001 > nul
 
-::::::Config:::::::
+::::::Config::::::
 set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.2.1
-set /a build=21
+set ver=1.3.0
+set /a build=22
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -56,7 +56,7 @@ if defined range (
 	)
 )
 
-::Get the drawmode value formatted as "n1-n2-n3" and separate it into two different variables.
+::Get the drawmode value formatted as "n1-n2-n3" and separate it into three different variables.
 if defined drawmode (
 	echo !drawmode! > "!temp1!"
 	for /f "usebackq tokens=1,2,3 delims=-" %%G in ("!temp1!") do (
@@ -66,10 +66,10 @@ if defined drawmode (
 	)
 )
 
-
+::Set default values
 if not defined val1 set /a val1=0
 if not defined val2 set /a val2=1
-if not defined size set /a size=2
+if not defined size set /a size=20
 if not defined theme set theme=1
 if not defined style set style=1
 if not defined shift set shift=1
@@ -80,18 +80,19 @@ if !val1! LSS 0 echo First value in range is below 0 & exit /b 1
 if !val2! LSS 0 echo Second value in range is below 0 & exit /b 1
 if !val1!==0 if !val2!==0 echo Both values in range are 0 & exit /b 1
 if !val1! GTR !val2! echo The first value in range is bigger than the second value & exit /b 1
-if !size! LSS 1 echo The size is below 1 & exit /b 1
+if !size! LSS 2 echo The size is below 2 & exit /b 1
 
 
 ::Arithmetic operations to get the correct number of segments to display and the percentage.
-set /a size2=size*10
-set /a segments=(val1*100/val2)*(size)
-set segments=!segments:~0,-1!
-set /a segments2=size2-segments
+set /a segments=(val1*100/val2)*(size*10)
+set segments=!segments:~0,-3!
+set /a segments2=size-segments
 set /a percent=(val1*100/val2)
 
 
 ::Set the elements to draw depending on the selected theme.
+set "space=​"
+set draw_bar_shift=[!shift!C
 
 ::bar_draw_empty
 ::bar_draw_full
@@ -115,7 +116,7 @@ if !theme!==1 (
 	set "bar_draw_overwrite=4"
 	
 ) else if !theme!==2 (
-	set "bar_draw_empty=​"
+	set "bar_draw_empty=!space!"
 	set "bar_draw_full=#"
 	set "bar_draw_vert=|"
 	set "bar_draw_overwrite=2"
@@ -147,14 +148,11 @@ if defined overwrite set "bar_info=!bar_info![0K"
 
 
 ::Draw the progress bar.
-set "space=​"
-set draw_bar_shift=[!shift!C
-
 ::The style 1 will draw the bar horizontally.
 if !style!==1 (
 	if defined overwrite echo [!bar_draw_overwrite!A
 	if defined bar_draw_corner1 < nul set /p "=!draw_bar_shift!!bar_draw_corner1!"
-	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
+	if defined bar_draw_horiz for /l %%G in (-1,1,!size!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner2 echo !bar_draw_corner2!
 	< nul set /p "=!draw_bar_shift!!bar_draw_vert! "
 
@@ -164,7 +162,7 @@ if !style!==1 (
 	echo !space!!bar_draw_vert! !bar_info!
 
 	if defined bar_draw_corner3 < nul set /p "=!draw_bar_shift!!bar_draw_corner3!"
-	if defined bar_draw_horiz for /l %%G in (-1,1,!size2!) do < nul set /p "=!bar_draw_horiz!"
+	if defined bar_draw_horiz for /l %%G in (-1,1,!size!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner4 echo !bar_draw_corner4!
 	
 	exit /b 0
@@ -172,7 +170,7 @@ if !style!==1 (
 	rem The style 2 will draw the bar vertically.
 ) else if !style!==2 (
 	if defined overwrite (
-		set /a overwrite=size2+4
+		set /a overwrite=size+4
 		echo [!overwrite!A
 	)
 	echo !draw_bar_shift!!bar_draw_corner1!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner2!!space!
@@ -231,11 +229,11 @@ echo Repository available at: "https://github.com/L89David/DarviLStuff"
 echo:
 echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/S number] [/N] [/O] [/P] [/SAVE]
 echo:
-echo   /R : Select a range of two values separated by "-" to display in the progress bar.
+echo   /R : Select a range of two values to display in the progress bar.
 echo   /T : Select a string to be displayed at the end of the progress bar.
-echo   /Y : Select the draw mode of the progress bar. The first number indicates the style of the bar,
-echo        (horizontal or vertical). The second number sets the set of characters to use for it.
-echo        The last number specifies the size of the progress bar. Default values are '1-1-2'.
+echo   /Y : Select the draw mode of the progress bar. The first number (n1) indicates the style of the bar,
+echo        (horizontal or vertical). The second number (n2) sets the set of characters to use for it.
+echo        The last number (n3) specifies the size of the progress bar. Default values are '1-1-20'.
 echo   /S : Shift the progress bar the number of characters specified. Using negative numbers will
 echo        shift it to the left. Default value is '1'.
 echo   /N : Do not display the percentage at the end of the progress bar.

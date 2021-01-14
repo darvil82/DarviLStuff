@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.3.0
-set /a build=22
+set ver=1.3.0-1
+set /a build=23
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -244,9 +244,9 @@ echo   /LOAD : Load all the parameters previously stored with '/SAVE'. If being 
 echo           be the first one in use. If another parameter of the ones above is specified, it will be added
 echo           to the current bar, and if it is already defined by the save, it will be overwritten.
 echo:
-echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-1'
+echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-10'
 echo                      Display a horizontal progress bar with a range of 4-13, with the custom text
-echo                      'Loading...', with a size of 1 (10 segments), and with the third theme.
+echo                      'Loading...', with a size of 10 segments, and with the third theme.
 echo:
 echo   - 'PBAR /CHKUP' will check if you are using the minimum necessary Windows build for ANSI escape codes
 echo     and the newest versions of PBAR.

@@ -9,8 +9,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.3.0-1
-set /a build=23
+set ver=1.3.0-2
+set /a build=24
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -70,9 +70,9 @@ if defined drawmode (
 if not defined val1 set /a val1=0
 if not defined val2 set /a val2=1
 if not defined size set /a size=20
-if not defined theme set theme=1
-if not defined style set style=1
-if not defined shift set shift=1
+if not defined theme set /a theme=1
+if not defined style set /a style=1
+if not defined shift set /a shift=1
 set /a shift=!shift! 2> nul
 if defined text set text=!text:"=!
 
@@ -116,7 +116,7 @@ if !theme!==1 (
 	set "bar_draw_overwrite=4"
 	
 ) else if !theme!==2 (
-	set "bar_draw_empty=!space!"
+	set "bar_draw_empty=."
 	set "bar_draw_full=#"
 	set "bar_draw_vert=|"
 	set "bar_draw_overwrite=2"

@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.0.1
-set /a build=2
+set ver=1.0.2
+set /a build=3
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -28,7 +28,7 @@ set brush_color=[97m
 set brush_color2=[97m
 set brush_type=██
 set /a canvas_X=32
-set /a canvas_Y=16
+set /a canvas_Y=24
 set draw_filename_state=
 
 
@@ -85,7 +85,7 @@ echo [!brush_Y!;!draw_barv_long!f█
 
 ::Horizontal bottom
 <nul set /p =[!draw_barv_size!;1f▓▓!draw_barh_done!▓▓
-<nul set /p =[!draw_barv_size!;!brush_X!f▄▄
+<nul set /p =[!draw_barv_size!;!brush_X!f▀▀
 
 ::Status bar
 <nul set /p =[!draw_barv_size!;1f
@@ -190,7 +190,7 @@ if !errorlevel!==15 set brush_color=[97m
 if !errorlevel!==16 (
 	set option_color_select_input=
 	set /p option_color_select_input=[!draw_options_offset!;1f[7mSelect a color value [255-255-255]:[0m[J 
-	if not defined option_color_select_input set option_color_select_input=255-255-255
+	if not defined option_color_select_input set brush_color=[97m& exit /b
 	echo !option_color_select_input! > "!temp1!"
 	for /f "usebackq tokens=1-3 delims=-" %%G in ("!temp1!") do (
 		set /a option_color_select_R=%%G 2> nul
@@ -294,7 +294,7 @@ exit /b
 ::Create a new file. Basically builds the header of the file, containing the build and the size of the canvas. All stored in a temp file.
 :file_create
 echo:
-set /p canvas_size="Select a size for the canvas [32x16]: "
+set /p canvas_size="Select a size for the canvas [32x24]: "
 if defined canvas_size (
 	echo !canvas_size! > "!temp1!"
 	for /f "usebackq tokens=1-2 delims=x" %%G in ("!temp1!") do (
@@ -305,7 +305,6 @@ if defined canvas_size (
 call :checksize
 set draw_filename=Untitled
 echo !build!:!canvas_X!:!canvas_Y!:VIRINTFile> "!wip1!"
-cls
 exit /b
 
 
@@ -313,7 +312,7 @@ exit /b
 ::Save a file. Basically copying the temp file where all the data is stored, to the path that the user specified.
 :file_save
 set file_save_input=
-set /p file_save_input=[!draw_options_offset!;1f[7mFilename: [!cd!\!draw_filename!][0m[J 
+set /p file_save_input=[!draw_options_offset!;1f[7mFilename [!draw_filename!]:[0m[J 
 if not defined file_save_input set file_save_input="!draw_filename!"
 set file_save_input=!file_save_input:"=!
 for %%G in ("!file_save_input!") do set file_save_input=%%~fG
@@ -334,10 +333,10 @@ exit /b
 
 ::Check if the canvas size is valid, and calculate the number of columns and lines for MODE.
 :checksize
-if !canvas_X! LSS 16 echo Invalid canvas size. &exit /b
-if !canvas_X! GTR 128 echo Invalid canvas size. &exit /b
-if !canvas_Y! LSS 16 echo Invalid canvas size. &exit /b
-if !canvas_Y! GTR 128 echo Invalid canvas size. &exit /b
+if !canvas_X! LSS 20 echo Invalid canvas size. &set invalid=1 & exit /b
+if !canvas_X! GTR 128 echo Invalid canvas size. &set invalid=1 & exit /b
+if !canvas_Y! LSS 20 echo Invalid canvas size. &set invalid=1 & exit /b
+if !canvas_Y! GTR 128 echo Invalid canvas size. &set invalid=1 & exit /b
 
 set /a window_cols="(canvas_X+4)*2"
 set /a window_lines=canvas_Y+12

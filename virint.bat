@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.0.0
-set /a build=1
+set ver=1.0.1
+set /a build=2
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -43,11 +43,13 @@ if !start_input!==1 call :file_create
 if !start_input!==2 call :file_load
 if defined invalid exit /b
 
-
+::Set required variables for drawing the UI.
 set /a draw_barh_size=canvas_X+2
 set /a draw_barv_size=canvas_Y+6
 set /a draw_barv_long=(canvas_X*2)+7
 set /a draw_options_offset=draw_barv_size+1
+for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!░░
+
 
 
 
@@ -70,10 +72,7 @@ set /a draw_cursor_Y=brush_Y-4
 <nul set /p "=[2;1fColor A: !brush_color!██[0m   Color B: !brush_color2!██[0m   X: !draw_cursor_X!/!canvas_X! Y: !draw_cursor_Y!/!canvas_Y![K"
 
 ::Horizontal top
-<nul set /p =[3;1f
-<nul set /p =▓▓
-for /l %%G in (1,1,!draw_barh_size!) do (<nul set /p =░░)
-<nul set /p =▓▓
+<nul set /p =[3;1f▓▓!draw_barh_done!▓▓
 <nul set /p =[3;!brush_X!f▄▄
 
 ::Vertical left
@@ -85,10 +84,7 @@ for /l %%G in (4,1,!draw_barv_size!) do <nul set /p =[%%G;!draw_barv_long!f░�
 echo [!brush_Y!;!draw_barv_long!f█ 
 
 ::Horizontal bottom
-<nul set /p =[!draw_barv_size!;1f
-<nul set /p =▓▓
-for /l %%G in (1,1,!draw_barh_size!) do (<nul set /p =░░)
-<nul set /p =▓▓
+<nul set /p =[!draw_barv_size!;1f▓▓!draw_barh_done!▓▓
 <nul set /p =[!draw_barv_size!;!brush_X!f▄▄
 
 ::Status bar

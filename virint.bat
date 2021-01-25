@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.0.2
-set /a build=3
+set ver=1.0.3
+set /a build=4
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -100,10 +100,9 @@ echo [J
 ::Draw brush on screen, and save the position in screen, the color, and the brush type to a temporary file.
 if defined brushToggle (
 	echo [!brush_Y!;!brush_X!f!brush_color!!brush_type![0m
-	echo !brush_Y!:!brush_X!:!brush_color!:!brush_type!>> "!wip1!"
+	if not defined brushErase (echo !brush_Y!:!brush_X!:!brush_color!:!brush_type!>> "!wip1!") else (echo !brush_Y!:!brush_X!::!brush_type!>> "!wip1!")
 	set draw_filename_state=*
 )
-
 exit /b
 
 
@@ -280,6 +279,7 @@ REM if !file_build! LSS !build! (
 REM )
 
 call :checksize
+if defined invalid exit /b
 echo [HLoading file. Please wait...
 for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
 	<nul set /p =[%%G;%%Hf%%I%%J[0m

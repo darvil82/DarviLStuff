@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.0.3
-set /a build=4
+set ver=1.1
+set /a build=5
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -92,7 +92,7 @@ echo [!brush_Y!;!draw_barv_long!f█
 echo:
 if defined brushToggle (<nul set /p "=[7mBrush: B[0m  |  ") else (<nul set /p "=Brush: B  |  ")
 if defined brushErase (<nul set /p "=[7mErase: E[0m  |  ") else (<nul set /p "=Erase: E  |  ")
-<nul set /p ="Color: C  |  Toggle Color: T  |  Coord: F  |  Clear: X  |  Save: V  |  Exit: M"
+<nul set /p ="Color: C  |  Toggle Color: T  |  Coord: F  |  Fill: X  |  Save: V  |  Exit: M"
 echo [J
 
 
@@ -149,7 +149,7 @@ if !getkey_input!==8 (
 	set brush_color2=!tmp!
 )
 if !getkey_input!==9 call :option_coord_select
-if !getkey_input!==10 call :option_canvas_clear
+if !getkey_input!==10 call :option_canvas_fill
 if !getkey_input!==11 call :option_exit
 if !getkey_input!==12 call :file_save
 exit /b
@@ -228,17 +228,27 @@ exit /b
 
 
 
-::Clear canvas option.
-:option_canvas_clear
-echo [!draw_options_offset!;1f[91m[7mClear canvas? [Y/N][0m[J
+::Fill the canvas with the current color. If Erase is on, just do cls and clear the file.
+:option_canvas_fill
+echo [!draw_options_offset!;1f[91m[7mFill canvas with current brush options? [Y/N][0m[J
 choice /c yn /n >nul
 if !errorlevel!==1 (
-	cls
 	echo !build!:!canvas_X!:!canvas_Y!:VIRINTFile> "!wip1!"
+	set option_canvas_fill_brush=
+	if not defined brushErase (
+		for /l %%G in (1,1,!canvas_X!) do (set option_canvas_fill_brush=!brush_type!!option_canvas_fill_brush!)
+		for /l %%G in (1,1,!canvas_Y!) do (
+			set /a option_canvas_fill_Y=%%G+4 2>nul
+			echo [!option_canvas_fill_Y!;5f!brush_color!!option_canvas_fill_brush![0m
+			echo !option_canvas_fill_Y!:5:!brush_color!:!option_canvas_fill_brush!>> "!wip1!"
+		)
+	) else cls
 	set draw_filename_state=*
 	exit /b
 )
 if !errorlevel!==2 exit /b
+
+
 
 
 
@@ -283,6 +293,7 @@ if defined invalid exit /b
 echo [HLoading file. Please wait...
 for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
 	<nul set /p =[%%G;%%Hf%%I%%J[0m
+	REM ping localhost -n 1 >nul
 )
 set draw_filename=!file_load_input!
 copy "!file_load_input!" "!wip1!">nul

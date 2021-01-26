@@ -10,14 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.1
-set /a build=5
-
-if not defined parms_array set "parms_array=%*"
-for %%G in (!parms_array!) do (
-	if /i "%%G"=="/nomode" set nomode=1
-	if /i "%%G"=="/chkup" goto chkup
-)
+set ver=1.2
+set /a build=6
 
 ::Setting default values.
 set /a brush_X=5
@@ -32,6 +26,34 @@ set /a canvas_Y=24
 set draw_filename_state=
 
 
+::Check for parameters.
+if not defined parms_array set "parms_array=%*"
+for %%G in (!parms_array!) do (
+	if defined tknxt (
+		set "!tknxt!=%%G"
+		set tknxt=
+	) else (
+		if /i "%%G"=="/s" set tknxt=canvas_size
+		if /i "%%G"=="/l" set tknxt=file_load_input
+		if /i "%%G"=="/n" set parm_new=1
+		if /i "%%G"=="/nomode" set nomode=1
+		if /i "%%G"=="/chkup" goto chkup
+	)
+)
+if defined parm_new (
+	call :file_create
+	if defined invalid exit /b 1
+	call :start
+	exit /b
+)
+if defined file_load_input (
+	call :file_load
+	if defined invalid exit /b 1
+	call :start
+	exit /b
+)
+
+
 ::Start menu.
 echo [96mVIRINT !ver![0m
 echo Select an option:
@@ -39,18 +61,18 @@ echo   1: Create new canvas.
 echo   2: Load file.
 choice /c 12 /n >nul
 set start_input=!errorlevel!
-if !start_input!==1 call :file_create
-if !start_input!==2 call :file_load
+if !start_input!==1 echo: & set /p canvas_size="Select a size for the canvas [32x24]: " & call :file_create
+if !start_input!==2 echo: & set /p file_load_input="Select a file to load: " & call :file_load
 if defined invalid exit /b
 
+
+:start
 ::Set required variables for drawing the UI.
 set /a draw_barh_size=canvas_X+2
 set /a draw_barv_size=canvas_Y+6
 set /a draw_barv_long=(canvas_X*2)+7
 set /a draw_options_offset=draw_barv_size+1
 for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!░░
-
-
 
 
 ::Main loop routine.
@@ -90,9 +112,10 @@ echo [!brush_Y!;!draw_barv_long!f█
 ::Status bar
 <nul set /p =[!draw_barv_size!;1f
 echo:
-if defined brushToggle (<nul set /p "=[7mBrush: B[0m  |  ") else (<nul set /p "=Brush: B  |  ")
-if defined brushErase (<nul set /p "=[7mErase: E[0m  |  ") else (<nul set /p "=Erase: E  |  ")
-<nul set /p ="Color: C  |  Toggle Color: T  |  Coord: F  |  Fill: X  |  Save: V  |  Exit: M"
+<nul set /p ="[96mMove: WASD  |  "
+if defined brushToggle (<nul set /p "=[7mBrush: B[27m  |  ") else (<nul set /p "=Brush: B  |  ")
+if defined brushErase (<nul set /p "=[7mErase: E[27m  |  ") else (<nul set /p "=Erase: E  |  ")
+<nul set /p ="Color: C  |  Toggle Color: T  |  Coord: F  |  Fill: X  |  [95mSave: V  |  Exit: M[0m"
 echo [J
 
 
@@ -265,8 +288,6 @@ if !errorlevel!==2 exit /b
 ::which is the first line of the file, it contains the build where the file was created, sets the size of the window to fit the canvas.
 ::Lastly, it reads every line that contains a pixel in the canvas.
 :file_load
-echo:
-set /p file_load_input="Select a file to load: "
 if not defined file_load_input echo Invalid filename. &set invalid=1 &exit /b
 set file_load_input=!file_load_input:"=!
 
@@ -304,8 +325,6 @@ exit /b
 
 ::Create a new file. Basically builds the header of the file, containing the build and the size of the canvas. All stored in a temp file.
 :file_create
-echo:
-set /p canvas_size="Select a size for the canvas [32x24]: "
 if defined canvas_size (
 	echo !canvas_size! > "!temp1!"
 	for /f "usebackq tokens=1-2 delims=x" %%G in ("!temp1!") do (

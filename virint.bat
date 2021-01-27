@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.3
-set /a build=7
+set ver=1.3-1
+set /a build=8
 
 ::Setting default values.
 set /a brush_X=5
@@ -139,10 +139,10 @@ set /a canvas_limitY=canvas_Y+6
 set /a brush_X_next=brush_X+2
 set /a brush_X_prev=brush_X-2
 set /a brush_Y_next=brush_Y+2
-set /a brush_Y_prev=brush_Y-2
-if !brush_X_prev! LEQ 3 (set brush_leftq=0) else (set brush_leftq=1)
+set /a brush_Y_prev=brush_Y-1
+if !brush_X_prev! LEQ 4 (set brush_leftq=0) else (set brush_leftq=1)
 if !brush_X_next! GEQ !canvas_limitX! (set brush_rightq=0) else (set brush_rightq=1)
-if !brush_Y_prev! LEQ 3 (set brush_upq=0) else (set brush_upq=1)
+if !brush_Y_prev! LEQ 4 (set brush_upq=0) else (set brush_upq=1)
 if !brush_Y_next! GEQ !canvas_limitY! (set brush_downq=0) else (set brush_downq=1)
 exit /b
 

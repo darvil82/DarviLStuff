@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.3-1
-set /a build=8
+set ver=1.3-2
+set /a build=9
 
 ::Setting default values.
 set /a brush_X=5
@@ -27,6 +27,8 @@ set draw_filename_state=
 
 
 ::Check for parameters.
+if "%1"=="/?" call :help noLoad & exit /b
+
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
 	if defined tknxt (
@@ -38,7 +40,6 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/n" set parm_new=1
 		if /i "%%G"=="/nomode" set nomode=1
 		if /i "%%G"=="/chkup" goto chkup
-		if /i "%%G"=="/?" call :help noLoad & exit /b
 	)
 )
 if defined parm_new (

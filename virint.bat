@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
 
-set ver=1.3-2
-set /a build=9
+set ver=1.3.1
+set /a build=10
 
 ::Setting default values.
 set /a brush_X=5
@@ -175,7 +175,11 @@ if !getkey_input!==8 (
 )
 if !getkey_input!==9 call :option_coord_select
 if !getkey_input!==10 call :option_canvas_fill
-if !getkey_input!==11 call :option_exit
+if !getkey_input!==11 (
+	call :display_message "Exit VIRINT? All unsaved changes will be lost. [Y/N]" red
+	choice /c yn /n >nul
+	if !errorlevel!==1 set run_exit=1 & exit /b
+)
 if !getkey_input!==12 call :file_save
 if !getkey_input!==13 call :help
 exit /b
@@ -187,10 +191,20 @@ exit /b
 
 
 
+
+
+
+
+
+
+
+
+
+
 ::Let the user select one of the default colors, or specify a RGB value.
 :option_color_select
-echo [!draw_options_offset!;1f[7mSelect a color:[0m[J
-echo:
+call :display_message "Select a color:" white
+echo:&echo:
 echo [7m[34m 1 [32m 2 [36m 3 [31m 4 [35m 5 [33m 6 [37m 7 [90m 8 [94m 9 [92m A [96m B [91m C [95m D [93m E [97m F [0m
 echo  G: Pick RGB.
 
@@ -214,7 +228,8 @@ if !errorlevel!==14 set brush_color=[93m
 if !errorlevel!==15 set brush_color=[97m
 if !errorlevel!==16 (
 	set option_color_select_input=
-	set /p option_color_select_input=[!draw_options_offset!;1f[7mSelect a color value [255-255-255]:[0m[J 
+	call :display_message "Select a color value [255-255-255]:" white
+	set /p option_color_select_input=
 	if not defined option_color_select_input set brush_color=[97m& exit /b
 	echo !option_color_select_input! > "!temp1!"
 	for /f "usebackq tokens=1-3 delims=-" %%G in ("!temp1!") do (
@@ -229,9 +244,12 @@ exit /b
 
 
 
+
+
 ::Select the coordinates of the cursor to move. Check if the user is trying to get out of bounds.
 :option_coord_select
-set /p option_coord_input=[!draw_options_offset!;1f[7mSelect the coordinates [1-1]:[0m[J 
+call :display_message "Select the coordinate [1-1]:" white
+set /p option_coord_input=
 if defined option_coord_input (
 	echo !option_coord_input! > "!temp1!"
 	for /f "usebackq tokens=1-2 delims=-" %%G in ("!temp1!") do (
@@ -243,10 +261,10 @@ if defined option_coord_input (
 	set /a option_coord_X=1
 	set /a option_coord_Y=1
 )
-if !option_coord_X! GTR !canvas_X! call :display_message "ERROR: Cursor out of bounds." red &exit /b
-if !option_coord_X! LSS 1 call :display_message "ERROR: Cursor out of bounds." red &exit /b
-if !option_coord_Y! GTR !canvas_Y! call :display_message "ERROR: Cursor out of bounds." red &exit /b
-if !option_coord_Y! LSS 1 call :display_message "ERROR: Cursor out of bounds." red &exit /b
+if !option_coord_X! GTR !canvas_X! call :display_message "ERROR: Cursor out of bounds." red wait &exit /b
+if !option_coord_X! LSS 1 call :display_message "ERROR: Cursor out of bounds." red wait &exit /b
+if !option_coord_Y! GTR !canvas_Y! call :display_message "ERROR: Cursor out of bounds." red wait &exit /b
+if !option_coord_Y! LSS 1 call :display_message "ERROR: Cursor out of bounds." red wait &exit /b
 
 set /a brush_X=((option_coord_X+2)*2)-1
 set /a brush_Y=option_coord_Y+4
@@ -254,11 +272,14 @@ exit /b
 
 
 
+
+
 ::Fill the canvas with the current color. If Erase is on, just do cls and clear the file.
 :option_canvas_fill
-echo [!draw_options_offset!;1f[91m[7mFill canvas with current brush options? [Y/N][0m[J
+call :display_message "Fill canvas with current brush options? [Y/N]" red
 choice /c yn /n >nul
 if !errorlevel!==1 (
+	call :display_message "Loading. Please wait..." yellow
 	echo !build!:!canvas_X!:!canvas_Y!:VIRINTFile> "!wip1!"
 	set option_canvas_fill_brush=
 	if not defined brushErase (
@@ -275,15 +296,6 @@ if !errorlevel!==1 (
 if !errorlevel!==2 exit /b
 
 
-
-
-
-::Exit option.
-:option_exit
-echo [!draw_options_offset!;1f[91m[7mExit VIRINT? All unsaved changes will be lost. [Y/N][0m[J
-choice /c yn /n >nul
-if !errorlevel!==1 set run_exit=1 & exit /b
-if !errorlevel!==2 exit /b
 
 
 
@@ -330,6 +342,8 @@ exit /b
 
 
 
+
+
 ::Create a new file. Basically builds the header of the file, containing the build and the size of the canvas. All stored in a temp file.
 :file_create
 if defined canvas_size (
@@ -347,13 +361,16 @@ exit /b
 
 
 
+
+
 ::Save a file. Basically copying the temp file where all the data is stored, to the path that the user specified.
 :file_save
 set file_save_input=
-set /p file_save_input=[!draw_options_offset!;1f[7mFilename [!draw_filename!]:[0m[J 
+call :display_message "Select a filename [!draw_filename!]:" white
+set /p file_save_input=
 if not defined file_save_input set file_save_input="!draw_filename!"
 set file_save_input=!file_save_input:"=!
-if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red & exit /b 1
+if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red wait & exit /b 1
 for %%G in ("!file_save_input!") do set file_save_input=%%~fG
 
 if exist "!file_save_input!" (
@@ -365,10 +382,10 @@ echo !build!:!canvas_X!:!canvas_Y!:!brush_X!:!brush_Y!:!brush_color!:!brush_colo
 findstr /v "VIRINTFile" "!wip1!" >> "!temp1!"
 copy "!temp1!" "!file_save_input!" >nul
 if exist "!file_save_input!" (
-	call :display_message "File saved succesfully as '!file_save_input!'." green
+	call :display_message "File saved succesfully as '!file_save_input!'." green wait
 	set draw_filename=!file_save_input!
 	set draw_filename_state=
-) else call :display_message "ERROR: An error occurred while trying to save the file as '!file_save_input!'." red
+) else call :display_message "ERROR: An error occurred while trying to save the file as '!file_save_input!'." red wait
 exit /b
 
 
@@ -393,15 +410,21 @@ exit /b
 
 
 
+
+
 ::Display a message under the canvas.
 :display_message
 set display_message_msg=%1
 set display_message_msg=!display_message_msg:"=!
-if %2==red set display_message_color=[91m
-if %2==green set display_message_color=[92m
-echo [!draw_options_offset!;1f!display_message_color![7m!display_message_msg![0m[J
-timeout /t 3 >nul
+if "%2"=="red" set display_message_color=[91m
+if "%2"=="green" set display_message_color=[92m
+if "%2"=="yellow" set display_message_color=[33m
+if "%2"=="white" set display_message_color=[97m
+<nul set /p =[!draw_options_offset!;1f!display_message_color![7m!display_message_msg![0m [J
+if "%3"=="wait" timeout /t 3 >nul
 exit /b
+
+
 
 
 
@@ -415,6 +438,8 @@ for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!wip1!") do (
 	REM ping localhost -n 1 >nul
 )
 exit /b
+
+
 
 
 
@@ -459,6 +484,7 @@ if not "%1"=="noLoad" (
 	call :wip_reload
 )
 exit /b
+
 
 
 

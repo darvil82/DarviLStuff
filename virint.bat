@@ -4,14 +4,12 @@
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
-
 ::::::Config::::::
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-
-set ver=1.3.1
-set /a build=10
+set ver=1.3.1-1
+set /a build=11
 
 ::Setting default values.
 set /a brush_X=5
@@ -344,6 +342,21 @@ exit /b
 
 
 
+::Very small thing to reload the file in wip.tmp
+:file_reload
+call :checksize
+echo [HLoading, please wait...
+for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!wip1!") do (
+	<nul set /p =[%%G;%%Hf%%I%%J[0m
+	REM ping localhost -n 1 >nul
+)
+exit /b
+
+
+
+
+
+
 ::Create a new file. Basically builds the header of the file, containing the build and the size of the canvas. All stored in a temp file.
 :file_create
 if defined canvas_size (
@@ -355,7 +368,7 @@ if defined canvas_size (
 )
 call :checksize
 set draw_filename=Untitled
-echo !build!:!canvas_X!:!canvas_Y!:VIRINTFile> "!wip1!"
+type nul > "!wip1!"
 exit /b
 
 
@@ -411,7 +424,6 @@ exit /b
 
 
 
-
 ::Display a message under the canvas.
 :display_message
 set display_message_msg=%1
@@ -424,20 +436,6 @@ if "%2"=="white" set display_message_color=[97m
 if "%3"=="wait" timeout /t 3 >nul
 exit /b
 
-
-
-
-
-
-::Very small thing to reload the file in wip.tmp
-:wip_reload
-call :checksize
-echo [HLoading, please wait...
-for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!wip1!") do (
-	<nul set /p =[%%G;%%Hf%%I%%J[0m
-	REM ping localhost -n 1 >nul
-)
-exit /b
 
 
 
@@ -481,7 +479,7 @@ echo You can open this help page by pressing H while editing a file.
 
 if not "%1"=="noLoad" (
 	pause>nul
-	call :wip_reload
+	call :file_reload
 )
 exit /b
 

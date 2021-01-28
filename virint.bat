@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=1.3.1-1
-set /a build=11
+set ver=2.0
+set /a build=12
 
 ::Setting default values.
 set /a brush_X=5
@@ -52,6 +52,8 @@ if defined file_load_input (
 	call :start
 	exit /b
 )
+
+
 
 
 ::Start menu.
@@ -278,15 +280,15 @@ call :display_message "Fill canvas with current brush options? [Y/N]" red
 choice /c yn /n >nul
 if !errorlevel!==1 (
 	call :display_message "Loading. Please wait..." yellow
-	echo !build!:!canvas_X!:!canvas_Y!:VIRINTFile> "!wip1!"
+	type nul > "!wip1!"
 	set option_canvas_fill_brush=
 	if not defined brushErase (
 		for /l %%G in (1,1,!canvas_X!) do (set option_canvas_fill_brush=!brush_type!!option_canvas_fill_brush!)
 		for /l %%G in (1,1,!canvas_Y!) do (
 			set /a option_canvas_fill_Y=%%G+4 2>nul
 			echo [!option_canvas_fill_Y!;5f!brush_color!!option_canvas_fill_brush![0m
-			echo !option_canvas_fill_Y!:5:!brush_color!:!option_canvas_fill_brush!>> "!wip1!"
 		)
+		echo XX:XX:!brush_color!:!option_canvas_fill_brush!>> "!wip1!"
 	) else cls
 	set draw_filename_state=*
 	exit /b
@@ -329,9 +331,22 @@ if !file_build! LSS !build! (
 call :checksize
 if defined invalid exit /b
 echo [HLoading file. Please wait...
-for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
-	<nul set /p =[%%G;%%Hf%%I%%J[0m
-	REM ping localhost -n 1 >nul
+
+findstr /r /c:"^^XX:XX:.*$" "!file_load_input!" > "!temp1!"
+if !errorlevel!==0 (
+	for /f "usebackq tokens=3-4 delims=:" %%A in ("!temp1!") do (
+		for /l %%G in (1,1,!canvas_Y!) do (
+			set /a option_canvas_fill_Y=%%G+4 2>nul
+			echo [!option_canvas_fill_Y!;5f%%A%%B[0m
+		)
+	)
+	for /f "usebackq skip=2 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
+		<nul set /p =[%%G;%%Hf%%I%%J[0m
+	)
+) else (
+	for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
+		<nul set /p =[%%G;%%Hf%%I%%J[0m
+	)
 )
 set draw_filename=!file_load_input!
 copy "!file_load_input!" "!wip1!">nul
@@ -346,9 +361,21 @@ exit /b
 :file_reload
 call :checksize
 echo [HLoading, please wait...
-for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!wip1!") do (
-	<nul set /p =[%%G;%%Hf%%I%%J[0m
-	REM ping localhost -n 1 >nul
+findstr /r /c:"^^XX:XX:.*$" "!wip1!" > "!temp1!"
+if !errorlevel!==0 (
+	for /f "usebackq tokens=3-4 delims=:" %%A in ("!temp1!") do (
+		for /l %%G in (1,1,!canvas_Y!) do (
+			set /a option_canvas_fill_Y=%%G+4 2>nul
+			echo [!option_canvas_fill_Y!;5f%%A%%B[0m
+		)
+	)
+	for /f "usebackq skip=2 tokens=1-4 delims=:" %%G in ("!wip1!") do (
+		<nul set /p =[%%G;%%Hf%%I%%J[0m
+	)
+) else (
+	for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!wip1!") do (
+		<nul set /p =[%%G;%%Hf%%I%%J[0m
+	)
 )
 exit /b
 
@@ -387,20 +414,48 @@ if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename.
 for %%G in ("!file_save_input!") do set file_save_input=%%~fG
 
 if exist "!file_save_input!" (
-	echo [!draw_options_offset!;1f[7m[33mFound file '!file_save_input!'. Overwrite? [Y/N][0m[J 
+	call :display_message "Found file '!file_save_input!'. Overwrite? [Y/N]" white
 	choice /c yn /n >nul
 	if !errorlevel!==2 exit /b
 )
-echo !build!:!canvas_X!:!canvas_Y!:!brush_X!:!brush_Y!:!brush_color!:!brush_color2!:VIRINTFile> "!temp1!"
-findstr /v "VIRINTFile" "!wip1!" >> "!temp1!"
-copy "!temp1!" "!file_save_input!" >nul
+
+findstr /v "VIRINTFile" "!wip1!" > "!temp1!"
+
+call :display_message "Apply compression? This operation may take some time. [Y/N]" white
+choice /c yn /n >nul
+if !errorlevel!==1 (
+	call :display_message "Applying compression. Please, wait..." yellow
+	call :file_compress
+)
+
+echo !build!:!canvas_X!:!canvas_Y!:!brush_X!:!brush_Y!:!brush_color!:!brush_color2!:VIRINTFile> "!wip1!"
+type "!temp1!" >> "!wip1!"
+copy "!wip1!" "!file_save_input!" >nul
+
 if exist "!file_save_input!" (
 	call :display_message "File saved succesfully as '!file_save_input!'." green wait
 	set draw_filename=!file_save_input!
 	set draw_filename_state=
 ) else call :display_message "ERROR: An error occurred while trying to save the file as '!file_save_input!'." red wait
+call :file_reload
 exit /b
 
+
+
+
+
+::Compression algorithm for making virint files smaller. Takes the content of the file !tmp1! (WITHOUT HEADER), and applies a search for any duplicated X or Y
+::value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file. After finishing, it outputs the compressed
+::file in !temp1!
+:file_compress
+for /f "usebackq tokens=1-2 delims=:" %%G in ("!temp1!") do (
+	findstr /r /c:"^^%%G:%%H:.*$" "!temp1!" > "!temp1!2"
+	for /f "usebackq" %%G in ("!temp1!2") do set file_save_lastLine=%%G
+	findstr /v /r /c:"^^%%G:%%H:.*$" "!temp1!" > "!temp1!3"
+	echo !file_save_lastLine!>> "!temp1!3"
+	type "!temp1!3" > "!temp1!"
+)
+exit /b
 
 
 

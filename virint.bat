@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.1
-set /a build=13
+set ver=2.1.1
+set /a build=14
 
 ::Setting default values.
 set /a brush_X=5
@@ -281,7 +281,6 @@ exit /b
 call :display_message "Fill canvas with current brush options? [Y/N]" red
 choice /c yn /n >nul
 if !errorlevel!==1 (
-	call :display_message "Loading. Please wait..." yellow
 	type nul > "!wip1!"
 	set option_canvas_fill_brush=
 	if not defined brushErase (
@@ -290,7 +289,7 @@ if !errorlevel!==1 (
 			set /a option_canvas_fill_Y=%%G+4 2>nul
 			echo [!option_canvas_fill_Y!;5f!brush_color!!option_canvas_fill_brush![0m
 		)
-		echo XX:XX:!brush_color!:!option_canvas_fill_brush!>> "!wip1!"
+		echo XX:XX:!brush_color!:!brush_type!>> "!wip1!"
 	) else cls
 	set draw_filename_state=*
 	exit /b
@@ -333,24 +332,7 @@ if !file_build! LSS !build! (
 
 call :checksize
 if defined invalid exit /b
-echo [HLoading file. Please wait...
-
-findstr /r /c:"^^XX:XX:.*$" "!file_load_input!" > "!temp1!"
-if !errorlevel!==0 (
-	for /f "usebackq tokens=3-4 delims=:" %%A in ("!temp1!") do (
-		for /l %%G in (1,1,!canvas_Y!) do (
-			set /a option_canvas_fill_Y=%%G+4 2>nul
-			echo [!option_canvas_fill_Y!;5f%%A%%B[0m
-		)
-	)
-	for /f "usebackq skip=2 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
-		<nul set /p =[%%G;%%Hf%%I%%J[0m
-	)
-) else (
-	for /f "usebackq skip=1 tokens=1-4 delims=:" %%G in ("!file_load_input!") do (
-		<nul set /p =[%%G;%%Hf%%I%%J[0m
-	)
-)
+call :file_reload
 set draw_filename=!file_load_input!
 copy "!file_load_input!" "!wip1!">nul
 exit /b
@@ -366,10 +348,12 @@ call :checksize
 echo [HLoading, please wait...
 findstr /r /c:"^^XX:XX:.*$" "!wip1!" > "!temp1!"
 if !errorlevel!==0 (
+	set file_load_full=
 	for /f "usebackq tokens=3-4 delims=:" %%A in ("!temp1!") do (
+		for /l %%G in (1,1,!canvas_X!) do (set file_load_full=!file_load_full!%%B)
 		for /l %%G in (1,1,!canvas_Y!) do (
 			set /a option_canvas_fill_Y=%%G+4 2>nul
-			echo [!option_canvas_fill_Y!;5f%%A%%B[0m
+			echo [!option_canvas_fill_Y!;5f%%A!file_load_full![0m
 		)
 	)
 	for /f "usebackq skip=2 tokens=1-4 delims=:" %%G in ("!wip1!") do (

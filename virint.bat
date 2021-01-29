@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.1.1
-set /a build=14
+set ver=2.2
+set /a build=15
 
 ::Setting default values.
 set /a brush_X=5
@@ -22,6 +22,14 @@ set brush_type=██
 set /a canvas_X=32
 set /a canvas_Y=24
 set draw_filename_state=
+
+::Get the current number of columns on screen.
+mode > "!temp1!"
+for /f "usebackq skip=4 tokens=2 delims=: " %%G in ("!temp1!") do (
+	set /a cols_current=%%G
+	goto get-cols-end
+)
+:get-cols-end
 
 
 ::Check for parameters.
@@ -36,7 +44,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/s" set tknxt=canvas_size
 		if /i "%%G"=="/l" set tknxt=file_load_input
 		if /i "%%G"=="/n" set parm_new=1
-		if /i "%%G"=="/NoNode" set nomode=1
+		if /i "%%G"=="/NoMode" set nomode=1
 		if /i "%%G"=="/chkup" goto chkup
 		if /i "%%G"=="/NoCompression" set noCompression=1
 	)
@@ -60,13 +68,17 @@ if defined file_load_input (
 ::Start menu.
 echo [96mVIRINT !ver![0m
 echo Select an option:
-echo   1: Create new canvas.
-echo   2: Load file.
-choice /c 12 /n >nul
+echo   [94m1)[0m Create new canvas.
+echo   [94m2)[0m Load file.
+echo:
+echo   [91m3)[0m Exit.
+choice /c 123 /n >nul
 set start_input=!errorlevel!
 if !start_input!==1 echo: & set /p canvas_size="Select a size for the canvas [32x24]: " & call :file_create
 if !start_input!==2 echo: & set /p file_load_input="Select a file to load: " & call :file_load
-if defined invalid exit /b
+if !start_input!==3 exit /b
+if defined invalid exit /b 1
+
 
 
 :start
@@ -78,12 +90,21 @@ set /a draw_options_offset=draw_barv_size+1
 for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!░░
 
 
+
 ::Main loop routine.
 :MAIN
 call :draw
 call :collide
 call :getkey
-if not defined run_exit (goto MAIN) else (exit /b)
+if not defined run_exit (
+	goto MAIN
+) else (
+	if not defined NoMode (
+		cls
+		mode con cols=!cols_current!
+	)
+	exit /b 0
+)
 
 
 
@@ -120,8 +141,6 @@ if defined brushToggle (<nul set /p "=[7mBrush: B[27m  |  ") else (<nul set /p
 if defined brushErase (<nul set /p "=[7mErase: E[27m  |  ") else (<nul set /p "=Erase: E  |  ")
 <nul set /p ="Color: C  |  Toggle Color: T  |  Coord: F  |  Fill: X  |  [95mSave: V  |  Exit: M[0m"
 echo [J
-
-
 
 ::Draw brush on screen, and save the position in screen, the color, and the brush type to a temporary file.
 if defined brushToggle (
@@ -276,7 +295,8 @@ exit /b
 
 
 
-::Fill the canvas with the current color. If Erase is on, just do cls and clear the file.
+::Fill the canvas with the current color. If Erase is on, just do cls and clear the file. Here it types XX:XX as the X and Y coords to the
+::file because we don't need to store every single line. The file_reload function will parse it correctly to draw it on screen.
 :option_canvas_fill
 call :display_message "Fill canvas with current brush options? [Y/N]" red
 choice /c yn /n >nul
@@ -300,9 +320,8 @@ if !errorlevel!==2 exit /b
 
 
 
-::Loading file function. This will parse all the the data inside the saved file to display it on screen. First, it will check the header,
-::which is the first line of the file, it contains the build where the file was created, sets the size of the window to fit the canvas.
-::Lastly, it reads every line that contains a pixel in the canvas.
+::Loading file function. This will parse all the the data in the header, which constains the script version number, the canvas size
+::in the X and Y axis, the brush position in the X and Y axis, the brush colors A and B, and a mark that is just 'VIRINTFile'.
 :file_load
 if not defined file_load_input echo Invalid filename. &set invalid=1 &exit /b
 set file_load_input=!file_load_input:"=!
@@ -329,7 +348,6 @@ if !file_build! LSS !build! (
 	if !errorlevel!==2 set invalid=1 & exit /b
 )
 
-
 call :checksize
 if defined invalid exit /b
 call :file_reload
@@ -342,7 +360,8 @@ exit /b
 
 
 
-::Very small thing to reload the file in wip.tmp
+::Parse the picture data inside the file. It basically reads every line to get the coordinates, color, and brush type to draw on screen.
+::If it finds a line containing XX:XX as the coordinates, it fills up the entire screen with the color and brush type.
 :file_reload
 call :checksize
 echo [HLoading, please wait...
@@ -371,7 +390,7 @@ exit /b
 
 
 
-::Create a new file. Basically builds the header of the file, containing the build and the size of the canvas. All stored in a temp file.
+::Changes the size of the screen to match the selected canvas size. It also changes the filename to 'Untitled', and clears up the wip file.
 :file_create
 if defined canvas_size (
 	echo !canvas_size! > "!temp1!"
@@ -390,7 +409,8 @@ exit /b
 
 
 
-::Save a file. Basically copying the temp file where all the data is stored, to the path that the user specified.
+::Save a file. Copies the temp file where all the data is stored to the path that the user specified. It also builds the header that
+::file_load can understand.
 :file_save
 set file_save_input=
 call :display_message "Select a filename [!draw_filename!]:" white
@@ -398,7 +418,7 @@ set /p file_save_input=
 if not defined file_save_input set file_save_input="!draw_filename!"
 set file_save_input=!file_save_input:"=!
 if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red wait & exit /b 1
-for %%G in ("!file_save_input!") do set file_save_input=%%~fG
+for %%G in ("!file_save_input!") do set "file_save_input=%%~fG"
 
 if exist "!file_save_input!" (
 	call :display_message "Found file '!file_save_input!'. Overwrite? [Y/N]" white
@@ -429,9 +449,9 @@ exit /b
 
 
 
-::Compression algorithm for making virint files smaller. Takes the content of the file !tmp1! (WITHOUT HEADER), and applies a search for any duplicated X or Y
-::value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file. After finishing, it outputs the compressed
-::file in !temp1!
+::Compression algorithm for making virint files smaller. Takes the content of the file !tmp1! (WITHOUT HEADER), and applies a search
+::for any duplicated X or Y value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file.
+::After finishing, it outputs the compressed file in !temp1!
 :file_compress
 for /f "usebackq tokens=1-2 delims=:" %%G in ("!temp1!") do (
 	set /a file_compress_counter=0
@@ -470,7 +490,7 @@ exit /b
 
 
 
-::Display a message under the canvas.
+::Display a message under the canvas. [red green yellow white] [wait]
 :display_message
 set display_message_msg=%1
 set display_message_msg=!display_message_msg:"=!
@@ -486,7 +506,7 @@ exit /b
 
 
 
-
+::Display help on screen. [noLoad]
 :help
 if not "%1"=="noLoad" (
 	cls
@@ -504,9 +524,9 @@ echo   [96m/N :[0m Create a new canvas.
 echo   [96m/S :[0m Select the size of the canvas to create. (Only useful when creating a new canvas)
 echo   [96m/L :[0m Load the specified file.
 echo:
-echo The scripts shows a quick menu if it is launched normally, so using this parameters is not necessary.
+echo The script shows a quick menu if it is launched normally, so using the parameters above is not necessary.
 echo:
-echo   [96m/NoCompression :[0m Disables the file compression algorithm. This will file saving much faster,
+echo   [96m/NoCompression :[0m Disables the file compression algorithm. This will make file saving much faster,
 echo                    but files will be much bigger, and they will take more time to load.
 echo   [96m/NoMode :[0m Stops resizing the window automatically.
 echo   [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes

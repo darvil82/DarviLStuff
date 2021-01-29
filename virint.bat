@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.2
-set /a build=15
+set ver=2.2-1
+set /a build=16
 
 ::Setting default values.
 set /a brush_X=5
@@ -350,9 +350,9 @@ if !file_build! LSS !build! (
 
 call :checksize
 if defined invalid exit /b
+copy "!file_load_input!" "!wip1!">nul
 call :file_reload
 set draw_filename=!file_load_input!
-copy "!file_load_input!" "!wip1!">nul
 exit /b
 
 

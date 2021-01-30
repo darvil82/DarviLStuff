@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.3
-set /a build=18
+set ver=2.4
+set /a build=19
 
 ::Setting default values.
 set /a brush_X=5
@@ -35,6 +35,7 @@ for /f "usebackq skip=4 tokens=2 delims=: " %%G in ("!temp1!") do (
 
 ::Check for parameters.
 if "%1"=="/?" call :help noLoad & exit /b
+if exist %1 set "file_load_input=%1"
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -570,7 +571,7 @@ echo   [94m- Fill (X) :[0m Fill the current canvas with the Color A. If the Er
 echo                canvas will be cleared.
 echo:
 echo Pressing 'R' will reload the UI (Useful if the canvas ended up getting messy). You can open this help page
-echo from the canvas pressing 'H'.
+echo from the canvas pressing 'H'. Dragging a file onto the script will make VIRINT attempt to load it.
 
 if not "%1"=="noLoad" (
 	pause>nul

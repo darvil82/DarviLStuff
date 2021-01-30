@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.2-1
-set /a build=16
+set ver=2.2.1
+set /a build=17
 
 ::Setting default values.
 set /a brush_X=5
@@ -84,9 +84,10 @@ if defined invalid exit /b 1
 :start
 ::Set required variables for drawing the UI.
 set /a draw_barh_size=canvas_X+2
-set /a draw_barv_size=canvas_Y+6
-set /a draw_barv_long=(canvas_X*2)+7
-set /a draw_options_offset=draw_barv_size+1
+set /a draw_barh_offset=canvas_Y+6
+set /a draw_barv_size=canvas_Y+5
+set /a draw_barv_offset=(canvas_X*2)+7
+set /a draw_options_offset=draw_barh_offset+1
 for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!░░
 
 
@@ -126,15 +127,15 @@ for /l %%G in (4,1,!draw_barv_size!) do <nul set /p =[%%G;1f░░
 echo [!brush_Y!;1f █
 
 ::Vertical right
-for /l %%G in (4,1,!draw_barv_size!) do <nul set /p =[%%G;!draw_barv_long!f░░
-echo [!brush_Y!;!draw_barv_long!f█ 
+for /l %%G in (4,1,!draw_barv_size!) do <nul set /p =[%%G;!draw_barv_offset!f░░
+echo [!brush_Y!;!draw_barv_offset!f█ 
 
 ::Horizontal bottom
-<nul set /p =[!draw_barv_size!;1f▓▓!draw_barh_done!▓▓
-<nul set /p =[!draw_barv_size!;!brush_X!f▀▀
+<nul set /p =[!draw_barh_offset!;1f▓▓!draw_barh_done!▓▓
+<nul set /p =[!draw_barh_offset!;!brush_X!f▀▀
 
 ::Status bar
-<nul set /p =[!draw_barv_size!;1f
+<nul set /p =[!draw_barh_offset!;1f
 echo:
 <nul set /p ="[96mMove: WASD  |  "
 if defined brushToggle (<nul set /p "=[7mBrush: B[27m  |  ") else (<nul set /p "=Brush: B  |  ")

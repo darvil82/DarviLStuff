@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip.tmp"
 
-set ver=2.4
-set /a build=19
+set ver=2.4.1
+set /a build=20
 
 ::Setting default values.
 set /a brush_X=5
@@ -46,7 +46,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/s" set tknxt=canvas_size
 		if /i "%%G"=="/l" set tknxt=file_load_input
 		if /i "%%G"=="/n" set parm_new=1
-		if /i "%%G"=="/c" if defined file_load_input set ParmDoCompress=1
+		if /i "%%G"=="/c" set parm_compress=1
 		if /i "%%G"=="/NoMode" set nomode=1
 		if /i "%%G"=="/chkup" goto chkup
 		if /i "%%G"=="/NoCompression" set noCompression=1
@@ -59,6 +59,7 @@ if defined parm_new (
 	exit /b
 )
 if defined file_load_input (
+	if defined parm_compress set LoadDoCompress=1
 	call :file_load
 	if defined invalid exit /b 1
 	call :start
@@ -202,9 +203,13 @@ if !getkey_input!==8 (
 if !getkey_input!==9 call :option_coord_select
 if !getkey_input!==10 call :option_canvas_fill
 if !getkey_input!==11 (
-	call :display_message "Exit VIRINT? All unsaved changes will be lost. [Y/N]" red
-	choice /c yn /n >nul
-	if !errorlevel!==1 set run_exit=1 & exit /b
+	if "!draw_filename_state!"=="*" (
+		call :display_message "Exit VIRINT? All unsaved changes will be lost. [Y/N]" red
+		choice /c yn /n >nul
+		if !errorlevel!==1 set run_exit=1
+		exit /b
+	)
+	set run_exit=1 & exit /b
 )
 if !getkey_input!==12 call :file_save
 if !getkey_input!==13 call :help
@@ -354,7 +359,7 @@ if !file_build! LSS !build! (
 	if !errorlevel!==2 set invalid=1 & exit /b
 )
 
-if defined ParmDoCompress (
+if defined LoadDoCompress (
 	copy "!file_load_input!" "!temp1!" >nul
 	call :file_compress
 	copy "!temp1!" "!file_load_input!" >nul
@@ -466,7 +471,7 @@ exit /b
 ::for any duplicated X or Y value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file.
 ::After finishing, it outputs the compressed file in !temp1!
 :file_compress
-if defined ParmDoCompress (
+if defined LoadDoCompress (
 	echo Applying compression. Please wait... ^(Started at !time!^)
 	for /f "usebackq" %%G in ("!temp1!") do set /a file_compress_lines1+=1
 )
@@ -483,7 +488,7 @@ for /f "usebackq tokens=1-2 delims=:" %%G in ("!temp1!") do (
 		type "!temp1!3" > "!temp1!"
 	)
 )
-if defined ParmDoCompress (
+if defined LoadDoCompress (
 	for /f "usebackq" %%G in ("!temp1!") do set /a file_compress_lines2+=1
 	set /a file_compress_result=file_compress_lines1-file_compress_lines2
 	echo Done. !file_compress_result! lines removed. [!file_compress_lines1! ^> !file_compress_lines2!^] ^(Finished at !time!^)

@@ -8,3 +8,14 @@ This is the repository that contains some scripts that I do when I'm bored or wh
 | [VIRINT](https://github.com/L89David/DarviLStuff/blob/master/virint.bat) | Basic pixel art editor. Can use colors, save/load files, etc... (Documentation in progress) | Called from instance / As a new instance | Batch |
 
 **There's a wiki explaining the instalation and usage of this scripts here: https://github.com/L89David/DarviLStuff/wiki**
+
+***
+
+## VIRINT
+![image](https://user-images.githubusercontent.com/48654552/106321142-2fa4f400-6274-11eb-8bca-b5435c8d8462.png)
+
+## PBAR
+![preview](https://user-images.githubusercontent.com/48654552/104537150-af4a8600-5619-11eb-9479-b43bd3ecb924.gif)
+
+## ECHOC
+![image](https://user-images.githubusercontent.com/48654552/106464772-6445c500-6499-11eb-86bb-9303bd273070.png)

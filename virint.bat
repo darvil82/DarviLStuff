@@ -7,10 +7,10 @@ setlocal EnableDelayedExpansion
 
 ::::::Config::::::
 set "temp1=%temp%\virint.tmp"
-set "wip1=%temp%\virint_wip.tmp"
+set "wip1=%temp%\virint_wip!random!.tmp"
 
-set ver=2.4.1
-set /a build=20
+set ver=2.4.2
+set /a build=21
 
 ::Setting default values.
 set /a brush_X=5
@@ -110,6 +110,7 @@ if not defined run_exit (
 		cls
 		mode con cols=!cols_current!
 	)
+	del /q "!wip1!"
 	exit /b 0
 )
 
@@ -334,11 +335,12 @@ if !errorlevel!==2 exit /b
 ::Loading file function. This will parse all the the data in the header, which constains the script version number, the canvas size
 ::in the X and Y axis, the brush position in the X and Y axis, the brush colors A and B, and a mark that is just 'VIRINTFile'.
 :file_load
-if not defined file_load_input echo Invalid filename. &set invalid=1 &exit /b
+if not defined file_load_input call :display_message "ERROR: Invalid filename." red newline &set invalid=1 &exit /b
 set file_load_input=!file_load_input:"=!
 
 for %%G in ("!file_load_input!") do set file_load_input=%%~fG
-if not exist "!file_load_input!" echo File '!file_load_input!' does not exist. &set invalid=1 &exit /b
+if exist "!file_load_input!\*" call :display_message "ERROR: File '!file_load_input!' is a directory." red newline &set invalid=1 &exit /b
+if not exist "!file_load_input!" call :display_message "ERROR: File '!file_load_input!' does not exist." red newline &set invalid=1 &exit /b
 
 set /p load_header=<"!file_load_input!"
 echo !load_header!>"!temp1!"
@@ -352,7 +354,7 @@ for /f "usebackq tokens=1-8 delims=:" %%G in ("!temp1!") do (
 	set brush_color2=%%M
 	set header_mark=%%N
 )
-if not "!header_mark!"=="VIRINTFile" echo Invalid file structure. &set invalid=1 &exit /b
+if not "!header_mark!"=="VIRINTFile" call :display_message "ERROR: Invalid file structure." red newline &set invalid=1 &exit /b
 if !file_build! LSS !build! (
 	echo This file has been edited in an older version of VIRINT. Proceed? [Y/N]
 	choice /c yn /n >nul
@@ -382,7 +384,7 @@ exit /b
 ::If it finds a line containing XX:XX as the coordinates, it fills up the entire screen with the color and brush type.
 :file_reload
 call :checksize
-echo [HLoading, please wait...
+call :display_message "[HLoading, please wait..." yellow newline
 findstr /r /c:"^^XX:XX:.*$" "!wip1!" > "!temp1!"
 if !errorlevel!==0 (
 	set file_load_full=
@@ -491,7 +493,7 @@ for /f "usebackq tokens=1-2 delims=:" %%G in ("!temp1!") do (
 if defined LoadDoCompress (
 	for /f "usebackq" %%G in ("!temp1!") do set /a file_compress_lines2+=1
 	set /a file_compress_result=file_compress_lines1-file_compress_lines2
-	echo Done. !file_compress_result! lines removed. [!file_compress_lines1! ^> !file_compress_lines2!^] ^(Finished at !time!^)
+	call :display_message "Done. !file_compress_result! lines removed. [!file_compress_lines1! ^> !file_compress_lines2!^] ^(Finished at !time!^)" green newline
 	rem Here we set invalid to 1 because we don't want to load the file on screen.
 	set invalid=1
 )
@@ -503,10 +505,10 @@ exit /b
 
 ::Check if the canvas size is valid, and calculate the number of columns and lines for MODE.
 :checksize
-if !canvas_X! LSS 20 echo Invalid canvas size. &set invalid=1 & exit /b
-if !canvas_X! GTR 128 echo Invalid canvas size. &set invalid=1 & exit /b
-if !canvas_Y! LSS 20 echo Invalid canvas size. &set invalid=1 & exit /b
-if !canvas_Y! GTR 128 echo Invalid canvas size. &set invalid=1 & exit /b
+if !canvas_X! LSS 20 call :display_message "ERROR: Exceeded minimum canvas horizontal size." red newline &set invalid=1 & exit /b
+if !canvas_X! GTR 128 call :display_message "ERROR: Exceeded maximun canvas horizontal size." red newline &set invalid=1 & exit /b
+if !canvas_Y! LSS 20 call :display_message "ERROR: Exceeded minimum canvas vertical size." red newline &set invalid=1 & exit /b
+if !canvas_Y! GTR 128 call :display_message "ERROR: Exceeded maximun canvas vertical size." red newline &set invalid=1 & exit /b
 
 set /a window_cols="(canvas_X+4)*2"
 set /a window_lines=canvas_Y+12
@@ -519,7 +521,7 @@ exit /b
 
 
 
-::Display a message under the canvas. [red green yellow white] [wait]
+::Display a message under the canvas. [red green yellow white] [wait/newline]
 :display_message
 set display_message_msg=%1
 set display_message_msg=!display_message_msg:"=!
@@ -527,7 +529,7 @@ if "%2"=="red" set display_message_color=[91m
 if "%2"=="green" set display_message_color=[92m
 if "%2"=="yellow" set display_message_color=[33m
 if "%2"=="white" set display_message_color=[97m
-<nul set /p =[!draw_options_offset!;1f!display_message_color![7m!display_message_msg![0m [J
+if "%3"=="newline" (echo !display_message_color!!display_message_msg![0m) else (<nul set /p =[!draw_options_offset!;1f!display_message_color![7m!display_message_msg![0m [J)
 if "%3"=="wait" timeout /t 3 >nul
 exit /b
 

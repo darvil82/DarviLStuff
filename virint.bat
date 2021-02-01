@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 
-set ver=2.4.2
-set /a build=21
+set ver=2.4.3
+set /a build=22
 
 ::Setting default values.
 set /a brush_X=5
@@ -313,7 +313,7 @@ exit /b
 call :display_message "Fill canvas with current brush options? [Y/N]" red
 choice /c yn /n >nul
 if !errorlevel!==1 (
-	type nul > "!wip1!"
+	echo VIRINTFile > "!wip1!"
 	set option_canvas_fill_brush=
 	if not defined brushErase (
 		for /l %%G in (1,1,!canvas_X!) do (set option_canvas_fill_brush=!brush_type!!option_canvas_fill_brush!)
@@ -421,7 +421,7 @@ if defined canvas_size (
 )
 call :checksize
 set draw_filename=Untitled
-type nul > "!wip1!"
+echo VIRINTFile > "!wip1!"
 exit /b
 
 

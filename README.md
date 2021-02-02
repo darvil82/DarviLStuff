@@ -12,7 +12,7 @@ This is the repository that contains some scripts that I do when I'm bored or wh
 ***
 
 ## VIRINT
-![image](https://user-images.githubusercontent.com/48654552/106321142-2fa4f400-6274-11eb-8bca-b5435c8d8462.png)
+![image](https://user-images.githubusercontent.com/48654552/106542959-19619700-6505-11eb-9e8e-f8405dc4445f.png)
 
 ## PBAR
 ![preview](https://user-images.githubusercontent.com/48654552/104537150-af4a8600-5619-11eb-9479-b43bd3ecb924.gif)

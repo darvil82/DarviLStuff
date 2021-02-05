@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 
-set ver=2.4.3
-set /a build=22
+set ver=2.4.4
+set /a build=23
 
 ::Setting default values.
 set /a brush_X=5
@@ -25,8 +25,7 @@ set /a canvas_Y=24
 set draw_filename_state=
 
 ::Get the current number of columns on screen.
-mode > "!temp1!"
-for /f "usebackq skip=4 tokens=2 delims=: " %%G in ("!temp1!") do (
+for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
 	set /a cols_current=%%G
 	goto get-cols-end
 )
@@ -264,8 +263,7 @@ if !errorlevel!==16 (
 	call :display_message "Select a color value [255-255-255]:" white
 	set /p option_color_select_input=
 	if not defined option_color_select_input set brush_color=[97m& exit /b
-	echo !option_color_select_input! > "!temp1!"
-	for /f "usebackq tokens=1-3 delims=-" %%G in ("!temp1!") do (
+	for /f "tokens=1-3 delims=-" %%G in ("!option_color_select_input!") do (
 		set /a option_color_select_R=%%G 2> nul
 		set /a option_color_select_G=%%H 2> nul
 		set /a option_color_select_B=%%I 2> nul
@@ -284,8 +282,7 @@ exit /b
 call :display_message "Select the coordinate [1-1]:" white
 set /p option_coord_input=
 if defined option_coord_input (
-	echo !option_coord_input! > "!temp1!"
-	for /f "usebackq tokens=1-2 delims=-" %%G in ("!temp1!") do (
+	for /f "tokens=1-2 delims=-" %%G in ("!option_coord_input!") do (
 		set /a option_coord_X=%%G 2>nul
 		set /a option_coord_Y=%%H 2>nul
 	)
@@ -343,8 +340,7 @@ if exist "!file_load_input!\*" call :display_message "ERROR: File '!file_load_in
 if not exist "!file_load_input!" call :display_message "ERROR: File '!file_load_input!' does not exist." red newline &set invalid=1 &exit /b
 
 set /p load_header=<"!file_load_input!"
-echo !load_header!>"!temp1!"
-for /f "usebackq tokens=1-8 delims=:" %%G in ("!temp1!") do (
+for /f "tokens=1-8 delims=:" %%G in ("!load_header!") do (
 	set /a file_build=%%G 2> nul
 	set /a canvas_X=%%H 2> nul
 	set /a canvas_Y=%%I 2> nul
@@ -413,8 +409,7 @@ exit /b
 ::Changes the size of the screen to match the selected canvas size. It also changes the filename to 'Untitled', and clears up the wip file.
 :file_create
 if defined canvas_size (
-	echo !canvas_size! > "!temp1!"
-	for /f "usebackq tokens=1-2 delims=x" %%G in ("!temp1!") do (
+	for /f "tokens=1-2 delims=x" %%G in ("!canvas_size!") do (
 		set /a canvas_X=%%G 2>nul
 		set /a canvas_Y=%%H 2>nul
 	)
@@ -479,8 +474,7 @@ if defined LoadDoCompress (
 )
 for /f "usebackq tokens=1-2 delims=:" %%G in ("!temp1!") do (
 	set /a file_compress_counter=0
-	findstr /r /c:"^^%%G:%%H:.*$" "!temp1!" > "!temp1!2"
-	for /f "usebackq" %%G in ("!temp1!2") do (
+	for /f "usebackq" %%G in (`findstr /r /c:"^^%%G:%%H:.*$" "!temp1!"`) do (
 		set /a file_compress_counter+=1
 		set file_save_lastLine=%%G
 	)
@@ -594,8 +588,7 @@ exit /b
 :chkup
 ::Check if the user is using windows 1909 at least
 <nul set /p =Checking Windows build... 
-ver > "!temp1!"
-for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
+for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
 	set /a ver_windows=%%G
 	set /a build_windows=%%H
 )
@@ -611,8 +604,7 @@ if !ver_windows!==10 (
 ping github.com /n 1 > nul
 if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
 bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "!temp1!" > nul
-find "virint" "!temp1!" > "!temp1!2"
-for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
+for /f "skip=2 tokens=3* usebackq" %%G in (`find "virint" "!temp1!"`) do set /a build_gh=%%G
 if !build_gh! GTR !build! (
 	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 	echo:

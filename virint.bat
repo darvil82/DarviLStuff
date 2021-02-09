@@ -10,7 +10,7 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 
 set ver=2.5
-set /a build=24
+set /a build=25
 
 ::Setting default values.
 set /a brush_X=5

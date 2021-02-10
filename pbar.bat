@@ -1,3 +1,4 @@
+
 ::Script to display progress bars easily. Written by DarviL (David Losantos)
 
 @echo off

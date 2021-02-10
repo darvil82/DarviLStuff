@@ -9,8 +9,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 
-set ver=2.5.1
-set /a build=26
+set ver=2.5.1-1
+set /a build=27
 
 ::Setting default values.
 set /a brush_X=5
@@ -582,7 +582,7 @@ exit /b
 	echo:
 	echo   [96m/N :[0m Create a new canvas.
 	echo   [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
-   echo        20 and 128 separated by '-'.
+   echo        20 and 128 separated by 'x'.
 	echo   [96m/L :[0m Load the specified file.
 	echo:
 	echo The script shows a quick menu if it is launched normally, so using the parameters above is not necessary.

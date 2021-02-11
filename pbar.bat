@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.4-1
-set /a build=26
+set ver=1.4-2
+set /a build=27
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup

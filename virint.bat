@@ -8,15 +8,15 @@ setlocal EnableDelayedExpansion
 ::::::Config::::::
 set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
+set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.5.1-1
-set /a build=27
+set ver=2.6
+set /a build=28
 
 ::Setting default values.
 set /a brush_X=5
 set /a brush_Y=5
 set "space=​"
-
 set brush_color=[97m
 set brush_color2=[97m
 set brush_type=██&set brushErase_oldType=██
@@ -33,9 +33,17 @@ for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
 :get-cols-end
 
 
+
+
 ::Check for parameters.
 if "%1"=="/?" call :help noLoad & exit /b
 if exist %1 set "file_load_input=%1"
+
+if exist "!cfg1!" (
+	for /f "usebackq tokens=1-2 delims==" %%G in (`findstr /v /r /c:"^^#" "!cfg1!"`) do (
+		if "%%H"=="0" (set %%G=) else (set /a %%G=%%H 2>nul)
+	)
+)
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (
@@ -50,6 +58,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/NoMode" set nomode=1
 		if /i "%%G"=="/chkup" goto chkup
 		if /i "%%G"=="/NoCompression" set noCompression=1
+		if /i "%%G"=="/NewCFG" call :cfg_create & exit /b
 	)
 )
 if defined parm_new (
@@ -69,7 +78,6 @@ if defined file_load_input (
 
 
 
-
 ::Start menu.
 for /l %%G in (1,1,!cols_center!) do set menu_center=!space!!menu_center!
 echo [96mVIRINT !ver! - Start menu[0m
@@ -84,7 +92,7 @@ echo !menu_center!║   [91m4)[0m Exit.               ║
 echo !menu_center!╚══════════════════════════╝
 choice /c 1234 /n >nul
 set start_input=!errorlevel!
-if !start_input!==1 echo: & set /p canvas_size="!menu_center!Canvas size? [32x24]: " & call :file_create
+if !start_input!==1 echo: & set /p canvas_size="!menu_center!Canvas size? [!canvas_X!x!canvas_Y!]: " & call :file_create
 if !start_input!==2 echo: & set /p file_load_input="!menu_center!Filename?: " & call :file_load
 if !start_input!==3 <nul set /p =[10A[J& call :help noLoad & exit /b 0 & rem Move the cursor up 10 lines, which is the size of the main menu.
 if !start_input!==4 <nul set /p =[10A[J& exit /b 0
@@ -106,12 +114,15 @@ if defined invalid exit /b 1
 
 ::Main loop routine.
 :MAIN
+    call :window_cursor hide
+
 	call :draw
 	call :collide
 	call :getkey
 	if not defined run_exit (
 		goto MAIN
 	) else (
+		call :window_cursor show
 		if not defined NoMode (
 			cls
 			mode con cols=!cols_current!
@@ -269,7 +280,9 @@ exit /b
 	if !errorlevel!==16 (
 		set option_color_select_input=
 		call :display_message "Select a color value [255-255-255]:" white
+		call :window_cursor show
 		set /p option_color_select_input=
+		call :window_cursor hide
 		if not defined option_color_select_input set brush_color=[97m& exit /b
 		for /f "tokens=1-3 delims=-" %%G in ("!option_color_select_input!") do (
 			set /a option_color_select_R=%%G 2> nul
@@ -314,7 +327,9 @@ exit /b
 ::Select the coordinates of the cursor to move. Check if the user is trying to get out of bounds.
 :option_coord_select
 	call :display_message "Select the coordinate [1-1]:" white
+	call :window_cursor show
 	set /p option_coord_input=
+	call :window_cursor hide
 	if defined option_coord_input (
 		for /f "tokens=1-2 delims=-" %%G in ("!option_coord_input!") do (
 			set /a option_coord_X=%%G 2>nul
@@ -463,7 +478,9 @@ exit /b
 :file_save
 	set file_save_input=
 	call :display_message "Select a filename [!draw_filename!]:" white
+	call :window_cursor show
 	set /p file_save_input=
+	call :window_cursor hide
 	if not defined file_save_input set file_save_input="!draw_filename!"
 	set file_save_input=!file_save_input:"=!
 	if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red wait & exit /b 1
@@ -570,7 +587,7 @@ exit /b
 :help
 	if not "%1"=="noLoad" (
 		cls
-		if not defined nomode mode con cols=120 lines=40
+		if not defined nomode mode con cols=120 lines=45
 	)
 	echo [96mVIRINT !ver! - Help[0m[K
 	echo Script that allows the user to paint on a canvas on the Windows console with different colors.
@@ -592,7 +609,9 @@ exit /b
 	echo                    but files will be much bigger, and they will take more time to load.
 	echo   [96m/NoMode :[0m Stops resizing the window automatically.
 	echo   [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes
-	echo            and the newest versions of VIRINT.
+	echo            and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
+   echo            to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
+   echo            is the folder that contains the currently running script, overriding the old version.
 	echo:
 	echo [94mTools provided for working on the canvas:
 	echo   - Brush (B) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
@@ -611,6 +630,8 @@ exit /b
 	echo:
 	echo Pressing 'R' will reload the UI (Useful if the canvas ended up getting messy). You can open this help page
 	echo from the canvas pressing 'H'. Dragging a file onto the script will make VIRINT attempt to load it.
+	echo VIRINT will attempt to load a configuration file called 'vrnt.cfg', located where the script is.
+	echo If you would like to create the default one, use '/NewCFG'.
 
 	if not "%1"=="noLoad" (
 		pause>nul
@@ -632,22 +653,66 @@ exit /b
 	)
 	if !ver_windows!==10 (
 		if !build_windows! GEQ 17763 (
-			echo Using Windows 10 !build_windows!, with ANSI escape codes support.
-		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
-	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+			call :display_message "Using Windows 10 !build_windows!, with ANSI escape codes support." green newline
+		) else call :display_message "Windows 10 1909 or higher is required for displaying ANSI escape codes." red newline
+	) else call :display_message "Windows 10 1909 or higher is required for displaying ANSI escape codes." red newline
 
 
 	::Check for updates.
 	<nul set /p =Checking for new versions of VIRINT... 
 	ping github.com /n 1 > nul
-	if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
-	bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "!temp1!" > nul
-	for /f "skip=2 tokens=3* usebackq" %%G in (`find "virint" "!temp1!"`) do set /a build_gh=%%G
-	if !build_gh! GTR !build! (
-		echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
+	if %errorlevel% == 1 call :display_message "Unable to connect to GitHub." red newline & exit /b 1
+	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
+	find "virint" "!temp1!" > "!temp1!2"
+	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
+	if !build_gh! GTR 1 (
+		call :display_message "Found a new version. (Using build: !build!. Latest build: !build_gh!)" yellow newline
 		echo:
-		choice /c YN /m "Do you want to open the repository where VIRINT is located?"
-		if !errorlevel!==1 start https://github.com/L89David/DarviLStuff/blob/master/virint.bat
-		if !errorlevel!==2 exit /b
-	) else echo Using latest build.
+		set /p "chkup_in=Select a destination folder to download VIRINT in. ['%~dp0'] "
+		if not defined chkup_in set chkup_in=%~dp0
+		set chkup_in=!chkup_in:"=!
+		set chkup_in=!chkup_in:/=\!
+		
+		<nul set /p =Downloading... 
+		if not exist "!chkup_in!\" (
+			call :display_message "The folder '!chkup_in!' doesn't exist. Download aborted." red newline
+			exit /b 1
+		) else (
+			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/virint.bat  > "!chkup_in!\virint.bat"
+			if not !errorlevel! == 0 call :display_message red "An error occurred while trying to download VIRINT." & exit /b 1
+			call :display_message "Downloaded VIRINT succesfully in '!chkup_in!'." green newline
+			exit /b 0
+		)
+	) else call :display_message "Using latest version." green newline
 exit /b 0
+
+
+
+
+:cfg_create
+	(
+		echo #VIRINT config file. Use '#' to comment out the values that you don't want to modify.
+		echo:
+		echo #Select the default size of the canvas, horizontally and vertically. ^(20-128^)
+		echo 	Canvas_X=32
+		echo 	Canvas_Y=24
+		echo:
+		echo:
+		echo #Enable/Disable the file compression algorithm. Disabling it will make file saving much faster,
+		echo #but files will be much bigger, and they will take more time to load. ^(0/1^)
+		echo 	NoCompression=0
+		echo:
+		echo:
+		echo #Enable/Disable the automatic window resizing. ^(0/1^)
+		echo 	NoMode=0
+	) > "!cfg1!"
+	 call :display_message "Created configuration file succesfully at '!cfg1!'." green newline
+exit /b
+
+
+
+
+:window_cursor
+if "%1"=="show" <nul set /p=[?25h
+if "%1"=="hide" <nul set /p=[?25l
+exit /b

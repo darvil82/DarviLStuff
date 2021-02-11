@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.3.0-2
-set /a build=24
+set ver=1.4
+set /a build=25
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -150,6 +150,7 @@ if defined overwrite set "bar_info=!bar_info![0K"
 
 ::Draw the progress bar.
 ::The style 1 will draw the bar horizontally.
+<nul set /p =[?25l
 if !style!==1 (
 	if defined overwrite echo [!bar_draw_overwrite!A
 	if defined bar_draw_corner1 < nul set /p "=!draw_bar_shift!!bar_draw_corner1!"
@@ -165,8 +166,6 @@ if !style!==1 (
 	if defined bar_draw_corner3 < nul set /p "=!draw_bar_shift!!bar_draw_corner3!"
 	if defined bar_draw_horiz for /l %%G in (-1,1,!size!) do < nul set /p "=!bar_draw_horiz!"
 	if defined bar_draw_corner4 echo !bar_draw_corner4!
-	
-	exit /b 0
 
 	rem The style 2 will draw the bar vertically.
 ) else if !style!==2 (
@@ -180,43 +179,54 @@ if !style!==1 (
 	echo !draw_bar_shift!!bar_draw_corner3!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner4!!space!
 	if defined bar_info echo !draw_bar_shift!!bar_info!
 	
-	exit /b 0
-	
 ) else echo Style '!style!' doesn't exist. & exit /b 1
-
+<nul set /p =[?25h
+exit /b 0
 
 
 
 
 :chkup
-::Check if the user is using windows 1909 at least
-<nul set /p =Checking Windows build... 
-ver > "!temp1!"
-for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
-	set /a ver_windows=%%G
-	set /a build_windows=%%H
-)
-if !ver_windows!==10 (
-	if !build_windows! GEQ 17763 (
-		echo Using Windows 10 !build_windows!, with ANSI escape codes support.
+	::Check if the user is using windows 1909 at least
+	<nul set /p =Checking Windows build... 
+	ver > "!temp1!"
+	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
+		set /a ver_windows=%%G
+		set /a build_windows=%%H
+	)
+	if !ver_windows!==10 (
+		if !build_windows! GEQ 17763 (
+			echo Using Windows 10 !build_windows!, with ANSI escape codes support.
+		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
 	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
-) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+	
+	
+	::Check for updates of PBAR.
+	<nul set /p =Checking for new versions of PBAR... 
+	ping github.com /n 1 > nul
+	if !errorlevel! == 1 echo Unable to connect to GitHub. & exit /b 1
+	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
+	find "pbar" "!temp1!" > "!temp1!2"
+	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
+	if !build_gh! GTR 1 (
+		echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
+		echo:
+		set /p "chkup_in=Select a destination folder to download PBAR in. ['%~dp0'] "
+		if not defined chkup_in set chkup_in=%~dp0
+		set chkup_in=!chkup_in:"=!
+		set chkup_in=!chkup_in:/=\!
 
-
-::Check for updates of PBAR.
-<nul set /p =Checking for new versions of PBAR... 
-ping github.com /n 1 > nul
-if %errorlevel% == 1 echo Unable to connect to GitHub. & exit /b 1
-bitsadmin /transfer /download "https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions" "!temp1!" > nul
-find "pbar" "!temp1!" > "!temp1!2"
-for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
-if !build_gh! GTR !build! (
-	echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
-	echo:
-	choice /c YN /m "Do you want to open the repository where PBAR is located?"
-	if !errorlevel!==1 start https://github.com/L89David/DarviLStuff/blob/master/pbar.bat
-	if !errorlevel!==2 exit /b
-) else echo Using latest build.
+		<nul set /p =Downloading... 
+		if not exist "!chkup_in!\" (
+			echo The folder '!chkup_in!' doesn't exist. Download aborted.
+			exit /b 1
+		) else (
+			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/pbar.bat > "!chkup_in!\pbar.bat"
+			if not !errorlevel! == 0 echo An error occurred while trying to download PBAR. & exit /b 1
+			echo Downloaded PBAR succesfully in '!chkup_in!'.
+			exit /b 0
+		)
+	) else echo Using latest build.
 exit /b 0
 
 
@@ -224,34 +234,36 @@ exit /b 0
 
 
 :help
-echo Script that allows the user to display progress bars easily.
-echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
-echo Repository available at: "https://github.com/L89David/DarviLStuff"
-echo:
-echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/S number] [/N] [/O] [/P] [/SAVE]
-echo:
-echo   /R : Select a range of two values to display in the progress bar.
-echo   /T : Select a string to be displayed at the end of the progress bar.
-echo   /Y : Select the draw mode of the progress bar. The first number (n1) indicates the style of the bar,
-echo        (horizontal or vertical). The second number (n2) sets the set of characters to use for it.
-echo        The last number (n3) specifies the size of the progress bar. Default values are '1-1-20'.
-echo   /S : Shift the progress bar the number of characters specified. Using negative numbers will
-echo        shift it to the left. Default value is '1'.
-echo   /N : Do not display the percentage at the end of the progress bar.
-echo   /O : Overwrite content when displaying the bar, use this in scripts.
-echo   /P : Display the range specified with '/R' at the end of the progress bar.
-echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
-echo   /LOAD : Load all the parameters previously stored with '/SAVE'. If being used, this parameter must
-echo           be the first one in use. If another parameter of the ones above is specified, it will be added
-echo           to the current bar, and if it is already defined by the save, it will be overwritten.
-echo:
-echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-10'
-echo                      Display a horizontal progress bar with a range of 4-13, with the custom text
-echo                      'Loading...', with a size of 10 segments, and with the third theme.
-echo:
-echo   - 'PBAR /CHKUP' will check if you are using the minimum necessary Windows build for ANSI escape codes
-echo     and the newest versions of PBAR.
-echo   - Use 'CMD /C' before this script if used in a batch file.
-echo   - More help available at 'https://github.com/L89David/DarviLStuff/wiki/PBAR'
+	echo Script that allows the user to display progress bars easily.
+	echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
+	echo Repository available at: "https://github.com/L89David/DarviLStuff"
+	echo:
+	echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/S number] [/N] [/O] [/P] [/SAVE]
+	echo:
+	echo   /R : Select a range of two values to display in the progress bar.
+	echo   /T : Select a string to be displayed at the end of the progress bar.
+	echo   /Y : Select the draw mode of the progress bar. The first number (n1) indicates the style of the bar,
+	echo        (horizontal or vertical). The second number (n2) sets the set of characters to use for it.
+	echo        The last number (n3) specifies the size of the progress bar. Default values are '1-1-20'.
+	echo   /S : Shift the progress bar the number of characters specified. Using negative numbers will
+	echo        shift it to the left. Default value is '1'.
+	echo   /N : Do not display the percentage at the end of the progress bar.
+	echo   /O : Overwrite content when displaying the bar, use this in scripts.
+	echo   /P : Display the range specified with '/R' at the end of the progress bar.
+	echo   /SAVE : Save all the parameters used in a temporary file. The progress bar won't be displayed.
+	echo   /LOAD : Load all the parameters previously stored with '/SAVE'. If being used, this parameter must
+	echo           be the first one in use. If another parameter of the ones above is specified, it will be added
+	echo           to the current bar, and if it is already defined by the save, it will be overwritten.
+	echo:
+	echo   Examples      : 'PBAR /r 4-13 /t "Loading..." /y 1-3-10'
+	echo                      Display a horizontal progress bar with a range of 4-13, with the custom text
+	echo                      'Loading...', with a size of 10 segments, and with the third theme.
+	echo:
+	echo   - 'PBAR /CHKUP' will check if you are using the minimum necessary Windows build for ANSI escape codes
+	echo     and the newest versions of PBAR. If it finds a newer version of it, it will ask for a folder to download
+	echo     PBAR in. Pressing ENTER without entering a path will select the default option, which is the folder that
+	echo     contains the currently running script, overriding the old version.
+	echo   - Use 'CMD /C' before this script if used in a batch file.
+	echo   - More help available at 'https://github.com/L89David/DarviLStuff/wiki/PBAR'
 
 exit /b 0

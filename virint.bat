@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.6
-set /a build=28
+set ver=2.6-1
+set /a build=29
 
 ::Setting default values.
 set /a brush_X=5
@@ -665,7 +665,7 @@ exit /b
 	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
 	find "virint" "!temp1!" > "!temp1!2"
 	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
-	if !build_gh! GTR 1 (
+	if !build_gh! GTR !build! (
 		call :display_message "Found a new version. (Using build: !build!. Latest build: !build_gh!)" yellow newline
 		echo:
 		set /p "chkup_in=Select a destination folder to download VIRINT in. ['%~dp0'] "

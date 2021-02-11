@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.4
-set /a build=25
+set ver=1.4-1
+set /a build=26
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -208,7 +208,7 @@ exit /b 0
 	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
 	find "pbar" "!temp1!" > "!temp1!2"
 	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
-	if !build_gh! GTR 1 (
+	if !build_gh! GTR !build! (
 		echo Found a new version. ^(Using build: !build!. Latest build: !build_gh!^)
 		echo:
 		set /p "chkup_in=Select a destination folder to download PBAR in. ['%~dp0'] "

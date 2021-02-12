@@ -9,7 +9,7 @@ set "temp1=%temp%\echoc.tmp"
 
 
 set ver=2.12.2
-set /a build=60
+set /a build=61
 
 if /i "%1"=="/?" goto help
 

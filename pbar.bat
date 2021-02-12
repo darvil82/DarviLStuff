@@ -11,7 +11,7 @@ set "save1=%temp%\pbar_save.tmp"
 
 
 set ver=1.4.2
-set /a build=28
+set /a build=29
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" call :chkup pbar & exit /b

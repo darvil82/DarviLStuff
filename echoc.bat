@@ -8,7 +8,7 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\echoc.tmp"
 
 
-set ver=2.12.1
+set ver=2.12.2
 set /a build=60
 
 if /i "%1"=="/?" goto help
@@ -217,16 +217,15 @@ if /i "!parm1!"=="/Z" (
 if /i "!parm1!"=="/CHKUP" (
 	::Check if the user is using windows 1909 at least
 	<nul set /p =Checking Windows build... 
-	ver > "!temp1!"
-	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in ("!temp1!") do (
+	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
 		set /a ver_windows=%%G
 		set /a build_windows=%%H
 	)
 	if !ver_windows!==10 (
 		if !build_windows! GEQ 17763 (
-			call :display green "Using Windows 10 !build_windows!, with color support."
-		) else echo Windows 10 1909 or higher is required for using this script.
-	) else echo Windows 10 1909 or higher is required for using this script.
+			echo [92mUsing Windows 10 !build_windows!, with ANSI escape codes support.[0m
+		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
 	
 	
 	::Check if the user has PowerShell installed.
@@ -237,32 +236,31 @@ if /i "!parm1!"=="/CHKUP" (
 	) else call :display green "PowerShell is installed."
 	
 
-	::Check for updates of ECHOC.
-	<nul set /p =Checking for new versions of ECHOC... 
+	::Check for updates.
+	<nul set /p =Checking for new versions of echoc... 
 	ping github.com /n 1 > nul
-	if !errorlevel! == 1 call :display red "Unable to connect to GitHub." & exit /b 1
+	if !errorlevel! == 1 echo [91mUnable to connect to GitHub.[0m & exit /b 1
 	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
-	find "echoc" "!temp1!" > "!temp1!2"
-	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
+	for /f "usebackq skip=2 tokens=3*" %%G in (`find /I "echoc" "!temp1!"`) do set /a build_gh=%%G
 	if !build_gh! GTR !build! (
-		call :display red "Found a new version. (Using build: !build!. Latest build: !build_gh!)"
+		echo [33mFound a new version. ^(Using build: !build!. Latest build: !build_gh!^)[0m
 		echo:
-		set /p "chkup_in=Select a destination folder to download ECHOC in. ['%~dp0'] "
+		set /p "chkup_in=Select a destination folder to download echoc in. ['%~dp0'] "
 		if not defined chkup_in set chkup_in=%~dp0
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
 		
 		<nul set /p =Downloading... 
 		if not exist "!chkup_in!\" (
-			call :display red "The folder '!chkup_in!' doesn't exist. Download aborted."
+			echo [91mThe folder '!chkup_in!' doesn't exist. Download aborted.[0m
 			exit /b 1
 		) else (
 			curl -s -B --Use-ASCII https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat > "!chkup_in!\echoc.bat"
-			if not !errorlevel! == 0 call :display red "An error occurred while trying to download ECHOC." & exit /b 1
-			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."
+			if not !errorlevel! == 0 echo [91mAn error occurred while trying to download echoc.[0m & exit /b 1
+			echo [92mDownloaded echoc succesfully in '!chkup_in!'.[0m
 			exit /b 0
 		)
-	) else call :display green "Using latest build."
+	) else echo [92mUsing latest version.[0m
 	exit /b 0
 )
 

@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.6.1
-set /a build=30
+set ver=2.6.2
+set /a build=31
 
 ::Setting default values.
 set /a brush_X=5
@@ -19,7 +19,7 @@ set /a brush_Y=5
 set "space=​"
 set brush_color=[97m
 set brush_color2=[97m
-set brush_type=██&set brushErase_oldType=██
+set brush_type=██& set brushErase_oldType=██
 set /a canvas_X=32
 set /a canvas_Y=24
 set draw_filename_state=
@@ -177,6 +177,7 @@ exit /b
 
 
 
+
 ::Detect if the cursor is getting close to the boundaries, and deny it's movement.
 :collide
 	set /a canvas_limitX=(canvas_X*2)+5
@@ -190,6 +191,7 @@ exit /b
 	if !brush_Y_prev! LEQ 4 (set brush_upq=0) else (set brush_upq=1)
 	if !brush_Y_next! GEQ !canvas_limitY! (set brush_downq=0) else (set brush_downq=1)
 exit /b
+
 
 
 
@@ -299,10 +301,10 @@ exit /b
 :option_brush_select
 	call :display_message "Select a brush:" white
 	echo:&echo:
-	echo !brush_color!██ ▓▓ ▒▒ ░░ ╔═ ╗  ╚═ ╝  ══ ║  ▄▄ ▀▀[0m
-	echo ── ── ── ── ── ── ── ── ── ── ── ──
-	echo 0  1  2  3  4  5  6  7  8  9  A  B
-	choice /c 0123456789AB /n >nul
+	echo !brush_color!██ ▓▓ ▒▒ ░░ ╔═ ╗  ╚═ ╝  ══ ║  ▄▄ ▀▀ ▌▐ ▐▌[0m
+	echo ── ── ── ── ── ── ── ── ── ── ── ── ── ──
+	echo 1  2  3  4  5  6  7  8  9  A  B  C  D  E
+	choice /c 123456789ABCDE /n >nul
 	if !errorlevel!==1 set brush_type=██
 	if !errorlevel!==2 set brush_type=▓▓
 	if !errorlevel!==3 set brush_type=▒▒
@@ -315,6 +317,8 @@ exit /b
 	if !errorlevel!==10 set brush_type=║!space!
 	if !errorlevel!==11 set brush_type=▄▄
 	if !errorlevel!==12 set brush_type=▀▀
+	if !errorlevel!==13 set brush_type=▌▐
+	if !errorlevel!==14 set brush_type=▐▌
 
 	set brushErase_oldType=!brush_type!
 exit /b

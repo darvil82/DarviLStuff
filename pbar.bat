@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.4-2
-set /a build=27
+set ver=1.4.1
+set /a build=28
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" goto chkup
@@ -221,7 +221,7 @@ exit /b 0
 			echo The folder '!chkup_in!' doesn't exist. Download aborted.
 			exit /b 1
 		) else (
-			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/pbar.bat > "!chkup_in!\pbar.bat"
+			curl -s -B --Use-ASCII https://raw.githubusercontent.com/L89David/DarviLStuff/master/pbar.bat > "!chkup_in!\pbar.bat"
 			if not !errorlevel! == 0 echo An error occurred while trying to download PBAR. & exit /b 1
 			echo Downloaded PBAR succesfully in '!chkup_in!'.
 			exit /b 0

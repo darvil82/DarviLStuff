@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\echoc.tmp"
 
 
-set ver=2.12
-set /a build=59
+set ver=2.12.1
+set /a build=60
 
 if /i "%1"=="/?" goto help
 
@@ -257,7 +257,7 @@ if /i "!parm1!"=="/CHKUP" (
 			call :display red "The folder '!chkup_in!' doesn't exist. Download aborted."
 			exit /b 1
 		) else (
-			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat > "!chkup_in!\echoc.bat"
+			curl -s -B --Use-ASCII https://raw.githubusercontent.com/L89David/DarviLStuff/master/echoc.bat > "!chkup_in!\echoc.bat"
 			if not !errorlevel! == 0 call :display red "An error occurred while trying to download ECHOC." & exit /b 1
 			call :display green "Downloaded ECHOC succesfully in '!chkup_in!'."
 			exit /b 0

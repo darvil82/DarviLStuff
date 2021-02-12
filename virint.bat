@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.6-1
-set /a build=29
+set ver=2.6.1
+set /a build=30
 
 ::Setting default values.
 set /a brush_X=5
@@ -36,7 +36,6 @@ for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
 
 
 ::Check for parameters.
-if "%1"=="/?" call :help noLoad & exit /b
 if exist %1 set "file_load_input=%1"
 
 if exist "!cfg1!" (
@@ -114,7 +113,7 @@ if defined invalid exit /b 1
 
 ::Main loop routine.
 :MAIN
-    call :window_cursor hide
+	call :window_cursor hide
 
 	call :draw
 	call :collide
@@ -484,6 +483,7 @@ exit /b
 	if not defined file_save_input set file_save_input="!draw_filename!"
 	set file_save_input=!file_save_input:"=!
 	if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red wait & exit /b 1
+	if exist "!file_save_input!\*" call :display_message "ERROR: File '!file_save_input!' is a directory." red wait & exit /b 1
 	for %%G in ("!file_save_input!") do set "file_save_input=%%~fG"
 
 	if exist "!file_save_input!" (
@@ -599,7 +599,7 @@ exit /b
 	echo:
 	echo   [96m/N :[0m Create a new canvas.
 	echo   [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
-   echo        20 and 128 separated by 'x'.
+	echo        20 and 128 separated by 'x'.
 	echo   [96m/L :[0m Load the specified file.
 	echo:
 	echo The script shows a quick menu if it is launched normally, so using the parameters above is not necessary.
@@ -610,8 +610,8 @@ exit /b
 	echo   [96m/NoMode :[0m Stops resizing the window automatically.
 	echo   [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes
 	echo            and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
-   echo            to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
-   echo            is the folder that contains the currently running script, overriding the old version.
+	echo            to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
+	echo            is the folder that contains the currently running script, overriding the old version.
 	echo:
 	echo [94mTools provided for working on the canvas:
 	echo   - Brush (B) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
@@ -636,7 +636,7 @@ exit /b
 	if not "%1"=="noLoad" (
 		pause>nul
 		call :file_reload
-	)
+	) else pause>nul
 exit /b
 
 

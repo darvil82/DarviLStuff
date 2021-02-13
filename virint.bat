@@ -10,11 +10,12 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.6.2
-set /a build=31
+set ver=2.7
+set /a build=32
 
 ::Setting default values.
 set /a brush_X=5
+
 set /a brush_Y=5
 set "space=​"
 set brush_color=[97m
@@ -55,7 +56,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/n" set parm_new=1
 		if /i "%%G"=="/c" set parm_compress=1
 		if /i "%%G"=="/NoMode" set nomode=1
-		if /i "%%G"=="/chkup" goto chkup
+		if /i "%%G"=="/chkup" call :chkup virint & exit /b
 		if /i "%%G"=="/NoCompression" set noCompression=1
 		if /i "%%G"=="/NewCFG" call :cfg_create & exit /b
 	)
@@ -73,6 +74,7 @@ if defined file_load_input (
 	call :start
 	exit /b
 )
+if defined CheckUpdates call :chkup virint quiet
 
 
 
@@ -305,22 +307,23 @@ exit /b
 	echo ── ── ── ── ── ── ── ── ── ── ── ── ── ──
 	echo 1  2  3  4  5  6  7  8  9  A  B  C  D  E
 	choice /c 123456789ABCDE /n >nul
-	if !errorlevel!==1 set brush_type=██
-	if !errorlevel!==2 set brush_type=▓▓
-	if !errorlevel!==3 set brush_type=▒▒
-	if !errorlevel!==4 set brush_type=░░
-	if !errorlevel!==5 set brush_type=╔═
-	if !errorlevel!==6 set brush_type=╗!space!
-	if !errorlevel!==7 set brush_type=╚═
-	if !errorlevel!==8 set brush_type=╝!space!
-	if !errorlevel!==9 set brush_type=══
-	if !errorlevel!==10 set brush_type=║!space!
-	if !errorlevel!==11 set brush_type=▄▄
-	if !errorlevel!==12 set brush_type=▀▀
-	if !errorlevel!==13 set brush_type=▌▐
-	if !errorlevel!==14 set brush_type=▐▌
+	if !errorlevel!==1 set  option_brush_type=██
+	if !errorlevel!==2 set option_brush_type=▓▓
+	if !errorlevel!==3 set option_brush_type=▒▒
+	if !errorlevel!==4 set option_brush_type=░░
+	if !errorlevel!==5 set option_brush_type=╔═
+	if !errorlevel!==6 set option_brush_type=╗!space!
+	if !errorlevel!==7 set option_brush_type=╚═
+	if !errorlevel!==8 set option_brush_type=╝!space!
+	if !errorlevel!==9 set option_brush_type=══
+	if !errorlevel!==10 set option_brush_type=║!space!
+	if !errorlevel!==11 set option_brush_type=▄▄
+	if !errorlevel!==12 set option_brush_type=▀▀
+	if !errorlevel!==13 set option_brush_type=▌▐
+	if !errorlevel!==14 set option_brush_type=▐▌
 
-	set brushErase_oldType=!brush_type!
+    if not defined brushErase set brush_type=!option_brush_type!
+	set brushErase_oldType=!option_brush_type!
 exit /b
 
 
@@ -375,7 +378,7 @@ exit /b
 		set draw_filename_state=*
 		exit /b
 	)
-if !errorlevel!==2 exit /b
+exit /b
 
 
 
@@ -570,7 +573,6 @@ exit /b
 
 
 
-
 ::Display a message under the canvas. [red green yellow white] [wait/newline]
 :display_message
 	set display_message_msg=%1
@@ -647,47 +649,47 @@ exit /b
 
 
 
-
 :chkup
-	::Check if the user is using windows 1909 at least
-	<nul set /p =Checking Windows build... 
-	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
-		set /a ver_windows=%%G
-		set /a build_windows=%%H
+    if not "%2"=="quiet" (
+    	rem Check if the user is using windows 1909 at least
+    	<nul set /p =Checking Windows build... 
+    	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
+    		set /a ver_windows=%%G
+    		set /a build_windows=%%H
+    	)
+    	if !ver_windows!==10 (
+    		if !build_windows! GEQ 17763 (
+    			echo [92mUsing Windows 10 !build_windows!, with ANSI escape codes support.[0m
+    		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+    	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
 	)
-	if !ver_windows!==10 (
-		if !build_windows! GEQ 17763 (
-			call :display_message "Using Windows 10 !build_windows!, with ANSI escape codes support." green newline
-		) else call :display_message "Windows 10 1909 or higher is required for displaying ANSI escape codes." red newline
-	) else call :display_message "Windows 10 1909 or higher is required for displaying ANSI escape codes." red newline
 
 
 	::Check for updates.
-	<nul set /p =Checking for new versions of VIRINT... 
+	if not "%2"=="quiet" <nul set /p =Checking for new versions of %1... 
 	ping github.com /n 1 > nul
-	if %errorlevel% == 1 call :display_message "Unable to connect to GitHub." red newline & exit /b 1
+	if !errorlevel! == 1 echo [91mUnable to connect to GitHub.[0m & exit /b 1
 	curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/versions > "!temp1!"
-	find "virint" "!temp1!" > "!temp1!2"
-	for /f "skip=2 tokens=3* usebackq" %%G in ("!temp1!2") do set /a build_gh=%%G
+	for /f "usebackq skip=2 tokens=3*" %%G in (`find /I "%1" "!temp1!"`) do set /a build_gh=%%G
 	if !build_gh! GTR !build! (
-		call :display_message "Found a new version. (Using build: !build!. Latest build: !build_gh!)" yellow newline
+		echo [33mFound a new version. ^(Using build: !build!. Latest build: !build_gh!^)[0m
 		echo:
-		set /p "chkup_in=Select a destination folder to download VIRINT in. ['%~dp0'] "
+		set /p "chkup_in=Select a destination folder to download %1 in. ['%~dp0'] "
 		if not defined chkup_in set chkup_in=%~dp0
 		set chkup_in=!chkup_in:"=!
 		set chkup_in=!chkup_in:/=\!
 		
 		<nul set /p =Downloading... 
 		if not exist "!chkup_in!\" (
-			call :display_message "The folder '!chkup_in!' doesn't exist. Download aborted." red newline
+			echo [91mThe folder '!chkup_in!' doesn't exist. Download aborted.[0m
 			exit /b 1
 		) else (
-			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/virint.bat  > "!chkup_in!\virint.bat"
-			if not !errorlevel! == 0 call :display_message red "An error occurred while trying to download VIRINT." & exit /b 1
-			call :display_message "Downloaded VIRINT succesfully in '!chkup_in!'." green newline
+			curl -s -B --Use-ASCII https://raw.githubusercontent.com/L89David/DarviLStuff/master/%1.bat > "!chkup_in!\%1.bat"
+			if not !errorlevel! == 0 echo [91mAn error occurred while trying to download %1.[0m & exit /b 1
+			echo [92mDownloaded %1 succesfully in '!chkup_in!'.[0m
 			exit /b 0
 		)
-	) else call :display_message "Using latest version." green newline
+	) else if not "%2"=="quiet" echo [92mUsing latest version.[0m
 exit /b 0
 
 
@@ -709,6 +711,10 @@ exit /b 0
 		echo:
 		echo #Enable/Disable the automatic window resizing. ^(0/1^)
 		echo 	NoMode=0
+		echo:
+		echo:
+		echo #Check for updates silently automatically when running the script. ^(0/1^)
+		echo 	CheckUpdates=0
 	) > "!cfg1!"
 	 call :display_message "Created configuration file succesfully at '!cfg1!'." green newline
 exit /b

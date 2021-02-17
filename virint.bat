@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.0.1
-set /a build=34
+set ver=3.0.2
+set /a build=35
 
 ::Setting default values.
 set /a brush_X=5
@@ -759,7 +759,7 @@ exit /b
 			echo [91mThe folder '!chkup_in!' doesn't exist. Download aborted.[0m
 			exit /b 1
 		) else (
-			curl -s -B --Use-ASCII https://raw.githubusercontent.com/L89David/DarviLStuff/master/%1.bat > "!chkup_in!\%1.bat"
+			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/%1.bat > "!chkup_in!\%1.bat"
 			if not !errorlevel! == 0 echo [91mAn error occurred while trying to download %1.[0m & exit /b 1
 			echo [92mDownloaded %1 succesfully in '!chkup_in!'.[0m
 			exit /b 0

@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=2.7
-set /a build=32
+set ver=3.0
+set /a build=33
 
 ::Setting default values.
 set /a brush_X=5
@@ -25,15 +25,7 @@ set /a canvas_X=32
 set /a canvas_Y=24
 set draw_filename_state=
 
-::Get the current number of columns on screen.
-for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
-	set /a cols_current=%%G
-	set /a cols_center=%%G/2-13
-	goto get-cols-end
-)
-:get-cols-end
-
-
+call :mode_get
 
 
 ::Check for parameters.
@@ -62,15 +54,23 @@ for %%G in (!parms_array!) do (
 	)
 )
 if defined parm_new (
+	if defined nomode call :window_opt newbuffer
 	call :file_create
-	if defined invalid exit /b 1
+	if defined invalid (
+	   if defined nomode timeout /t 3 >nul & call :window_opt oldbuffer
+	   exit /b 1
+    )
 	call :start
 	exit /b
 )
 if defined file_load_input (
 	if defined parm_compress set LoadDoCompress=1
+	if defined nomode call :window_opt newbuffer
 	call :file_load
-	if defined invalid exit /b 1
+	if defined invalid (
+	   if defined nomode timeout /t 3 >nul & call :window_opt oldbuffer
+	   exit /b 1
+    )
 	call :start
 	exit /b
 )
@@ -80,7 +80,11 @@ if defined CheckUpdates call :chkup virint quiet
 
 
 ::Start menu.
-for /l %%G in (1,1,!cols_center!) do set menu_center=!space!!menu_center!
+if !cols_current! LSS 30 call :display_message "ERROR: Cannot draw menu." red newline & exit /b 1
+if defined nomode call :window_opt newbuffer
+set menu_center=[!cols_center!C
+for /l %%G in (1,1,!cols_current!) do set menu_hr=!menu_hr!─
+
 echo [96mVIRINT !ver! - Start menu[0m
 echo:
 echo !menu_center!╔══════════════════════════╗
@@ -91,13 +95,36 @@ echo !menu_center!║                          ║
 echo !menu_center!║   [94m3)[0m Help.               ║
 echo !menu_center!║   [91m4)[0m Exit.               ║
 echo !menu_center!╚══════════════════════════╝
+
 choice /c 1234 /n >nul
 set start_input=!errorlevel!
-if !start_input!==1 echo: & set /p canvas_size="!menu_center!Canvas size? [!canvas_X!x!canvas_Y!]: " & call :file_create
-if !start_input!==2 echo: & set /p file_load_input="!menu_center!Filename?: " & call :file_load
-if !start_input!==3 <nul set /p =[10A[J& call :help noLoad & exit /b 0 & rem Move the cursor up 10 lines, which is the size of the main menu.
-if !start_input!==4 <nul set /p =[10A[J& exit /b 0
-if defined invalid exit /b 1
+if !start_input!==1 (
+	echo:
+	echo !menu_hr!
+	set /p canvas_size="[94mCanvas size? [!canvas_X!x!canvas_Y!]: [0m"
+	call :file_create
+)
+if !start_input!==2 (
+	echo:
+	echo !menu_hr!
+	set /p file_load_input="[94mFilename?: [0m"
+	call :file_load
+)
+if !start_input!==3 (
+	call :window_opt cls
+	call :help noLoad
+	call :window_opt oldbuffer
+	exit /b 0
+)
+if !start_input!==4 (
+	<nul set /p =[10F[J
+	if defined nomode call :window_opt oldbuffer
+	exit /b 0
+)
+if defined invalid (
+	if defined nomode timeout /t 3 >nul & call :window_opt oldbuffer
+	exit /b 1
+)
 
 
 
@@ -112,10 +139,9 @@ if defined invalid exit /b 1
 	for /l %%G in (4,1,!draw_barv_size!) do (set draw_barv_done=!draw_barv_done![%%G;1f░░& set draw_barv2_done=!draw_barv2_done![%%G;!draw_barv_offset!f░░)
 
 
-
 ::Main loop routine.
 :MAIN
-	call :window_cursor hide
+	call :window_opt hide
 
 	call :draw
 	call :collide
@@ -123,11 +149,11 @@ if defined invalid exit /b 1
 	if not defined run_exit (
 		goto MAIN
 	) else (
-		call :window_cursor show
+		call :window_opt show
 		if not defined NoMode (
 			cls
 			mode con cols=!cols_current!
-		)
+		) else call :window_opt oldbuffer
 		del /q "!wip1!"
 		exit /b 0
 	)
@@ -140,7 +166,7 @@ if defined invalid exit /b 1
 	set /a draw_cursor_Y=brush_Y-4
 
 	::Info bar
-	<nul set /p "=[H[96mVIRINT !ver! - [!draw_filename_state!'!draw_filename!'][0m[K"
+	<nul set /p "=[H[7m[96mVIRINT !ver! - [!draw_filename_state!'!draw_filename!'][K[0m"
 	<nul set /p "=[2;1fColor A: !brush_color!!brush_type![0m   Color B: !brush_color2!!brush_type![0m   X: !draw_cursor_X!/!canvas_X! Y: !draw_cursor_Y!/!canvas_Y![K"
 
 	::Horizontal top
@@ -283,9 +309,9 @@ exit /b
 	if !errorlevel!==16 (
 		set option_color_select_input=
 		call :display_message "Select a color value [255-255-255]:" white
-		call :window_cursor show
+		call :window_opt show
 		set /p option_color_select_input=
-		call :window_cursor hide
+		call :window_opt hide
 		if not defined option_color_select_input set brush_color=[97m& exit /b
 		for /f "tokens=1-3 delims=-" %%G in ("!option_color_select_input!") do (
 			set /a option_color_select_R=%%G 2> nul
@@ -322,7 +348,7 @@ exit /b
 	if !errorlevel!==13 set option_brush_type=▌▐
 	if !errorlevel!==14 set option_brush_type=▐▌
 
-    if not defined brushErase set brush_type=!option_brush_type!
+	if not defined brushErase set brush_type=!option_brush_type!
 	set brushErase_oldType=!option_brush_type!
 exit /b
 
@@ -333,9 +359,9 @@ exit /b
 ::Select the coordinates of the cursor to move. Check if the user is trying to get out of bounds.
 :option_coord_select
 	call :display_message "Select the coordinate [1-1]:" white
-	call :window_cursor show
+	call :window_opt show
 	set /p option_coord_input=
-	call :window_cursor hide
+	call :window_opt hide
 	if defined option_coord_input (
 		for /f "tokens=1-2 delims=-" %%G in ("!option_coord_input!") do (
 			set /a option_coord_X=%%G 2>nul
@@ -374,7 +400,7 @@ exit /b
 				echo [!option_canvas_fill_Y!;5f!brush_color!!option_canvas_fill_brush![0m
 			)
 			echo XX:XX:!brush_color!:!brush_type!>> "!wip1!"
-		) else cls
+		) else call :window_opt cls
 		set draw_filename_state=*
 		exit /b
 	)
@@ -484,9 +510,9 @@ exit /b
 :file_save
 	set file_save_input=
 	call :display_message "Select a filename [!draw_filename!]:" white
-	call :window_cursor show
+	call :window_opt show
 	set /p file_save_input=
-	call :window_cursor hide
+	call :window_opt hide
 	if not defined file_save_input set file_save_input="!draw_filename!"
 	set file_save_input=!file_save_input:"=!
 	if /i "!file_save_input!"=="con" call :display_message "ERROR: Invalid filename." red wait & exit /b 1
@@ -566,9 +592,29 @@ exit /b
 	set /a window_cols="(canvas_X+4)*2"
 	set /a window_lines=canvas_Y+12
 
-	cls
-	if not defined nomode mode con cols=!window_cols! lines=!window_lines!
+	call :window_opt cls
+	call :mode_get
+	if not defined nomode (
+		mode con cols=!window_cols! lines=!window_lines!
+	) else (
+    	if !cols_current! LSS !window_cols! call :checksize_wait
+    	if !lines_current! LSS !window_lines! call :checksize_wait
+	)
 exit /b
+
+
+
+
+:checksize_wait
+	call :mode_get
+	if !cols_current! GEQ !window_cols! if !lines_current! GEQ !window_lines! exit /b 0
+	call :display_message "[HERROR: Waiting for window resize.[K" red newline
+	if !cols_current! GEQ !window_cols! (call :display_message "Columns: !cols_current! ^> !window_cols![K" green newline) else (call :display_message "Columns: !cols_current! ^< !window_cols![K" red newline)
+	if !lines_current! GEQ !window_lines! (call :display_message "Lines: !lines_current! ^> !window_lines![K" green newline) else (call :display_message "Lines: !lines_current! ^< !window_lines![K" red newline)
+	<nul set /p =[J
+	@REM timeout /t 1 /nobreak >nul
+	for /l %%G in (1,1,10) do ping localhost -n 1 >nul
+goto checksize_wait
 
 
 
@@ -591,58 +637,87 @@ exit /b
 
 ::Display help on screen. [noLoad]
 :help
-	if not "%1"=="noLoad" (
-		cls
-		if not defined nomode mode con cols=120 lines=45
+	if not defined nomode (
+		mode con cols=120 lines=50
+	) else (
+		call :mode_get
+		if !cols_current! LSS 115 call :display_message "ERROR: Not enough horizontal size for displaying the help page." red wait & exit /b
 	)
-	echo [96mVIRINT !ver! - Help[0m[K
-	echo Script that allows the user to paint on a canvas on the Windows console with different colors.
-	echo Supporting the ability to save and load files generated by this script.
-	echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
-	echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
+	<nul set /p =[3;r
+	call :window_opt cls
+	echo [7m[96mVIRINT !ver! - Help[K
+	if defined nomode (echo Press any key to display the next two lines on screen.[K[0m) else (echo [K[0m)
 	echo:
-	echo [96mVIRINT [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/CHKUP][0m
-	echo:
-	echo   [96m/N :[0m Create a new canvas.
-	echo   [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
-	echo        20 and 128 separated by 'x'.
-	echo   [96m/L :[0m Load the specified file.
-	echo:
-	echo The script shows a quick menu if it is launched normally, so using the parameters above is not necessary.
-	echo:
-	echo   [96m/C :[0m Compress the specified file with '/L'.
-	echo   [96m/NoCompression :[0m Disables the file compression algorithm. This will make file saving much faster,
-	echo                    but files will be much bigger, and they will take more time to load.
-	echo   [96m/NoMode :[0m Stops resizing the window automatically.
-	echo   [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes
-	echo            and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
-	echo            to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
-	echo            is the folder that contains the currently running script, overriding the old version.
-	echo:
-	echo [94mTools provided for working on the canvas:
-	echo   - Brush (B) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
-	echo                 color selected (Color A).
-	echo   [94m- Erase (E) :[0m Toggle the eraser. Enabling it will start erasing content on the canvas. This
-	echo                 tool only works when used with the Brush tool.
-	echo   [94m- Color (C) :[0m Select a color from the list, or select a custom RGB value. After selecting a
-	echo                 color, it will be displayed at the Info bar (Color A). If you select a new color,
-	echo                 The previously selected color will be saved in Color B.
-	echo   [94m- Toggle Color (T) :[0m Toggle between the primary and secundary selected colors (Color A and B).
-	echo   [94m- Brush Type (Z) :[0m Select a type of brush from the list. After selecting a brush, it will be
-	echo                 displayed at the Info bar (Color A and Color B).
-	echo   [94m- Coord (F) :[0m Select a coordinate to move the cursor on the canvas (x-y).
-	echo   [94m- Fill (X) :[0m Fill the current canvas with the Color A. If the Erase tool is enabled, the entire
-	echo                canvas will be cleared.
-	echo:
-	echo Pressing 'R' will reload the UI (Useful if the canvas ended up getting messy). You can open this help page
-	echo from the canvas pressing 'H'. Dragging a file onto the script will make VIRINT attempt to load it.
-	echo VIRINT will attempt to load a configuration file called 'vrnt.cfg', located where the script is.
-	echo If you would like to create the default one, use '/NewCFG'.
+	
+	(
+	   echo !space!Script that allows the user to paint on a canvas on the Windows console with different colors.
+	   echo !space!Supporting the ability to save and load files generated by this script.
+	   echo !space![90mWritten by DarviL ^(David Losantos^) in batch. Using version !ver! ^(Build !build!^)
+	   echo !space!Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
+	   echo !space!
+	   echo !space![96mVIRINT [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/CHKUP][0m
+	   echo !space!
+	   echo !space!  [96m/N :[0m Create a new canvas.
+	   echo !space!  [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
+	   echo !space!       20 and 128 separated by 'x'.
+	   echo !space!  [96m/L :[0m Load the specified file.
+	   echo !space!
+	   echo !space!The script shows a quick menu if it is launched normally, so using the parameters above is not necessary.
+	   echo !space!
+	   echo !space!  [96m/C :[0m Compress the specified file with '/L'.
+	   echo !space!  [96m/NoCompression :[0m Disables the file compression algorithm. This will make file saving much faster,
+	   echo !space!                   but files will be much bigger, and they will take more time to load.
+	   echo !space!  [96m/NoMode :[0m Stops resizing the window automatically. Enabling this option will make VIRINT use a
+       echo !space!            secundary console buffer to not clear the original one, but no automatic resizing will be done.
+	   echo !space!  [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes
+	   echo !space!           and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
+	   echo !space!           to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
+	   echo !space!           is the folder that contains the currently running script, overriding the old version.
+	   echo !space!
+	   echo !space![94mTools provided for working on the canvas:
+	   echo !space!  - Brush ^(B^) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
+	   echo !space!                color selected ^(Color A^).
+	   echo !space!  [94m- Erase ^(E^) :[0m Toggle the eraser. Enabling it will start erasing content on the canvas. This
+	   echo !space!                tool only works when used with the Brush tool.
+	   echo !space!  [94m- Color ^(C^) :[0m Select a color from the list, or select a custom RGB value. After selecting a
+	   echo !space!                color, it will be displayed at the Info bar ^(Color A^). If you select a new color,
+	   echo !space!                The previously selected color will be saved in Color B.
+	   echo !space!  [94m- Toggle Color ^(T^) :[0m Toggle between the primary and secundary selected colors ^(Color A and B^).
+	   echo !space!  [94m- Brush Type ^(Z^) :[0m Select a type of brush from the list. After selecting a brush, it will be
+	   echo !space!                displayed at the Info bar ^(Color A and Color B^).
+	   echo !space!  [94m- Coord ^(F^) :[0m Select a coordinate to move the cursor on the canvas ^(x-y^).
+	   echo !space!  [94m- Fill ^(X^) :[0m Fill the current canvas with the Color A. If the Erase tool is enabled, the entire
+	   echo !space!               canvas will be cleared.
+	   echo !space!
+	   echo !space!Pressing 'R' will reload the UI ^(Useful if the canvas ended up getting messy^). You can open this help page
+	   echo !space!from the canvas by pressing 'H'. Dragging a file onto the script will make VIRINT attempt to load it.
+	   echo !space!VIRINT will attempt to load a configuration file called 'vrnt.cfg', located where the script is.
+	   echo !space!If you would like to create the default one, use '/NewCFG'.
+	) > "!temp1!"
 
-	if not "%1"=="noLoad" (
-		pause>nul
-		call :file_reload
-	) else pause>nul
+
+	if defined nomode (
+    	set /a help_counter=6
+    	for /f "usebackq tokens=*" %%G in ("!temp1!") do (
+    		set /a help_counter+=1
+    		if not defined help_doSkip (
+    			if !help_counter! GTR !lines_current! pause >nul
+    			set help_doSkip=1
+    		) else set help_doSkip=
+    		echo %%G
+    	)
+		echo: & echo:
+    	<nul set /p =[100;0f[7m[92mPress 'Q' to exit, or 'R' to read again.[K
+    	<nul set /p =[1FFinished reading help.[K
+    	timeout /t 1 /nobreak >nul
+    	choice /c QR /n >nul
+    	if !errorlevel!==2 goto help
+	) else (
+		for /f "usebackq tokens=*" %%G in ("!temp1!") do (echo %%G)
+		pause >nul
+	)
+
+	if not "%1"=="noLoad" call :file_reload
 exit /b
 
 
@@ -650,18 +725,18 @@ exit /b
 
 
 :chkup
-    if not "%2"=="quiet" (
-    	rem Check if the user is using windows 1909 at least
-    	<nul set /p =Checking Windows build... 
-    	for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
-    		set /a ver_windows=%%G
-    		set /a build_windows=%%H
-    	)
-    	if !ver_windows!==10 (
-    		if !build_windows! GEQ 17763 (
-    			echo [92mUsing Windows 10 !build_windows!, with ANSI escape codes support.[0m
-    		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
-    	) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+	if not "%2"=="quiet" (
+		rem Check if the user is using windows 1909 at least
+		<nul set /p =Checking Windows build... 
+		for /f "usebackq skip=1 tokens=4,6 delims=[]. " %%G in (`ver`) do (
+			set /a ver_windows=%%G
+			set /a build_windows=%%H
+		)
+		if !ver_windows!==10 (
+			if !build_windows! GEQ 17763 (
+				echo [92mUsing Windows 10 !build_windows!, with ANSI escape codes support.[0m
+			) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
+		) else echo Windows 10 1909 or higher is required for displaying ANSI escape codes.
 	)
 
 
@@ -709,7 +784,8 @@ exit /b 0
 		echo 	NoCompression=0
 		echo:
 		echo:
-		echo #Enable/Disable the automatic window resizing. ^(0/1^)
+		echo #Enable/Disable the automatic window resizing. Enabling this option will make VIRINT use a
+		echo #secundary console buffer to not clear the original one, but no automatic resizing will be done. ^(0/1^)
 		echo 	NoMode=0
 		echo:
 		echo:
@@ -722,7 +798,29 @@ exit /b
 
 
 
-:window_cursor
-if "%1"=="show" <nul set /p=[?25h
-if "%1"=="hide" <nul set /p=[?25l
+:window_opt
+	if "%1"=="show" <nul set /p=[?25h
+	if "%1"=="hide" <nul set /p=[?25l
+	if "%1"=="newbuffer" <nul set /p =[?1049h
+	if "%1"=="oldbuffer" <nul set /p =[?1049l
+	if "%1"=="cls" if defined nomode (<nul set /p =[H[0m[J) else (cls)
+exit /b
+
+
+
+
+
+:mode_get
+::Get the current number of columns on screen.
+for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
+	set /a cols_current=%%G
+	set /a cols_center=%%G/2-13
+	goto mode_get-lines
+)
+:mode_get-lines
+for /f "usebackq skip=3 tokens=2 delims=: " %%G in (`mode`) do (
+	set /a lines_current=%%G
+	goto mode_get-end
+)
+:mode_get-end
 exit /b

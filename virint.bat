@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.0
-set /a build=33
+set ver=3.0.1
+set /a build=34
 
 ::Setting default values.
 set /a brush_X=5
@@ -592,7 +592,6 @@ exit /b
 	set /a window_cols="(canvas_X+4)*2"
 	set /a window_lines=canvas_Y+12
 
-	call :window_opt cls
 	call :mode_get
 	if not defined nomode (
 		mode con cols=!window_cols! lines=!window_lines!
@@ -600,6 +599,7 @@ exit /b
     	if !cols_current! LSS !window_cols! call :checksize_wait
     	if !lines_current! LSS !window_lines! call :checksize_wait
 	)
+	call :window_opt cls
 exit /b
 
 

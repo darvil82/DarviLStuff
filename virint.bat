@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.0.2
-set /a build=35
+set ver=3.1
+set /a build=36
 
 ::Setting default values.
 set /a brush_X=5
@@ -51,6 +51,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/chkup" call :chkup virint & exit /b
 		if /i "%%G"=="/NoCompression" set noCompression=1
 		if /i "%%G"=="/NewCFG" call :cfg_create & exit /b
+		if /i "%%G"=="/NoOldWarn" set NoOldWarn=1
 	)
 )
 if defined parm_new (
@@ -432,10 +433,12 @@ exit /b
 		set header_mark=%%N
 	)
 	if not "!header_mark!"=="VIRINTFile" call :display_message "ERROR: Invalid file structure." red newline &set invalid=1 &exit /b
-	if !file_build! LSS !build! (
-		echo This file has been edited in an older version of VIRINT. Proceed? [Y/N]
-		choice /c yn /n >nul
-		if !errorlevel!==2 set invalid=1 & exit /b
+	if not defined NoOldWarn (
+    	if !file_build! LSS !build! (
+    		echo This file has been edited in an older version of VIRINT. Proceed? [Y/N]
+    		choice /c yn /n >nul
+    		if !errorlevel!==2 set invalid=1 & exit /b
+    	)
 	)
 
 	if defined LoadDoCompress (
@@ -673,6 +676,7 @@ exit /b
 	   echo !space!           and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
 	   echo !space!           to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
 	   echo !space!           is the folder that contains the currently running script, overriding the old version.
+	   echo !space!  [96m/NoOldWarn :[0m Do not warn about old files being loaded.
 	   echo !space!
 	   echo !space![94mTools provided for working on the canvas:
 	   echo !space!  - Brush ^(B^) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
@@ -791,6 +795,10 @@ exit /b 0
 		echo:
 		echo #Check for updates silently automatically when running the script. ^(0/1^)
 		echo 	CheckUpdates=0
+		echo:
+		echo:
+		echo #Do not warn about old files being loaded. ^(0/1^)
+		echo 	NoOldWarn=0
 	) > "!cfg1!"
 	 call :display_message "Created configuration file succesfully at '!cfg1!'." green newline
 exit /b

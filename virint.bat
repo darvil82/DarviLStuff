@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1
-set /a build=36
+set ver=3.1-1
+set /a build=37
 
 ::Setting default values.
 set /a brush_X=5
@@ -697,6 +697,7 @@ exit /b
 	   echo !space!from the canvas by pressing 'H'. Dragging a file onto the script will make VIRINT attempt to load it.
 	   echo !space!VIRINT will attempt to load a configuration file called 'vrnt.cfg', located where the script is.
 	   echo !space!If you would like to create the default one, use '/NewCFG'.
+	   echo !space![90mMore in depth help can be found at: "[4mhttps://github.com/L89David/DarviLStuff/wiki/VIRINT[24m"[0m
 	) > "!temp1!"
 
 

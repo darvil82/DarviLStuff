@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1-2
-set /a build=38
+set ver=3.1.1
+set /a build=39
 
 ::Setting default values.
 set /a brush_X=5
@@ -80,6 +80,9 @@ if defined CheckUpdates call :chkup virint quiet
 
 
 
+
+
+
 ::Start menu.
 if !cols_current! LSS 30 call :display_message "ERROR: Cannot draw menu." red newline & exit /b 1
 if defined nomode call :window_opt newbuffer
@@ -129,8 +132,13 @@ if defined invalid (
 
 
 
+
+
+
+
 :start
 	::Set required variables for drawing the UI.
+	
 	set /a draw_barh_size=canvas_X+2
 	set /a draw_barh_offset=canvas_Y+6
 	set /a draw_barv_size=canvas_Y+5
@@ -140,8 +148,14 @@ if defined invalid (
 	for /l %%G in (4,1,!draw_barv_size!) do (set draw_barv_done=!draw_barv_done![%%G;1f░░& set draw_barv2_done=!draw_barv2_done![%%G;!draw_barv_offset!f░░)
 
 
-::Main loop routine.
+
+
+
+
+
 :MAIN
+	::Main loop routine.
+	
 	call :window_opt hide
 
 	call :draw
@@ -161,8 +175,14 @@ if defined invalid (
 
 
 
-::Draw the entire UI.
+
+
+
+
+
 :draw
+	::Draw the entire UI.
+	
 	set /a draw_cursor_X=(brush_X-2)/2
 	set /a draw_cursor_Y=brush_Y-4
 
@@ -207,8 +227,9 @@ exit /b
 
 
 
-::Detect if the cursor is getting close to the boundaries, and deny it's movement.
 :collide
+	::Detect if the cursor is getting close to the boundaries, and deny it's movement.
+	
 	set /a canvas_limitX=(canvas_X*2)+5
 	set /a canvas_limitY=canvas_Y+6
 	set /a brush_X_next=brush_X+2
@@ -225,8 +246,9 @@ exit /b
 
 
 
-::Get the key that the user presses. The script won't continue until the user presses any key.
 :getkey
+	::Get the key that the user presses. The script won't continue until the user presses any key.
+	
 	choice /c WASDBECTFXMVHRZ /n >nul
 	set getkey_input=!errorlevel!
 
@@ -282,7 +304,6 @@ exit /b
 
 
 
-::Let the user select one of the default colors, or specify a RGB value.
 :option_color_select
 	call :display_message "Select a color:" white
 	echo:&echo:
@@ -357,8 +378,9 @@ exit /b
 
 
 
-::Select the coordinates of the cursor to move. Check if the user is trying to get out of bounds.
 :option_coord_select
+	::Select the coordinates of the cursor to move. Check if the user is trying to get out of bounds.
+
 	call :display_message "Select the coordinate [1-1]:" white
 	call :window_opt show
 	set /p option_coord_input=
@@ -386,9 +408,10 @@ exit /b
 
 
 
-::Fill the canvas with the current color. If Erase is on, just do cls and clear the file. Here it types XX:XX as the X and Y coords to the
-::file because we don't need to store every single line. The file_reload function will parse it correctly to draw it on screen.
 :option_canvas_fill
+	::Fill the canvas with the current color. If Erase is on, just do cls and clear the file. Here it types XX:XX as the X and Y coords to the
+	::file because we don't need to store every single line. The file_reload function will parse it correctly to draw it on screen.
+	
 	call :display_message "Fill canvas with current brush options? [Y/N]" red
 	choice /c yn /n >nul
 	if !errorlevel!==1 (
@@ -411,9 +434,10 @@ exit /b
 
 
 
-::Loading file function. This will parse all the the data in the header, which constains the script version number, the canvas size
-::in the X and Y axis, the brush position in the X and Y axis, the brush colors A and B, and a mark that is just 'VIRINTFile'.
 :file_load
+	::Loading file function. This will parse all the the data in the header, which constains the script version number, the canvas size
+	::in the X and Y axis, the brush position in the X and Y axis, the brush colors A and B, and a mark that is just 'VIRINTFile'.
+
 	if not defined file_load_input call :display_message "ERROR: Invalid filename." red newline &set invalid=1 &exit /b
 	set file_load_input=!file_load_input:"=!
 
@@ -460,9 +484,10 @@ exit /b
 
 
 
-::Parse the picture data inside the file. It basically reads every line to get the coordinates, color, and brush type to draw on screen.
-::If it finds a line containing XX:XX as the coordinates, it fills up the entire screen with the color and brush type.
 :file_reload
+	::Parse the picture data inside the file. It basically reads every line to get the coordinates, color, and brush type to draw on screen.
+	::If it finds a line containing XX:XX as the coordinates, it fills up the entire screen with the color and brush type.
+	
 	call :checksize
 	call :display_message "[HLoading, please wait..." yellow newline
 	findstr /r /c:"^^XX:XX:.*$" "!wip1!" > "!temp1!"
@@ -490,8 +515,9 @@ exit /b
 
 
 
-::Changes the size of the screen to match the selected canvas size. It also changes the filename to 'Untitled', and clears up the wip file.
 :file_create
+	::Changes the size of the screen to match the selected canvas size. It also changes the filename to 'Untitled', and clears up the wip file.
+
 	if defined canvas_size (
 		for /f "tokens=1-2 delims=x" %%G in ("!canvas_size!") do (
 			set /a canvas_X=%%G 2>nul
@@ -508,9 +534,11 @@ exit /b
 
 
 
-::Save a file. Copies the temp file where all the data is stored to the path that the user specified. It also builds the header that
-::file_load can understand.
+
 :file_save
+	::Save a file. Copies the temp file where all the data is stored to the path that the user specified. It also builds the header that
+	::file_load can understand.
+	
 	set file_save_input=
 	call :display_message "Select a filename [!draw_filename!]:" white
 	call :window_opt show
@@ -552,10 +580,12 @@ exit /b
 
 
 
-::Compression algorithm for making virint files smaller. Takes the content of the file !tmp1! (WITHOUT HEADER), and applies a search
-::for any duplicated X or Y value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file.
-::After finishing, it outputs the compressed file in !temp1!
+
 :file_compress
+	::Compression algorithm for making virint files smaller. Takes the content of the file !tmp1! (WITHOUT HEADER), and applies a search
+	::for any duplicated X or Y value. If it finds duplicates, it will only save the last occurence. This is done for every single line in the file.
+	::After finishing, it outputs the compressed file in !temp1!
+	
 	if defined LoadDoCompress (
 		echo Applying compression. Please wait... ^(Started at !time!^)
 		for /f "usebackq" %%G in ("!temp1!") do set /a file_compress_lines1+=1
@@ -585,8 +615,10 @@ exit /b
 
 
 
-::Check if the canvas size is valid, and calculate the number of columns and lines for MODE.
+
 :checksize
+	::Check if the canvas size is valid, and calculate the number of columns and lines for MODE.
+	
 	if !canvas_X! LSS 20 call :display_message "ERROR: Exceeded minimum canvas horizontal size." red newline &set invalid=1 & exit /b
 	if !canvas_X! GTR 128 call :display_message "ERROR: Exceeded maximun canvas horizontal size." red newline &set invalid=1 & exit /b
 	if !canvas_Y! LSS 20 call :display_message "ERROR: Exceeded minimum canvas vertical size." red newline &set invalid=1 & exit /b
@@ -622,8 +654,10 @@ goto checksize_wait
 
 
 
-::Display a message under the canvas. [red green yellow white] [wait/newline]
+
 :display_message
+	::Display a message under the canvas. [red green yellow white] [wait/newline]
+	
 	set display_message_msg=%1
 	set display_message_msg=!display_message_msg:"=!
 	if "%2"=="red" set display_message_color=[91m
@@ -638,8 +672,10 @@ exit /b
 
 
 
-::Display help on screen. [noLoad]
+
 :help
+	::Display help on screen. [noLoad]
+	
 	if not defined nomode (
 		mode con cols=120 lines=50
 	) else (
@@ -658,7 +694,7 @@ exit /b
 		echo !space![90mWritten by DarviL ^(David Losantos^) in batch. Using version !ver! ^(Build !build!^)
 		echo !space!Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 		echo !space!
-		echo !space![96mVIRINT [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/CHKUP][0m
+		echo !space![96mVIRINT [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP][0m
 		echo !space!
 		echo !space!  [96m/N :[0m Create a new canvas.
 		echo !space!  [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
@@ -672,11 +708,11 @@ exit /b
 		echo !space!                   but files will be much bigger, and they will take more time to load.
 		echo !space!  [96m/NoMode :[0m Stops resizing the window automatically. Enabling this option will make VIRINT use a
 		echo !space!            secundary console buffer to not clear the original one, but no automatic resizing will be done.
+		echo !space!  [96m/NoOldWarn :[0m Do not warn about old files being loaded.
 		echo !space!  [96m/CHKUP :[0m Check if you are using the minimum necessary Windows build for ANSI escape codes
 		echo !space!           and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
 		echo !space!           to download VIRINT in. Pressing ENTER without entering a path will select the default option, which
 		echo !space!           is the folder that contains the currently running script, overriding the old version.
-		echo !space!  [96m/NoOldWarn :[0m Do not warn about old files being loaded.
 		echo !space!
 		echo !space![94mTools provided for working on the canvas:
 		echo !space!  - Brush ^(B^) :[0m Toggle the brush. Enabling it will start painting on the canvas with the current
@@ -808,6 +844,13 @@ exit /b
 
 
 :window_opt
+    ::Some quick terminal options:
+	::    show: Show cursor.
+	::    hide: Hide cursor.
+	::    newbuffer: New console buffer
+	::    oldbuffer: Return to old console buffer.
+	::    cls: Clear screen. If NoMode being used, we can't use CLS, because everything breaks.
+
 	if "%1"=="show" <nul set /p=[?25h
 	if "%1"=="hide" <nul set /p=[?25l
 	if "%1"=="newbuffer" <nul set /p =[?1049h
@@ -820,16 +863,17 @@ exit /b
 
 
 :mode_get
-::Get the current number of columns on screen.
-for /f "usebackq skip=4 tokens=2 delims=: " %%G in (`mode`) do (
-	set /a cols_current=%%G
-	set /a cols_center=%%G/2-13
-	goto mode_get-lines
-)
-:mode_get-lines
-for /f "usebackq skip=3 tokens=2 delims=: " %%G in (`mode`) do (
-	set /a lines_current=%%G
-	goto mode_get-end
-)
-:mode_get-end
+	::Get the current number of columns on screen.
+	
+	for /f "usebackq skip=3 tokens=2 delims=: " %%G in (`mode`) do (
+		if defined mode_get-looped (
+			set /a cols_current=%%G
+			set /a cols_center=%%G/2-13
+			set mode_get-looped=
+			exit /b
+		) else (
+			set /a lines_current=%%G
+			set mode_get-looped=1
+		)
+	)
 exit /b

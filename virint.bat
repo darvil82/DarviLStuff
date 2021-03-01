@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1.1
-set /a build=39
+set ver=3.1.2
+set /a build=40
 
 ::Setting default values.
 set /a brush_X=5
@@ -489,7 +489,7 @@ exit /b
 	::If it finds a line containing XX:XX as the coordinates, it fills up the entire screen with the color and brush type.
 	
 	call :checksize
-	call :display_message "[HLoading, please wait..." yellow newline
+	<nul set /p "=[H[7m[96mVIRINT !ver! - Loading, please wait...[K[0m"
 	findstr /r /c:"^^XX:XX:.*$" "!wip1!" > "!temp1!"
 	if !errorlevel!==0 (
 		set file_load_full=
@@ -628,13 +628,13 @@ exit /b
 	set /a window_lines=canvas_Y+12
 
 	call :mode_get
+	call :window_opt cls
 	if not defined nomode (
 		mode con cols=!window_cols! lines=!window_lines!
 	) else (
 		if !cols_current! LSS !window_cols! call :checksize_wait
 		if !lines_current! LSS !window_lines! call :checksize_wait
 	)
-	call :window_opt cls
 exit /b
 
 
@@ -647,8 +647,8 @@ exit /b
 	if !cols_current! GEQ !window_cols! (call :display_message "Columns: !cols_current! ^> !window_cols![K" green newline) else (call :display_message "Columns: !cols_current! ^< !window_cols![K" red newline)
 	if !lines_current! GEQ !window_lines! (call :display_message "Lines: !lines_current! ^> !window_lines![K" green newline) else (call :display_message "Lines: !lines_current! ^< !window_lines![K" red newline)
 	<nul set /p =[J
-	@REM timeout /t 1 /nobreak >nul
-	for /l %%G in (1,1,10) do ping localhost -n 1 >nul
+	
+	ping localhost -n 1 >nul
 goto checksize_wait
 
 
@@ -757,7 +757,7 @@ exit /b
 		for /f "usebackq tokens=*" %%G in ("!temp1!") do (echo %%G)
 		pause >nul
 	)
-
+	<nul set /p =[;r
 	if not "%1"=="noLoad" call :file_reload
 exit /b
 
@@ -855,7 +855,7 @@ exit /b
 	if "%1"=="hide" <nul set /p=[?25l
 	if "%1"=="newbuffer" <nul set /p =[?1049h
 	if "%1"=="oldbuffer" <nul set /p =[?1049l
-	if "%1"=="cls" if defined nomode (<nul set /p =[H[0m[J) else (cls)
+	if "%1"=="cls" if defined nomode (<nul set /p =[0m[2J) else (cls)
 exit /b
 
 

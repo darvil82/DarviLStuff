@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1.2
-set /a build=40
+set ver=3.1.3
+set /a build=41
 
 ::Setting default values.
 set /a brush_X=5
@@ -29,6 +29,8 @@ call :mode_get
 
 
 ::Check for parameters.
+set "self_filename=%~nx0"
+set "self_name=%~n0"
 if exist %1 set "file_load_input=%1"
 
 if exist "!cfg1!" (
@@ -694,7 +696,7 @@ exit /b
 		echo !space![90mWritten by DarviL ^(David Losantos^) in batch. Using version !ver! ^(Build !build!^)
 		echo !space!Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
 		echo !space!
-		echo !space![96mVIRINT [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP][0m
+		echo !space![96m!self_name! [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP][0m
 		echo !space!
 		echo !space!  [96m/N :[0m Create a new canvas.
 		echo !space!  [96m/S :[0m Select the size of the canvas to create. The value must be specified with two numbers between
@@ -800,7 +802,7 @@ exit /b
 			echo [91mThe folder '!chkup_in!' doesn't exist. Download aborted.[0m
 			exit /b 1
 		) else (
-			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/%1.bat > "!chkup_in!\%1.bat"
+			curl -s https://raw.githubusercontent.com/L89David/DarviLStuff/master/%1.bat > "!chkup_in!\!self_filename!"
 			if not !errorlevel! == 0 echo [91mAn error occurred while trying to download %1.[0m & exit /b 1
 			echo [92mDownloaded %1 succesfully in '!chkup_in!'.[0m
 			exit /b 0

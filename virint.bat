@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0\vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1.3
-set /a build=41
+set ver=3.1.3-1
+set /a build=42
 
 ::Setting default values.
 set /a brush_X=5
@@ -760,7 +760,7 @@ exit /b
 		pause >nul
 	)
 	<nul set /p =[;r
-	if not "%1"=="noLoad" call :file_reload
+	if not "%1"=="noLoad" (call :file_reload) else (cls)
 exit /b
 
 

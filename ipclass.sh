@@ -1,6 +1,6 @@
 #!/bin/bash
 #Written by David Losantos.
-#Version 1.1
+#Version 1.1.1
 
 [[ -n $1 ]] && parm1=$1 || read parm1
 
@@ -22,8 +22,10 @@ function displayMsg {
 function showHelp {
 	echo "IPv4 class and type detector."
 	echo -e "A valid IPv4 address must be specified as a parameter or as a console input,\nsuch as pipe redirection. Usage:\n"
-	echo -e "ipclass.sh --self | xxx.xxx.xxx.xxx\n"
-	echo -e "Examples:\n\t- ipclass.sh 172.23.10.1\n\t- echo 10.23.1.2 | ipclass.sh\n\t- ipclass.sh --self"
+	echo -e "ipclass.sh xxx.xxx.xxx.xxx | --self\n"
+	echo -e "--self\t\tTries to get your IP Address.\n\n"
+	echo -e "Examples:\n\t- ipclass.sh 172.23.10.1\n\t- echo 10.23.1.2 | ipclass.sh\n\t- ipclass.sh --self\n"
+	echo "Written by David Losantos (DarviL)."
 }
 
 
@@ -32,7 +34,7 @@ function showHelp {
 function splitAddress {
 	[[ ! $1 =~ ^.*\. ]] && displayMsg red "ERROR: Invalid IPv4 syntax." && exit
 	for x in `seq 1 4`; do
-		currentByte=`cut -d"." -f$x <<< $1`
+		currentByte=$(cut -d"." -f$x <<< $1)
 		[[ ! -n $currentByte ]] && displayMsg red "ERROR: Missing byte $x." && exit
 		if [[ ! $currentByte =~ ^[0-9]*$ ]] || [[ $currentByte -gt 255 ]] || [[ $currentByte -lt 0 ]]; then
 			displayMsg red "ERROR: Invalid value '$currentByte' at byte $x."

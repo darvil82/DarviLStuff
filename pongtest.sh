@@ -1,14 +1,15 @@
 #!/bin/bash
 #Written by David Losantos.
-#Version 1.0.1
+#Version 1.0.1-1
 
 [[ -f "log" ]] && rm log
 
 
 
 function Help {
-	echo "	-s : Select max random delay. Default is 40."
-	echo "	--debug : Debug mode."
+	echo -e "pongtest.sh [-s num] [--debug]\n"
+	echo -e "-s\t\tSelect max random delay. Default is 40."
+	echo -e "--debug\t\tDebug mode."
 }
 
 
@@ -94,7 +95,7 @@ mode_X="+"
 color="[97m"
 let cursor_X=-1
 
-while [ True ]; do
+while true; do
 	#Obtener el tamaño de la ventana.
 	let window_lines=`tput lines`
 	let window_cols=`tput cols`-2
@@ -111,7 +112,7 @@ while [ True ]; do
 	[[ $cursor_X -le 1 ]] && { mode_X="+"; collide; }
 
 	#Mostrar el gráfico en pantalla con las coordenadas y color calculados.
-	[[ -n $show_debug ]] && echo "[0m[K[7m[HPOS: X$cursor_X Y$cursor_Y[0m"
+	[[ -n $show_debug ]] && echo "[0m[7m[HPOS: X$cursor_X Y$cursor_Y[0m[K"
 	printf "$color[$cursor_Y;${cursor_X}f██"
 
 	#Realizar una pequeña espera por cada vuelta al bucle.

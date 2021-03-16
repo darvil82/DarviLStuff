@@ -1,6 +1,6 @@
 #!/bin/bash
 #Written by David Losantos.
-#Version 1.0
+#Version 1.0.1
 
 [[ -f "log" ]] && rm log
 
@@ -29,20 +29,27 @@ function displayMsg {
 
 #Procesar los parámetros introducidos por el usuario.
 for param in $@; do
-	case $param in
-		"--debug" )
-			show_debug=1
-		;;
-		"-s" )
-			shift 1
-			maxSpeed=$1
-		;;
-		"--help" | "-h" )
-			Help
-			exit
-		;;
-	esac
+	if [[ -n $tknxt ]]; then
+		(($tknxt=$param))
+		tknxt=
+	else
+		case $param in
+			"--debug" )
+				show_debug=1
+				continue
+			;;
+			"-s" )
+				tknxt="maxSpeed"
+				continue
+			;;
+			"--help" | "-h" )
+				Help
+				exit
+			;;
+		esac
+	fi
 done
+
 
 [[ ! -n $maxSpeed ]] && maxSpeed=40
 

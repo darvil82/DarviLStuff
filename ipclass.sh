@@ -1,7 +1,7 @@
 #!/bin/bash
 #Written by David Losantos.
-#Version 1.1.1
 
+ver=1.1.1
 [[ -n $1 ]] && parm1=$1 || read parm1
 
 
@@ -25,7 +25,7 @@ function showHelp {
 	echo -e "ipclass.sh xxx.xxx.xxx.xxx | --self\n"
 	echo -e "--self\t\tTries to get your IP Address.\n\n"
 	echo -e "Examples:\n\t- ipclass.sh 172.23.10.1\n\t- echo 10.23.1.2 | ipclass.sh\n\t- ipclass.sh --self\n"
-	echo "Written by David Losantos (DarviL)."
+	echo "Written by David Losantos (DarviL). Version $ver."
 }
 
 

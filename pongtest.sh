@@ -1,7 +1,7 @@
 #!/bin/bash
 #Written by David Losantos.
-#Version 1.0.1-1
 
+ver=1.0.1-1
 [[ -f "log" ]] && rm log
 
 
@@ -9,7 +9,8 @@
 function Help {
 	echo -e "pongtest.sh [-s num] [--debug]\n"
 	echo -e "-s\t\tSelect max random delay. Default is 40."
-	echo -e "--debug\t\tDebug mode."
+	echo -e "--debug\t\tDebug mode.\n"
+	echo "Written by David Losantos (DarviL). Version $ver."
 }
 
 

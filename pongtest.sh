@@ -7,7 +7,7 @@ ver=1.1
 
 
 function Help {
-	echo -e "pongtest.sh [-s num] [--debug]\n"
+	echo -e "pongtest.sh [-s num] [-n] [--debug]\n"
 	echo -e "-s\t\tSelect max random delay. Default is 40."
 	echo -e "-n\t\tDo not clear the screen when colliding."
 	echo -e "--debug\t\tDebug mode. Displays coordinates and creates a log file.\n"

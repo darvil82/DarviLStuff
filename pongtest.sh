@@ -1,7 +1,7 @@
 #!/bin/bash
 #Written by David Losantos.
 
-ver=1.0.1-1
+ver=1.1
 [[ -f "log" ]] && rm log
 
 
@@ -9,7 +9,8 @@ ver=1.0.1-1
 function Help {
 	echo -e "pongtest.sh [-s num] [--debug]\n"
 	echo -e "-s\t\tSelect max random delay. Default is 40."
-	echo -e "--debug\t\tDebug mode.\n"
+	echo -e "-n\t\tDo not clear the screen when colliding."
+	echo -e "--debug\t\tDebug mode. Displays coordinates and creates a log file.\n"
 	echo "Written by David Losantos (DarviL). Version $ver."
 }
 
@@ -29,7 +30,7 @@ function displayMsg {
 
 
 
-#Procesar los parámetros introducidos por el usuario.
+#Process the parameters that the user entered.
 for param in $@; do
 	if [[ -n $tknxt ]]; then
 		(($tknxt=$param))
@@ -42,6 +43,10 @@ for param in $@; do
 			;;
 			"-s" )
 				tknxt="maxSpeed"
+				continue
+			;;
+			"-n" )
+				noClear=1
 				continue
 			;;
 			"--help" | "-h" )
@@ -61,9 +66,9 @@ done
 
 
 
-#Selección de color aleatorio. Selecciona un color aleatorio desde 0 a 14.
-#También selecciona una velocidad aleatoria, además de limpiar la pantalla.
-function collide {
+#Select a random color from 0 to 14.
+#It also selects a random delay, apart from clearing the screen (if enabled).
+function Collide {
 	case `expr $RANDOM % 14` in
 		0)	color="[34m";;
 		1)	color="[32m";;
@@ -83,36 +88,37 @@ function collide {
 	esac
 
 	let delay=`expr $RANDOM % $maxSpeed`
-	[[ -n $show_debug ]] && echo "${color}Colisión! Estableciendo retraso a $delay.[0m" >> log
-	clear
+	[[ -n $show_debug ]] && echo "${color}Collision! Setting delay to $delay.[0m" >> log
+	[[ ! -n $noClear ]] && clear
 }
 
 
 
 
-
+clear
 mode_Y="+"
 mode_X="+"
 color="[97m"
 let cursor_X=-1
 
 while true; do
-	#Obtener el tamaño de la ventana.
+	#Get the current size of the window.
 	let window_lines=`tput lines`
 	let window_cols=`tput cols`-2
 
-	#Sumar o restar 1 a las coordenadas del cursor actuales. (La variable 'mode' puede contener '+' o '-')
+	#Add or subtract to the current coordinates. (The 'mode' variable can contain '+' or '-')
 	let cursor_X${mode_X}=2
 	let cursor_Y${mode_Y}=1
 
-	#Comprobar si el cursor se encuentra colisionando con uno de los bordes de la ventana. Cambiar el tipo de
-	#operación para que sea una resta o una suma, y además llamar a la función 'collide'.
-	[[ $cursor_Y -ge $window_lines ]] && { mode_Y="-"; collide; }
-	[[ $cursor_Y -le 1 ]] && { mode_Y="+"; collide; }
-	[[ $cursor_X -ge $window_cols ]] && { mode_X="-"; collide; }
-	[[ $cursor_X -le 1 ]] && { mode_X="+"; collide; }
+	#Check if the cursor is colliding with the borders of the window.
+	#Change the type of operation to do in the next loop, depending on where the cursor collided.
+	#Also calls the 'Collide' function for every time there's a collision.
+	[[ $cursor_Y -ge $window_lines ]] && { mode_Y="-"; Collide; }
+	[[ $cursor_Y -le 1 ]] && { mode_Y="+"; Collide; }
+	[[ $cursor_X -ge $window_cols ]] && { mode_X="-"; Collide; }
+	[[ $cursor_X -le 1 ]] && { mode_X="+"; Collide; }
 
-	#Mostrar el gráfico en pantalla con las coordenadas y color calculados.
+	#Show the sprite on screen with the color and coordinates processed.
 	[[ -n $show_debug ]] && echo "[0m[7m[HPOS: X$cursor_X Y$cursor_Y[0m[K"
 	printf "$color[$cursor_Y;${cursor_X}f██"
 
@@ -121,4 +127,3 @@ while true; do
 		ping localhost -c 1 > /dev/null
 	done
 done
-

@@ -3,13 +3,14 @@
 #Please don't expect beautiful things here, it would be even better to expect the worst.
 
 from time import sleep
-from os import popen
+from os import popen, get_terminal_size, system as runsys
 from random import randrange, randint
 import argparse
 from sys import exit
+from platform import system
 
 maxLines = 5000
-prjVersion = "1.0"
+prjVersion = "1.0.1"
 
 
 
@@ -40,7 +41,10 @@ def terminalOpt(*args, **kwargs):
 
 
 def getWindowSize():
-    return (int(popen("tput cols").read()) - 2, int(popen("tput lines").read()))
+	size = list(get_terminal_size())
+	cols = size[0] - 2
+	lines = size[1]
+	return (cols, lines)
 
 
 def randomColor():
@@ -92,6 +96,7 @@ if invalid: exit()
 
 
 windowSize = getWindowSize()
+if system() == "Windows": runsys("")
 terminalOpt(buffer=True, cursor=False)
 
 

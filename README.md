@@ -8,6 +8,7 @@ This is the repository that contains some scripts that I do when I'm bored or wh
 | [VIRINT](https://github.com/L89David/DarviLStuff/blob/master/virint.bat) | Basic pixel art editor. Can use colors, save/load files, etc... | Called from instance / As a new instance. [Wiki available.](https://github.com/DarviL82/DarviLStuff/wiki/VIRINT) | Batch |
 | [ipclass](https://github.com/L89David/DarviLStuff/blob/master/ipclass.sh) | Just a small test thing that tells the IPv4 class (A, B, C, D, E) and type (Private or Public) of the specified IP. |  | Bash |
 | [pongtest](https://github.com/L89David/DarviLStuff/blob/master/pongtest.sh) | Just a line colliding at the borders of the console. |  | Bash |
+| [pongtest2](https://github.com/L89David/DarviLStuff/blob/master/pongtest2.py) | Like pongtest.sh, but much more complex. Multiple lines, length, and much more. |  | Python 3 |
 
 **There's a wiki explaining the instalation and usage of this scripts here: https://github.com/L89David/DarviLStuff/wiki**
 
@@ -27,3 +28,6 @@ This is the repository that contains some scripts that I do when I'm bored or wh
 
 ## pongtest
 ![e190c45b-4eab-4e8c-a8a1-e4cf3feed375](https://user-images.githubusercontent.com/48654552/112477976-c91fec00-8d73-11eb-93f4-3850f7935f08.gif)
+
+## pongtest2
+![image](https://user-images.githubusercontent.com/48654552/114112850-903c5700-98dd-11eb-8265-7c65000d9768.png)

@@ -41,10 +41,10 @@ def terminalOpt(*args, **kwargs):
 
 
 def getWindowSize():
-	size = list(get_terminal_size())
-	cols = size[0] - 2
-	lines = size[1]
-	return (cols, lines)
+    size = list(get_terminal_size())
+    cols = size[0] - 2
+    lines = size[1]
+    return (cols, lines)
 
 
 def randomColor():

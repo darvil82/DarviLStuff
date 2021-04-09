@@ -3,7 +3,7 @@
 #Please don't expect beautiful things here, it would be even better to expect the worst.
 
 from time import sleep
-from os import popen, system
+from os import popen
 from random import randrange, randint
 import argparse
 from sys import exit

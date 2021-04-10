@@ -10,7 +10,7 @@ from sys import exit
 from platform import system
 
 maxLines = 5000
-prjVersion = "1.1"
+prjVersion = "1.1.1"
 
 
 
@@ -124,7 +124,9 @@ class Line:
     def collide(self, axis=0, state=0):
         self._state[axis] = state
         if args.d and len(lines) < maxLines: lines.append(Line(color=self._color, state=self._state))
-        if args.c: terminalOpt("clear")
+        if args.c:
+            terminalOpt("clear")
+            self._posHistory.clear()
 
 
     def operate(self):
@@ -192,7 +194,10 @@ class Line:
                 print(_brush, end="", flush=True)
                 
                 self._posHistory.pop(-1)
-        
+
+
+
+
 
 
 

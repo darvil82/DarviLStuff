@@ -73,10 +73,10 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 # Getting parms
 argparser = argparse.ArgumentParser(description="Pong test thing I guess.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
-argparser.add_argument("-n", help="number of lines to display", type=int, default=2)
+argparser.add_argument("-n", help="number of lines to display", type=int, default=1)
 argparser.add_argument("-c", help="clear the screen when colliding", action="store_true")
 argparser.add_argument("-s", help="delay per screen frame in seconds", type=float, default=0.02)
-argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=50)
+argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=10)
 argparser.add_argument("-d", help="create a new line at every collision with the same color as it's parent", action="store_true")
 argparser.add_argument("-w", help="make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines", action="store_true")
 argparser.add_argument("--debug", help="debug mode", action="store_true")

@@ -10,7 +10,7 @@ from sys import exit
 from platform import system
 
 maxLines = 5000
-prjVersion = "1.0.1"
+prjVersion = "1.1"
 
 
 
@@ -73,10 +73,10 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 # Getting parms
 argparser = argparse.ArgumentParser(description="Pong test thing I guess.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
-argparser.add_argument("-n", help="number of lines to display", type=int, default=1)
+argparser.add_argument("-n", help="number of lines to display", type=int, default=2)
 argparser.add_argument("-c", help="clear the screen when colliding", action="store_true")
 argparser.add_argument("-s", help="delay per screen frame in seconds", type=float, default=0.02)
-argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=10)
+argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=50)
 argparser.add_argument("-d", help="create a new line at every collision with the same color as it's parent", action="store_true")
 argparser.add_argument("-w", help="make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines", action="store_true")
 argparser.add_argument("--debug", help="debug mode", action="store_true")
@@ -115,6 +115,10 @@ class Line:
                 self._color = value
             elif key == "pos":
                 self._pos = list(value)
+
+
+    def __str__(self):
+        return f"\u001b[H\u001b[0m\u001b[7m\u001b[KLength: {self._llength}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\u001b[27m\u001b[K"
 
 
     def collide(self, axis=0, state=0):
@@ -173,28 +177,22 @@ class Line:
             self._posHistory.insert(0, list(self._pos))
 
             if len(self._posHistory) == self._llength:
-                self._oldPos = list(self._posHistory[-1])
-
-                print(
-                    f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f  ",
-                    end="",
-                    flush=True
-                )
+                self._oldPos = self._posHistory[-1]
+                _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f  "
+                
+                if self._oldPos in self._posHistory[0:-2]:
+                    _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m██"
+                else:
+                    for obj in lines:
+                        if obj._posHistory is self._posHistory: continue
+                        if self._oldPos in obj._posHistory:
+                            _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m██"
+                            break
+        
+                print(_brush, end="", flush=True)
                 
                 self._posHistory.pop(-1)
         
-        if args.debug:
-            print(f"\u001b[H\u001b[0mPos history: {self._posHistory}\u001b[K")
-            print(f"\u001b[KCurrent pos: {self._pos}\tObjects: {len(lines)}\u001b[K")
-        
-
-    
-
-
-
-
-
-
 
 
 
@@ -211,6 +209,7 @@ try:
 
         for x in range(0, len(lines)):
             lines[x].move()
+            if args.debug: print(lines[x])
 
         sleep(args.s)
         getSizeCounter += 1

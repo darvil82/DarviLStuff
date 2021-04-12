@@ -7,48 +7,52 @@ from os import popen, get_terminal_size, system as runsys
 from random import randrange, randint
 import argparse
 from sys import exit
-from platform import system
 
 maxLines = 5000
-prjVersion = "1.1.1"
+prjVersion = "1.1.2"
 
 
 
-def terminalOpt(*args, **kwargs):
+ESCcodes = {
+    "clear": "\u001b[H\u001b[2J",
+    "reset": "\u001b[0m",
+    "newbuffer": "\u001b[?1049h",
+    "oldbuffer": "\u001b[?1049l",
+    "showcursor": "\u001b[?25h",
+    "hidecursor": "\u001b[?25l"
+}
+
+
+
+def terminalOpt(*args):
     """
     Quick terminal options
 
     Options:
         - clear
-    Key/values:
-        - buffer = bool
-        - cursor = bool
+        - reset
+        - newbuffer / oldbuffer
+        - showcursor / hidecursor
     """
-    if "clear" in args: print("\u001b[H\u001b[2J", end="")
-    for key in kwargs:
-        value = kwargs.get(key)
-        if key == "buffer":
-            if value:
-                out = "[?1049h"
-            else: out = "[?1049l"
-        elif key == "cursor":
-            if value:
-                out = "[?25h"
-            else: out = "[?25l"
-        
-        print("\u001b" + out, end="")
-    return
+    out = ""
+    for arg in args:
+        out = out + ESCcodes.get(arg)
+
+    print(out, end="")
 
 
 def getWindowSize():
+    """
+    Returns a list with the size of the terminal.
+    Also it subtracts 2 to cols because otherwise the lines won't be aligned or something.
+    """
     size = list(get_terminal_size())
     cols = size[0] - 2
     lines = size[1]
     return (cols, lines)
 
 
-def randomColor():
-    return([randrange(0,255), randrange(0,255), randrange(0,255)])
+randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 
 def showMsg(**kwargs):
@@ -70,9 +74,10 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 
 
+runsys("")  # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
 
-# Getting parms
-argparser = argparse.ArgumentParser(description="Pong test thing I guess.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
+# Parse parms
+argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
 argparser.add_argument("-n", help="number of lines to display", type=int, default=1)
 argparser.add_argument("-c", help="clear the screen when colliding", action="store_true")
 argparser.add_argument("-s", help="delay per screen frame in seconds", type=float, default=0.02)
@@ -96,8 +101,7 @@ if invalid: exit()
 
 
 windowSize = getWindowSize()
-if system() == "Windows": runsys("")
-terminalOpt(buffer=True, cursor=False)
+terminalOpt("newbuffer", "hidecursor", "clear")
 
 
 
@@ -121,7 +125,7 @@ class Line:
         return f"\u001b[H\u001b[0m\u001b[7m\u001b[KLength: {self._llength}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\u001b[K\u001b[27m"
 
 
-    def collide(self, axis=0, state=0):
+    def collide(self, axis, state):
         self._state[axis] = state
         if args.d and len(lines) < maxLines: lines.append(Line(color=self._color, state=self._state))
         if args.c:
@@ -143,20 +147,20 @@ class Line:
         else:
             nextPos[1] = currentPos[1] + 1
         return nextPos
-    
 
-    def move(self):        
-        nextPos = self.operate()
-        
+
+    def move(self):
+        _nextPos = self.operate()
+
         # Line to line collision detection
         if args.w and args.n != 0:
             for obj in lines:
                 if obj is self.__class__: continue
-                if nextPos in self._posHistory: continue
-                if nextPos in obj._posHistory: return
+                if _nextPos in self._posHistory: continue
+                if _nextPos in obj._posHistory: return
 
         # Add / Subtract to the current coordinates
-        self._pos = nextPos
+        self._pos = _nextPos
         if self._pos[0] <= 1: self.collide(0, 0)
         if self._pos[1] <= 1: self.collide(1, 0)
         if self._pos[0] >= windowSize[0]: self.collide(0, 1)
@@ -181,7 +185,7 @@ class Line:
             if len(self._posHistory) == self._llength:
                 self._oldPos = self._posHistory[-1]
                 _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f  "
-                
+
                 if self._oldPos in self._posHistory[0:-2]:
                     _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m██"
                 else:
@@ -190,10 +194,11 @@ class Line:
                         if self._oldPos in obj._posHistory:
                             _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m██"
                             break
-        
+
                 print(_brush, end="", flush=True)
                 
                 self._posHistory.pop(-1)
+
 
 
 
@@ -220,5 +225,5 @@ try:
         getSizeCounter += 1
 
 except KeyboardInterrupt:
-    terminalOpt(buffer=False, cursor=True)
+    terminalOpt("clear", "reset", "oldbuffer", "showcursor")
     exit()

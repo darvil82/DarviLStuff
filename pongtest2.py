@@ -8,8 +8,7 @@ from random import randrange, randint
 import argparse
 from sys import exit
 
-maxLines = 5000
-prjVersion = "1.1.2"
+prjVersion = "1.2"
 
 
 
@@ -84,7 +83,9 @@ argparser.add_argument("-s", help="delay per screen frame in seconds", type=floa
 argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=10)
 argparser.add_argument("-d", help="create a new line at every collision with the same color as it's parent", action="store_true")
 argparser.add_argument("-w", help="make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines", action="store_true")
+argparser.add_argument("-r", help="change the color of the line on every frame", action="store_true")
 argparser.add_argument("--debug", help="debug mode", action="store_true")
+argparser.add_argument("--max", help="maximun number of line objects that can be created. Default is 5000", type=int, default=5000)
 args = argparser.parse_args()
 
 invalid = False
@@ -127,7 +128,7 @@ class Line:
 
     def collide(self, axis, state):
         self._state[axis] = state
-        if args.d and len(lines) < maxLines: lines.append(Line(color=self._color, state=self._state))
+        if args.d and len(lines) < args.max: lines.append(Line(color=self._color))
         if args.c:
             terminalOpt("clear")
             self._posHistory.clear()
@@ -166,7 +167,7 @@ class Line:
         if self._pos[0] >= windowSize[0]: self.collide(0, 1)
         if self._pos[1] >= windowSize[1]: self.collide(1, 1)
 
-
+        if args.r: self._color = randomColor()
 
         print(
             f"\u001b[{self._pos[1]};{self._pos[0]}f\u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m██",
@@ -196,7 +197,7 @@ class Line:
                             break
 
                 print(_brush, end="", flush=True)
-                
+
                 self._posHistory.pop(-1)
 
 
@@ -207,7 +208,7 @@ class Line:
 
 
 lines = []
-for x in range(0, capValue(args.n, maxLines)):
+for x in range(0, capValue(args.n, args.max)):
     lines.append(Line())
 
 getSizeCounter = 0

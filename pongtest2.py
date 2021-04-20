@@ -8,7 +8,7 @@ from random import randrange, randint
 import argparse
 from sys import exit
 
-prjVersion = "1.2"
+prjVersion = "1.2.1"
 
 
 
@@ -91,6 +91,7 @@ args = argparser.parse_args()
 invalid = False
 if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below"); invalid = True
 if args.l > 500: showMsg(error="Length cannot exceed 500"); invalid = True
+if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below"); invalid = True
 if invalid: exit()
 
 

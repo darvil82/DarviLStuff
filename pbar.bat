@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.4.2
-set /a build=29
+set ver=1.4.2-1
+set /a build=30
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" call :chkup pbar & exit /b
@@ -177,7 +177,7 @@ if !style!==1 (
 	echo !draw_bar_shift!!bar_draw_corner3!!bar_draw_horiz!!bar_draw_horiz!!bar_draw_corner4!!space!
 	if defined bar_info echo !draw_bar_shift!!bar_info!
 	
-) else echo Style '!style!' doesn't exist. & exit /b 1
+) else echo Style '!style!' doesn't exist. & <nul set /p =[?25h & exit /b 1
 <nul set /p =[?25h
 exit /b 0
 

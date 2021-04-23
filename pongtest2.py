@@ -12,17 +12,6 @@ prjVersion = "1.2.1"
 
 
 
-ESCcodes = {
-    "clear": "\u001b[H\u001b[2J",
-    "reset": "\u001b[0m",
-    "newbuffer": "\u001b[?1049h",
-    "oldbuffer": "\u001b[?1049l",
-    "showcursor": "\u001b[?25h",
-    "hidecursor": "\u001b[?25l"
-}
-
-
-
 def terminalOpt(*args):
     """
     Quick terminal options
@@ -33,6 +22,16 @@ def terminalOpt(*args):
         - newbuffer / oldbuffer
         - showcursor / hidecursor
     """
+    
+    ESCcodes = {
+        "clear": "\u001b[H\u001b[2J",
+        "reset": "\u001b[0m",
+        "newbuffer": "\u001b[?1049h",
+        "oldbuffer": "\u001b[?1049l",
+        "showcursor": "\u001b[?25h",
+        "hidecursor": "\u001b[?25l"
+    }
+    
     out = ""
     for arg in args:
         out = out + ESCcodes.get(arg)

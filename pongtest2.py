@@ -8,7 +8,7 @@ from random import randrange, randint
 import argparse
 from sys import exit
 
-prjVersion = "1.2.1"
+prjVersion = "1.2.1-1"
 
 
 
@@ -22,7 +22,7 @@ def terminalOpt(*args):
         - newbuffer / oldbuffer
         - showcursor / hidecursor
     """
-    
+
     ESCcodes = {
         "clear": "\u001b[H\u001b[2J",
         "reset": "\u001b[0m",
@@ -31,7 +31,7 @@ def terminalOpt(*args):
         "showcursor": "\u001b[?25h",
         "hidecursor": "\u001b[?25l"
     }
-    
+
     out = ""
     for arg in args:
         out = out + ESCcodes.get(arg)
@@ -226,5 +226,5 @@ try:
         getSizeCounter += 1
 
 except KeyboardInterrupt:
-    terminalOpt("clear", "reset", "oldbuffer", "showcursor")
+    terminalOpt("clear", "oldbuffer", "reset", "showcursor")
     exit()

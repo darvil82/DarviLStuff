@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.1.5
-set /a build=44
+set ver=3.1.6
+set /a build=45
 
 ::Setting default values.
 set /a brush_X=5
@@ -81,6 +81,9 @@ if defined CheckUpdates call :chkup virint quiet
 
 
 
+::Remove temporary files ONLY if there's no more than one instance of VIRINT running (including the current one)
+for /f "usebackq" %%G in (`tasklist /fi "imagename eq cmd.exe" /v ^| find "!self_name!"`) do set /a instanceCounter += 1
+if !instanceCounter! LEQ 1 if exist "%temp%\virint*.tmp*" del /f /q "%temp%\virint*.tmp*" 2> nul
 
 
 

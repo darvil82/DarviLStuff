@@ -95,8 +95,6 @@ if defined CheckUpdates call :chkup virint quiet
 ::Start menu.
 if !cols_current! LSS 30 call :display_message "ERROR: Cannot draw menu." red newline & exit /b 1
 if defined nomode call :window_opt newbuffer
-set menu_center=[!cols_center!C
-for /l %%G in (1,1,!cols_current!) do set menu_hr=!menu_hr!─
 
 call :menu_draw new
 
@@ -111,6 +109,7 @@ if !start_input!==1 (
 )
 if !start_input!==2 (
 	call :menu_draw 2
+	call :file_mgr
 	echo:
 	echo !menu_hr!
 	set /p file_load_input="[94mFilename?: [0m"
@@ -883,7 +882,7 @@ exit /b
 	for /f "usebackq skip=3 tokens=2 delims=: " %%G in (`mode`) do (
 		if defined mode_get-looped (
 			set /a cols_current=%%G
-			set /a cols_center=%%G/2-13
+			set /a cols_center=%%G/2
 			set mode_get-looped=
 			exit /b
 		) else (
@@ -900,6 +899,9 @@ exit /b
 :menu_draw
 	::Draw the main menu.
 
+    set /a menu_center=cols_center - 13 & set menu_center=[!menu_center!C
+	set menu_hr=
+    for /l %%G in (1,1,!cols_current!) do set menu_hr=!menu_hr!─
 	if not "%1"=="new" <nul set /p =[10F
 	echo [96mVIRINT !ver! - Start menu[0m
 	echo:
@@ -914,3 +916,96 @@ exit /b
 	::timeout /t 1 > nul
 	for /l %%G in (0,1,20) do (ping localhost -n 1 >nul)
 exit /b
+
+
+
+
+
+:file_mgr
+    ::Small file manager
+	
+	type nul > "!temp1!"
+	setlocal
+	for %%G in ("!cd!\*") do (
+		set /a file_counter+=1
+		echo file_mgr_p!file_counter!=%%G >> "!temp1!"
+	)
+	endlocal
+	set /a selectPointer=0
+	
+	call :mode_get
+	call :window_opt cls
+	
+	
+:file_mgr_loop
+	<nul set /p =[H
+    set fileCounter=
+	set file_mgr_currentDir=!cd!
+    for %%G in ("!file_mgr_currentDir!\*") do set /a fileCounter+=1
+	set /a file_mgr_center=cols_center - 20 & set file_mgr_center=[!file_mgr_center!C
+	
+	echo [96mVIRINT !ver! - File Selector[0m
+	echo:
+	echo [7mCurrent directory:[27m !file_mgr_currentDir!
+	echo:
+	echo !file_mgr_center!╔══════════════════════════════════════╗
+	echo !file_mgr_center!║ Files:                               ║
+	echo !file_mgr_center!║                                      ║
+	if !selectPointer! == 0 (echo !file_mgr_center!║ [7m▲ Parent directory[27m                   ║) else (echo !file_mgr_center!║ ▲ Parent directory                   ║)
+	setlocal
+	for %%G in ("!file_mgr_currentDir!\*") do (
+		set /a file_counter+=1
+		set "path=%%~nxG"
+		call :strlen slength path
+		set pathSpace=
+		set /a slength = 33 - slength
+		for /l %%G in (1,1,!slength!) do set "pathSpace=!pathSpace! "
+		if !selectPointer! == !file_counter! (echo !file_mgr_center!║ │  [7m!path![27m!pathSpace! ║) else (echo !file_mgr_center!║ │  !path!!pathSpace! ║)
+	)
+	endlocal
+	echo !file_mgr_center!║ └─                                   ║
+	echo !file_mgr_center!╚══════════════════════════════════════╝
+
+    for /f "usebackq tokens=*" %%G in ("!temp1!") do set "%%G"
+	choice /c wsf /n >nul
+	if !errorlevel! == 1 if !selectPointer! GTR 0 set /a selectPointer -= 1
+	if !errorlevel! == 2 if !selectPointer! LSS !fileCounter! set /a selectPointer += 1
+	if !errorlevel! == 3 (
+		if !selectPointer! == 0 cd !file_mgr_currentDir!\..
+		goto file_mgr
+	)
+	
+	
+	
+	
+	goto file_mgr_loop
+
+exit /b
+
+
+
+
+
+
+:strlen
+    ::strlen <resultVar> <stringVar> function by jeb (https://stackoverflow.com/a/5841587)
+    (   
+        setlocal EnableDelayedExpansion
+        (set^ tmp=!%~2!)
+        if defined tmp (
+            set "len=1"
+            for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+                if "!tmp:~%%P,1!" NEQ "" ( 
+                    set /a "len+=%%P"
+                    set "tmp=!tmp:~%%P!"
+                )
+            )
+        ) ELSE (
+            set len=0
+        )
+    )
+    ( 
+        endlocal
+        set "%~1=%len%"
+        exit /b
+    )

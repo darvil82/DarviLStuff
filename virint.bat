@@ -110,9 +110,7 @@ if !start_input!==1 (
 if !start_input!==2 (
 	call :menu_draw 2
 	call :file_mgr
-	echo:
-	echo !menu_hr!
-	set /p file_load_input="[94mFilename?: [0m"
+
 	call :file_load
 )
 if !start_input!==3 (
@@ -877,7 +875,7 @@ exit /b
 
 
 :mode_get
-	::Get the current number of columns on screen.
+	::Get the size of the terminal.
 	
 	for /f "usebackq skip=3 tokens=2 delims=: " %%G in (`mode`) do (
 		if defined mode_get-looped (
@@ -925,10 +923,11 @@ exit /b
     ::Small file manager
 	
 	type nul > "!temp1!"
+	set fileCounter=1
 	setlocal
-	for %%G in ("!cd!\*") do (
+	for /f "usebackq tokens=*" %%G in (`dir /b "!cd!"`) do (
 		set /a file_counter+=1
-		echo file_mgr_p!file_counter!=%%G >> "!temp1!"
+		echo %%~fG >> "!temp1!"
 	)
 	endlocal
 	set /a selectPointer=0
@@ -941,37 +940,46 @@ exit /b
 	<nul set /p =[H
     set fileCounter=
 	set file_mgr_currentDir=!cd!
-    for %%G in ("!file_mgr_currentDir!\*") do set /a fileCounter+=1
-	set /a file_mgr_center=cols_center - 20 & set file_mgr_center=[!file_mgr_center!C
+    for /f "usebackq" %%G in ("!temp1!") do set /a fileCounter+=1
 	
 	echo [96mVIRINT !ver! - File Selector[0m
 	echo:
 	echo [7mCurrent directory:[27m !file_mgr_currentDir!
 	echo:
-	echo !file_mgr_center!╔══════════════════════════════════════╗
-	echo !file_mgr_center!║ Files:                               ║
-	echo !file_mgr_center!║                                      ║
-	if !selectPointer! == 0 (echo !file_mgr_center!║ [7m▲ Parent directory[27m                   ║) else (echo !file_mgr_center!║ ▲ Parent directory                   ║)
+	echo ─────────────────────────────────────────────────────
+	echo:
+	if !selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
 	setlocal
-	for %%G in ("!file_mgr_currentDir!\*") do (
+	for /f "usebackq tokens=*" %%G in ("!temp1!") do (
 		set /a file_counter+=1
 		set "path=%%~nxG"
-		call :strlen slength path
-		set pathSpace=
-		set /a slength = 33 - slength
-		for /l %%G in (1,1,!slength!) do set "pathSpace=!pathSpace! "
-		if !selectPointer! == !file_counter! (echo !file_mgr_center!║ │  [7m!path![27m!pathSpace! ║) else (echo !file_mgr_center!║ │  !path!!pathSpace! ║)
+		set strWrapper=
+		if !selectPointer! == !file_counter! set strWrapper=[7m
+		if exist "%%~nxG\*" set strWrapper=!strWrapper![96m
+		echo   │ !strWrapper! !path! [27m[0m
 	)
 	endlocal
-	echo !file_mgr_center!║ └─                                   ║
-	echo !file_mgr_center!╚══════════════════════════════════════╝
+	echo   └─
 
-    for /f "usebackq tokens=*" %%G in ("!temp1!") do set "%%G"
 	choice /c wsf /n >nul
-	if !errorlevel! == 1 if !selectPointer! GTR 0 set /a selectPointer -= 1
-	if !errorlevel! == 2 if !selectPointer! LSS !fileCounter! set /a selectPointer += 1
+	if !errorlevel! == 1 if !selectPointer! GTR 0 (set /a selectPointer -= 1) else (set /a selectPointer = !fileCounter! 2> nul)
+	if !errorlevel! == 2 if !selectPointer! LSS !fileCounter! (set /a selectPointer += 1) else (set /a selectPointer = 0)
 	if !errorlevel! == 3 (
-		if !selectPointer! == 0 cd !file_mgr_currentDir!\..
+		if !selectPointer! == 0 (
+			cd !file_mgr_currentDir!\..
+		) else (
+			set selectCounter=
+			for /f "tokens=*" %%G in (!temp1!) do (
+				set /a selectCounter+=1
+				if !selectCounter!==!selectPointer! set testing=%%~nxG
+			)
+			if exist "!testing!\*" (
+				cd !testing!
+			) else (
+				set "file_load_input=!testing!"
+				exit /b
+			)
+		)
 		goto file_mgr
 	)
 	

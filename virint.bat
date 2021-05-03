@@ -937,6 +937,7 @@ exit /b
 	endlocal
 	set /a file_mgr_selectPointer=0
 	set file_mgr_hr=
+	set /a file_mgr_vertsize=lines_current-10
 	
 	call :mode_get
 	call :window_opt cls
@@ -948,54 +949,63 @@ exit /b
 :file_mgr_loop
 	<nul set /p =[H
 	set file_mgr_fileCounter=
-	set file_mgr_currentDir=!cd!
+	set "file_mgr_currentDir=!cd!"
 	for /f "usebackq" %%G in ("!temp1!") do set /a file_mgr_fileCounter+=1
 	
 	echo [96mVIRINT !ver! - File Selector[0m
 	echo:
-	echo [96mUp: W  ^|  Down: S  ^|  Select: F  ^|  Drive: R[0m
+	echo   [96mUp: W  ^|  Down: S  ^|  Select: F  ^|  Drive: R[0m
 	echo:
 	echo !file_mgr_hr!
-	echo [7mCurrent directory:[27m !file_mgr_currentDir!
+	echo [7m Current directory: [27m !file_mgr_currentDir:\=[92m\[0m!
 	echo:
 	if !file_mgr_selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
 	setlocal
 	for /f "usebackq tokens=*" %%G in ("!temp1!") do (
 		set /a file_mgr_loopcounter+=1
 		set "file_mgr_filename=%%~nxG"
+		if !file_mgr_loopcounter! GEQ !file_mgr_vertsize! (
+			if !file_mgr_selectPointer! GEQ !file_mgr_loopcounter! (echo   │ [7m ... [27m) else (echo   │  ... )
+			goto file_mgr_endloop
+		)
+		
 		set strWrapper=
 		if !file_mgr_selectPointer! == !file_mgr_loopcounter! set strWrapper=[7m
 		if exist "%%~nxG\*" set strWrapper=!strWrapper![96m
+		
 		echo   │ !strWrapper! !file_mgr_filename! [27m[0m
 	)
+	:file_mgr_endloop
 	endlocal
 	echo   └─
 
-	choice /c wsfr /n >nul
+	choice /c WSFR /n >nul
 	if !errorlevel! == 1 if !file_mgr_selectPointer! GTR 0 (set /a file_mgr_selectPointer -= 1) else (set /a file_mgr_selectPointer = !file_mgr_fileCounter! 2> nul)
 	if !errorlevel! == 2 if !file_mgr_selectPointer! LSS !file_mgr_fileCounter! (set /a file_mgr_selectPointer += 1) else (set /a file_mgr_selectPointer = 0)
 	if !errorlevel! == 3 (
 		if !file_mgr_selectPointer! == 0 (
-			cd "!file_mgr_currentDir!\.."
+			cd "!file_mgr_currentDir!\.." 2> nul
 		) else (
-			set selectCounter=
-			for /f "tokens=*" %%G in (!temp1!) do (
-				set /a selectCounter+=1
-				if !selectCounter!==!file_mgr_selectPointer! set file_mgr_selector=%%~nxG
-			)
-			if exist "!file_mgr_selector!\*" (
-				cd "!file_mgr_selector!"
-			) else (
-				set "file_load_input=!file_mgr_selector!"
-				exit /b 0
+			if !file_mgr_selectPointer! LSS !file_mgr_vertsize! (
+				set selectCounter=
+				for /f "tokens=*" %%G in (!temp1!) do (
+					set /a selectCounter+=1
+					if !selectCounter!==!file_mgr_selectPointer! set file_mgr_selector=%%~nxG
+				)
+				if exist "!file_mgr_selector!\*" (
+					cd "!file_mgr_selector!" 2> nul
+				) else (
+					set "file_load_input=!file_mgr_selector!"
+					exit /b 0
+				)
 			)
 		)
 		goto file_mgr
 	)
 	if !errorlevel! == 4 (
-		echo !file_mgr_hr!
+		echo [2A!file_mgr_hr!
 		set alphabet=0ABCEDFGHIJKLMNOPQRSTUWXYZ
-		echo Select a drive letter [A-Z]
+		<nul set /p =Select a drive letter [A-Z]
 		choice /c ABCEDFGHIJKLMNOPQRSTUWXYZ /n >nul
 		call set file_mgr_newdrive=%%alphabet:~!errorlevel!,1%%
 		!file_mgr_newdrive!: 2> nul

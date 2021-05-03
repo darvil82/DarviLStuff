@@ -905,9 +905,9 @@ exit /b
 :menu_draw
 	::Draw the main menu.
 
-    set /a menu_center=cols_center - 13 & set menu_center=[!menu_center!C
+	set /a menu_center=cols_center - 13 & set menu_center=[!menu_center!C
 	set menu_hr=
-    for /l %%G in (1,1,!cols_current!) do set menu_hr=!menu_hr!─
+	for /l %%G in (1,1,!cols_current!) do set menu_hr=!menu_hr!─
 	if not "%1"=="new" <nul set /p =[10F
 	echo [96mVIRINT !ver! - Start menu[0m
 	echo:
@@ -928,7 +928,7 @@ exit /b
 
 
 :file_mgr
-    ::Small file manager
+	::Small file manager
 	
 	type nul > "!temp1!"
 	set file_mgr_fileCounter=1
@@ -945,11 +945,11 @@ exit /b
 	
 	
 	
-:file_mgr_loop
+:file_mgr_loopz
 	<nul set /p =[H
-    set file_mgr_fileCounter=
+	set file_mgr_fileCounter=
 	set file_mgr_currentDir=!cd!
-    for /f "usebackq" %%G in ("!temp1!") do set /a file_mgr_fileCounter+=1
+	for /f "usebackq" %%G in ("!temp1!") do set /a file_mgr_fileCounter+=1
 	
 	echo [96mVIRINT !ver! - File Selector[0m
 	echo:
@@ -1010,24 +1010,24 @@ exit /b
 
 
 :strlen
-    ::strlen <resultVar> <stringVar> function by jeb (https://stackoverflow.com/a/5841587)
-    (   
-        setlocal EnableDelayedExpansion
-        (set^ tmp=!%~2!)
-        if defined tmp (
-            set "len=1"
-            for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
-                if "!tmp:~%%P,1!" NEQ "" ( 
-                    set /a "len+=%%P"
-                    set "tmp=!tmp:~%%P!"
-                )
-            )
-        ) ELSE (
-            set len=0
-        )
-    )
-    ( 
-        endlocal
-        set "%~1=%len%"
-        exit /b
-    )
+	::strlen <resultVar> <stringVar> function by jeb (https://stackoverflow.com/a/5841587)
+	(   
+		setlocal EnableDelayedExpansion
+		(set^ tmp=!%~2!)
+		if defined tmp (
+			set "len=1"
+			for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+				if "!tmp:~%%P,1!" NEQ "" ( 
+					set /a "len+=%%P"
+					set "tmp=!tmp:~%%P!"
+				)
+			)
+		) ELSE (
+			set len=0
+		)
+	)
+	( 
+		endlocal
+		set "%~1=%len%"
+		exit /b
+	)

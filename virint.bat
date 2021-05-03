@@ -683,7 +683,7 @@ exit /b
 	::Display help on screen. [noLoad]
 	
 	if not defined nomode (
-		mode con cols=112 lines=54
+		mode con cols=112 lines=55
 	) else (
 		call :mode_get
 		if !cols_current! LSS 112 call :display_message "ERROR: Not enough horizontal size for displaying the help page." red wait & exit /b
@@ -701,7 +701,7 @@ exit /b
 		echo !space!Repository available at: [4mhttps://github.com/L89David/DarviLStuff[24m[0m
 		echo !space!
 		echo !space!
-		echo !space![96m!self_name! [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP] [/NoFileMgr]
+		echo !space![96m!self_name! [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/NoFileMgr] [/CHKUP]
 		echo !space!
 		echo !space!/N[0m	Create a new canvas.
 		echo !space![96m/S[0m	[37mSelect the size of the canvas to create. The value must be specified with two numbers between
@@ -716,7 +716,8 @@ exit /b
 		echo !space![96m/NoMode[0m	Stops resizing the window automatically. Enabling this option will make VIRINT use a
 		echo !space!		secundary console buffer to not clear the original one, but no automatic resizing will be done.
 		echo !space![96m/NoOldWarn[0m	[37mDo not warn about old files being loaded.
-		echo !space![96m/CHKUP[0m		Check if you are using the minimum necessary Windows build for ANSI escape codes
+		echo !space![96m/NoFileMgr[0m	[0mDo not use the file viewer when searching for files.
+		echo !space![96m/CHKUP[37m		Check if you are using the minimum necessary Windows build for ANSI escape codes
 		echo !space!		and the newest versions of VIRINT. If it finds a newer version of it, it will ask for a folder
 		echo !space!		to download VIRINT in. Pressing ENTER without entering a path will select the default option,
 		echo !space!		which is the folder that contains the currently running script, overriding the old version.
@@ -852,7 +853,7 @@ exit /b 0
 		echo 	NoOldWarn=0
 		echo:
 		echo:
-		echo #Disable the simple graphical file manager when loading files. ^(0/1^)
+		echo #Do not use the file viewer when searching for files. ^(0/1^)
 		echo 	NoFileMgr=0
 	) > "!cfg1!"
 	
@@ -1013,6 +1014,7 @@ exit /b
 	)
 	goto file_mgr_loop
 exit /b
+
 
 
 

@@ -945,7 +945,7 @@ exit /b
 	
 	
 	
-:file_mgr_loopz
+:file_mgr_loop
 	<nul set /p =[H
 	set file_mgr_fileCounter=
 	set file_mgr_currentDir=!cd!

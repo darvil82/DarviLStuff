@@ -60,6 +60,7 @@ for %%G in (!parms_array!) do (
 		if /i "%%G"=="/NoCompression" set noCompression=1
 		if /i "%%G"=="/NewCFG" call :cfg_create & exit /b
 		if /i "%%G"=="/NoOldWarn" set NoOldWarn=1
+		if /i "%%G"=="/NoFileMgr" set NoFileMgr=1
 	)
 )
 if defined parm_new (
@@ -109,8 +110,11 @@ if !start_input!==1 (
 )
 if !start_input!==2 (
 	call :menu_draw 2
-	call :file_mgr
-
+	if not defined NoFileMgr (call :file_mgr) else (
+		echo:
+		echo !menu_hr!
+		set /p file_load_input="[94mFilename?: [0m"
+	)
 	call :file_load
 )
 if !start_input!==3 (
@@ -697,7 +701,7 @@ exit /b
 		echo !space!Repository available at: [4mhttps://github.com/L89David/DarviLStuff[24m[0m
 		echo !space!
 		echo !space!
-		echo !space![96m!self_name! [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP]
+		echo !space![96m!self_name! [/N [/S NxN]] [/L file [/C]] [/NoCompression] [/NoMode] [/NoOldWarn] [/CHKUP] [/NoFileMgr]
 		echo !space!
 		echo !space!/N[0m	Create a new canvas.
 		echo !space![96m/S[0m	[37mSelect the size of the canvas to create. The value must be specified with two numbers between
@@ -846,6 +850,10 @@ exit /b 0
 		echo:
 		echo #Do not warn about old files being loaded. ^(0/1^)
 		echo 	NoOldWarn=0
+		echo:
+		echo:
+		echo #Disable the simple graphical file manager when loading files. ^(0/1^)
+		echo 	NoFileMgr=0
 	) > "!cfg1!"
 	
 	if not exist "!cfg1!" (call :display_message "ERROR: Couldn't create config file '!cfg1!'." red newline) else (call :display_message "Created configuration file succesfully at '!cfg1!'." green newline)
@@ -923,71 +931,77 @@ exit /b
     ::Small file manager
 	
 	type nul > "!temp1!"
-	set fileCounter=1
+	set file_mgr_fileCounter=1
 	setlocal
-	for /f "usebackq tokens=*" %%G in (`dir /b "!cd!"`) do (
-		set /a file_counter+=1
-		echo %%~fG >> "!temp1!"
-	)
+	for /f "usebackq tokens=*" %%G in (`dir /b "!cd!"`) do echo %%~fG >> "!temp1!"
 	endlocal
-	set /a selectPointer=0
+	set /a file_mgr_selectPointer=0
+	set file_mgr_hr=
 	
 	call :mode_get
 	call :window_opt cls
 	
+	for /l %%G in (1,1,!cols_current!) do set file_mgr_hr=!file_mgr_hr!─
+	
+	
 	
 :file_mgr_loop
 	<nul set /p =[H
-    set fileCounter=
+    set file_mgr_fileCounter=
 	set file_mgr_currentDir=!cd!
-    for /f "usebackq" %%G in ("!temp1!") do set /a fileCounter+=1
+    for /f "usebackq" %%G in ("!temp1!") do set /a file_mgr_fileCounter+=1
 	
 	echo [96mVIRINT !ver! - File Selector[0m
 	echo:
+	echo [96mUp: W  ^|  Down: S  ^|  Select: F  ^|  Drive: R[0m
+	echo:
+	echo !file_mgr_hr!
 	echo [7mCurrent directory:[27m !file_mgr_currentDir!
 	echo:
-	echo ─────────────────────────────────────────────────────
-	echo:
-	if !selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
+	if !file_mgr_selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
 	setlocal
 	for /f "usebackq tokens=*" %%G in ("!temp1!") do (
-		set /a file_counter+=1
-		set "path=%%~nxG"
+		set /a file_mgr_loopcounter+=1
+		set "file_mgr_filename=%%~nxG"
 		set strWrapper=
-		if !selectPointer! == !file_counter! set strWrapper=[7m
+		if !file_mgr_selectPointer! == !file_mgr_loopcounter! set strWrapper=[7m
 		if exist "%%~nxG\*" set strWrapper=!strWrapper![96m
-		echo   │ !strWrapper! !path! [27m[0m
+		echo   │ !strWrapper! !file_mgr_filename! [27m[0m
 	)
 	endlocal
 	echo   └─
 
-	choice /c wsf /n >nul
-	if !errorlevel! == 1 if !selectPointer! GTR 0 (set /a selectPointer -= 1) else (set /a selectPointer = !fileCounter! 2> nul)
-	if !errorlevel! == 2 if !selectPointer! LSS !fileCounter! (set /a selectPointer += 1) else (set /a selectPointer = 0)
+	choice /c wsfr /n >nul
+	if !errorlevel! == 1 if !file_mgr_selectPointer! GTR 0 (set /a file_mgr_selectPointer -= 1) else (set /a file_mgr_selectPointer = !file_mgr_fileCounter! 2> nul)
+	if !errorlevel! == 2 if !file_mgr_selectPointer! LSS !file_mgr_fileCounter! (set /a file_mgr_selectPointer += 1) else (set /a file_mgr_selectPointer = 0)
 	if !errorlevel! == 3 (
-		if !selectPointer! == 0 (
-			cd !file_mgr_currentDir!\..
+		if !file_mgr_selectPointer! == 0 (
+			cd "!file_mgr_currentDir!\.."
 		) else (
 			set selectCounter=
 			for /f "tokens=*" %%G in (!temp1!) do (
 				set /a selectCounter+=1
-				if !selectCounter!==!selectPointer! set testing=%%~nxG
+				if !selectCounter!==!file_mgr_selectPointer! set file_mgr_selector=%%~nxG
 			)
-			if exist "!testing!\*" (
-				cd !testing!
+			if exist "!file_mgr_selector!\*" (
+				cd "!file_mgr_selector!"
 			) else (
-				set "file_load_input=!testing!"
-				exit /b
+				set "file_load_input=!file_mgr_selector!"
+				exit /b 0
 			)
 		)
 		goto file_mgr
 	)
-	
-	
-	
-	
+	if !errorlevel! == 4 (
+		echo !file_mgr_hr!
+		set alphabet=0ABCEDFGHIJKLMNOPQRSTUWXYZ
+		echo Select a drive letter [A-Z]
+		choice /c ABCEDFGHIJKLMNOPQRSTUWXYZ /n >nul
+		call set file_mgr_newdrive=%%alphabet:~!errorlevel!,1%%
+		!file_mgr_newdrive!: 2> nul
+		goto file_mgr
+	)
 	goto file_mgr_loop
-
 exit /b
 
 

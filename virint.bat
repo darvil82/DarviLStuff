@@ -953,13 +953,13 @@ exit /b
 	set "file_mgr_currentDir=!cd!"
 	for /f "usebackq" %%G in ("!temp1!") do set /a file_mgr_fileCounter+=1
 	
-	echo [96mVIRINT !ver! - File Selector[0m
-	echo:
-	echo   [96mUp: W  ^|  Down: S  ^|  Select: F  ^|  Drive: R[0m
-	echo:
+	echo [K[96mVIRINT !ver! - File Selector[0m
+	echo [K
+	echo [K  [96mUp: W  ^|  Down: S  ^|  Select: F  ^|  Drive: R[0m
+	echo [K
 	echo !file_mgr_hr!
-	echo [7m Current directory: [27m !file_mgr_currentDir:\=[92m\[0m!
-	echo:
+	echo [K[7m Current directory: [27m !file_mgr_currentDir:\=[92m\[0m!
+	echo [K
 	if !file_mgr_selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
 	setlocal
 	for /f "usebackq tokens=*" %%G in ("!temp1!") do (
@@ -974,11 +974,11 @@ exit /b
 		if !file_mgr_selectPointer! == !file_mgr_loopcounter! set strWrapper=[7m
 		if exist "%%~nxG\*" set strWrapper=!strWrapper![96m
 		
-		echo   │ !strWrapper! !file_mgr_filename! [27m[0m
+		echo [K  │ !strWrapper! !file_mgr_filename! [27m[0m
 	)
 	:file_mgr_endloop
 	endlocal
-	echo   └─
+	echo   └─[J
 
 	choice /c WSFR /n >nul
 	if !errorlevel! == 1 if !file_mgr_selectPointer! GTR 0 (set /a file_mgr_selectPointer -= 1) else (set /a file_mgr_selectPointer = !file_mgr_fileCounter! 2> nul)

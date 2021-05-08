@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.2
-set /a build=47
+set ver=3.3
+set /a build=48
 
 ::Setting default values.
 set /a brush_X=5
@@ -36,11 +36,12 @@ if !instanceCounter! LEQ 1 if exist "%temp%\virint*.tmp*" del /f /q "%temp%\viri
 ::Check for parameters.
 set "self_filename=%~nx0"
 set "self_name=%~n0"
+set "file_extension=.vrnt"
 if exist %1 set "file_load_input=%1"
 
 if exist "!cfg1!" (
     for /f "usebackq tokens=1-2 delims==" %%G in (`findstr /v /r /c:"^^#" "!cfg1!"`) do (
-        if "%%H"=="0" (set %%G=) else (set /a %%G=%%H 2>nul)
+        if "%%H"=="0" (set "%%G=") else (set "%%G=%%H")
     )
 )
 
@@ -864,6 +865,11 @@ exit /b 0
         echo:
         echo #Do not use the file viewer when searching for files. ^(0/1^)
         echo 	NoFileMgr=0
+        echo:
+        echo:
+        echo #File extension definition. Currently only used to highlight the files with this extension in the
+        echo #file viewer. ^(string^)
+        echo 	file_extension=.vrnt
     ) > "!cfg1!"
     
     if not exist "!cfg1!" (call :display_message "ERROR: Couldn't create config file '!cfg1!'." red newline) else (call :display_message "Created configuration file succesfully at '!cfg1!'." green newline)
@@ -982,6 +988,7 @@ exit /b
         set strWrapper=
         if !file_mgr_selectPointer! == !file_mgr_loopcounter! set strWrapper=[7m
         if exist "%%~nxG\*" set strWrapper=!strWrapper![96m
+        if "%%~xG" == "!file_extension!" set strWrapper=!strWrapper![94m
         
         echo [K  │ !strWrapper! !file_mgr_filename! [27m[0m
     )

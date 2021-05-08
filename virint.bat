@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.3
-set /a build=48
+set ver=3.3.1
+set /a build=49
 
 ::Setting default values.
 set /a brush_X=5
@@ -152,9 +152,8 @@ if defined invalid (
     for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!▒▒
     for /l %%G in (4,1,!draw_barv_size!) do (set draw_barv_done=!draw_barv_done![%%G;1f▒▒& set draw_barv2_done=!draw_barv2_done![%%G;!draw_barv_offset!f▒▒)
     
-    set "draw_info_titlebar=VIRINT !ver! - [*'!draw_filename!"
+    set "draw_info_titlebar=VIRINT !ver! - [*'!draw_filename!']"
     call :strlen draw_info_titlebar_size draw_info_titlebar
-    set /a draw_info_titlebar_cutVal=draw_info_titlebar_size-cols_current+6
 
 
 
@@ -197,6 +196,7 @@ if defined invalid (
 
     ::Info bar
     if !draw_info_titlebar_size! GTR !cols_current! (
+		set /a draw_info_titlebar_cutVal=draw_info_titlebar_size-cols_current+6
         call set draw_info_titlebar=%%draw_filename:~0,-!draw_info_titlebar_cutVal!%%
         set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_info_titlebar!...']"
     ) else (
@@ -644,13 +644,13 @@ exit /b
     set /a window_lines=canvas_Y+12
 
     call :mode_get
-    call :window_opt cls
     if not defined nomode (
         mode con cols=!window_cols! lines=!window_lines!
     ) else (
         if !cols_current! LSS !window_cols! call :checksize_wait
         if !lines_current! LSS !window_lines! call :checksize_wait
     )
+	call :window_opt cls
 exit /b
 
 

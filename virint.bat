@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.3.2
-set /a build=50
+set ver=3.3.3
+set /a build=51
 
 ::Setting default values.
 set /a brush_X=5
@@ -132,6 +132,7 @@ if !start_input!==4 (
 )
 if defined invalid (
     if defined nomode timeout /t 3 >nul & call :window_opt oldbuffer
+	call :window_opt show
     exit /b 1
 )
 
@@ -957,6 +958,7 @@ exit /b
     
     call :mode_get
     call :window_opt cls
+	call :window_opt hide
     
     for /l %%G in (1,1,!cols_current!) do set file_mgr_hr=!file_mgr_hr!─
     

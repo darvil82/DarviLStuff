@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.3.1
-set /a build=49
+set ver=3.3.2
+set /a build=50
 
 ::Setting default values.
 set /a brush_X=5
@@ -975,7 +975,7 @@ exit /b
     echo !file_mgr_hr!
     echo [K[7m Current directory: [27m !file_mgr_currentDir:\=[92m\[0m!
     echo [K
-    if !file_mgr_selectPointer! == 0 (echo   [7m▲ Parent directory[27m) else (echo   ▲ Parent directory)
+    if !file_mgr_selectPointer! == 0 (echo [K  [7m▲ Parent directory[27m) else (echo [K  ▲ Parent directory)
     setlocal
     for /f "usebackq tokens=*" %%G in ("!temp1!") do (
         set /a file_mgr_loopcounter+=1

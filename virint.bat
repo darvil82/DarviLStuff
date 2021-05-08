@@ -15,7 +15,6 @@ set /a build=47
 
 ::Setting default values.
 set /a brush_X=5
-
 set /a brush_Y=5
 set "space=​"
 set brush_color=[97m

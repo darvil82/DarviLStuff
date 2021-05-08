@@ -149,19 +149,12 @@ if defined invalid (
     set /a draw_barv_size=canvas_Y+5
     set /a draw_barv_offset=(canvas_X*2)+7
     set /a draw_options_offset=draw_barh_offset+1
-    for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!░░
-    for /l %%G in (4,1,!draw_barv_size!) do (set draw_barv_done=!draw_barv_done![%%G;1f░░& set draw_barv2_done=!draw_barv2_done![%%G;!draw_barv_offset!f░░)
+    for /l %%G in (1,1,!draw_barh_size!) do set draw_barh_done=!draw_barh_done!▒▒
+    for /l %%G in (4,1,!draw_barv_size!) do (set draw_barv_done=!draw_barv_done![%%G;1f▒▒& set draw_barv2_done=!draw_barv2_done![%%G;!draw_barv_offset!f▒▒)
     
     set "draw_info_titlebar=VIRINT !ver! - [*'!draw_filename!"
     call :strlen draw_info_titlebar_size draw_info_titlebar
-    set /a draw_info_titlebar_cutVal=draw_info_titlebar_size-cols_current+5
-    
-    if !draw_info_titlebar_size! GTR !cols_current! (
-        call set draw_info_titlebar=%%draw_filename:~0,-!draw_info_titlebar_cutVal!%%
-        set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_info_titlebar!...']"
-    ) else (
-        set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_filename!']"
-    )
+    set /a draw_info_titlebar_cutVal=draw_info_titlebar_size-cols_current+6
 
 
 
@@ -203,24 +196,30 @@ if defined invalid (
     set /a draw_cursor_Y=brush_Y-4
 
     ::Info bar
+    if !draw_info_titlebar_size! GTR !cols_current! (
+        call set draw_info_titlebar=%%draw_filename:~0,-!draw_info_titlebar_cutVal!%%
+        set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_info_titlebar!...']"
+    ) else (
+        set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_filename!']"
+    )
     <nul set /p "=[H[7m[96m!draw_info_titlebar![K[0m"
     <nul set /p "=[2;1fColor A: !brush_color!!brush_type![0m   Color B: !brush_color2!!brush_type![0m   X: !draw_cursor_X!/!canvas_X! Y: !draw_cursor_Y!/!canvas_Y!   C/S: !cols_current!/!lmfao![K"
 
     ::Horizontal top
-    <nul set /p =[3;1f▓▓!draw_barh_done!▓▓
-    <nul set /p =[3;!brush_X!f▄▄
+    <nul set /p =[3;1f▓▓[0m!draw_barh_done!▓▓[0m
+    <nul set /p =[3;!brush_X!f[96m▄▄[0m
 
     ::Vertical left
     <nul set /p =!draw_barv_done!
-    echo [!brush_Y!;1f █
+    echo [!brush_Y!;1f[96m █[0m
 
     ::Vertical right
     <nul set /p =!draw_barv2_done!
-    echo [!brush_Y!;!draw_barv_offset!f█ 
+    echo [!brush_Y!;!draw_barv_offset!f[96m█ [0m
 
     ::Horizontal bottom
-    <nul set /p =[!draw_barh_offset!;1f▓▓!draw_barh_done!▓▓
-    <nul set /p =[!draw_barh_offset!;!brush_X!f▀▀
+    <nul set /p =[!draw_barh_offset!;1f▓▓[0m!draw_barh_done!▓▓[0m
+    <nul set /p =[!draw_barh_offset!;!brush_X!f[96m▀▀[0m
 
     ::Status bar
     <nul set /p =[!draw_barh_offset!;1f

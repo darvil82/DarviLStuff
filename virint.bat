@@ -202,7 +202,7 @@ if defined invalid (
         set "draw_info_titlebar=VIRINT !ver! - [!draw_filename_state!'!draw_filename!']"
     )
     <nul set /p "=[H[7m[96m!draw_info_titlebar![K[0m"
-    <nul set /p "=[2;1fColor A: !brush_color!!brush_type![0m   Color B: !brush_color2!!brush_type![0m   X: !draw_cursor_X!/!canvas_X! Y: !draw_cursor_Y!/!canvas_Y!   C/S: !cols_current!/!lmfao![K"
+    <nul set /p "=[2;1fColor A: !brush_color!!brush_type![0m   Color B: !brush_color2!!brush_type![0m   X: !draw_cursor_X!/!canvas_X! Y: !draw_cursor_Y!/!canvas_Y![K"
 
     ::Horizontal top
     <nul set /p =[3;1f▓▓[0m!draw_barh_done!▓▓[0m

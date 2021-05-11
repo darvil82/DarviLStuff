@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.3.3
-set /a build=51
+set ver=3.4
+set /a build=52
 
 ::Setting default values.
 set /a brush_X=5
@@ -400,14 +400,16 @@ exit /b
 
     call :display_message "Select the coordinate [1-1]:" white
     call :window_opt show
+    set option_coord_input=
     set /p option_coord_input=
     call :window_opt hide
     if defined option_coord_input (
         for /f "tokens=1-2 delims=-" %%G in ("!option_coord_input!") do (
-            set /a option_coord_X=%%G 2>nul
-            set /a option_coord_Y=%%H 2>nul
+            set option_coord_X=%%G
+            set option_coord_Y=%%H
         )
-        set option_coord_input=
+        if /i "!option_coord_X!"=="E" set option_coord_X=!canvas_X!
+        if /i "!option_coord_Y!"=="E" set option_coord_Y=!canvas_Y!
     ) else (
         set /a option_coord_X=1
         set /a option_coord_Y=1
@@ -694,7 +696,7 @@ exit /b
     ::Display help on screen. [noLoad]
     
     if not defined nomode (
-        mode con cols=112 lines=55
+        mode con cols=112 lines=57
     ) else (
         call :mode_get
         if !cols_current! LSS 112 call :display_message "ERROR: Not enough horizontal size for displaying the help page." red wait & exit /b
@@ -744,7 +746,9 @@ exit /b
         echo !space! [94m- Toggle Color ^(T^)[0m	[37mToggle between the primary and secundary selected colors ^(Color A and B^).
         echo !space! [94m- Brush Type ^(Z^)[0m	Select a type of brush from the list. After selecting a brush, it will be
         echo !space!			displayed at the Info bar ^(Color A and Color B^).
-        echo !space! [94m- Coord ^(F^)[0m		[37mSelect a coordinate to move the cursor on the canvas ^(x-y^).
+        echo !space! [94m- Coord ^(F^)[0m		[37mSelect a coordinate to move the cursor on the canvas ^(x-y^). Pressing ENTER
+        echo !space!			without entering any value will move the cursor to position X1 and Y1. Use a value of
+        echo !space!			'E' to move the cursor to the limit of the canvas on the specified axis.
         echo !space! [94m- Fill ^(X^)[0m		Fill the current canvas with the Color A. If the Erase tool is enabled, the entire
         echo !space!			canvas will be cleared.
         echo !space!

@@ -165,7 +165,7 @@ class Line:
                 if obj is self.__class__: continue
                 if _nextPos in self._posHistory: continue
                 if _nextPos in obj._posHistory:
-                    if args.debug: self.logmsg(f"Collision with line at {self._pos}")
+                    if args.debug: self.logmsg(f"Line collision at {self._pos}")
                     return
 
         # Add / Subtract to the current coordinates

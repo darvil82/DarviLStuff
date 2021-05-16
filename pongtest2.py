@@ -6,9 +6,8 @@ from time import sleep
 from os import get_terminal_size, system as runsys
 from random import randrange, randint
 import argparse
-from sys import exit
 
-prjVersion = "1.3-1"
+prjVersion = "1.3.1"
 
 
 
@@ -89,7 +88,7 @@ invalid = False
 if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below"); invalid = True
 if args.l > 500: showMsg(error="Length cannot exceed 500"); invalid = True
 if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below"); invalid = True
-if invalid: exit()
+if invalid: quit(1)
 
 
 
@@ -239,4 +238,4 @@ except KeyboardInterrupt:
     if args.debug:
         logfile.write("Interrupted.\n")
         logfile.close()
-    exit()
+    quit(0)

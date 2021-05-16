@@ -2,14 +2,13 @@
 #Written by DarviL (David Losantos)
 #Please don't expect beautiful things here, it would be even better to expect the worst.
 
-from genericpath import exists
 from time import sleep
-from os import get_terminal_size, remove, system as runsys, path
+from os import get_terminal_size, system as runsys, path
 from random import randrange, randint
 import argparse
 from sys import exit
 
-prjVersion = "1.3"
+prjVersion = "1.3-1"
 
 
 

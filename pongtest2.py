@@ -2,13 +2,14 @@
 #Written by DarviL (David Losantos)
 #Please don't expect beautiful things here, it would be even better to expect the worst.
 
+from genericpath import exists
 from time import sleep
-from os import popen, get_terminal_size, system as runsys
+from os import get_terminal_size, remove, system as runsys, path
 from random import randrange, randint
 import argparse
 from sys import exit
 
-prjVersion = "1.2.1-1"
+prjVersion = "1.3"
 
 
 
@@ -45,9 +46,7 @@ def getWindowSize():
     Also it subtracts 2 to cols because otherwise the lines won't be aligned or something.
     """
     size = list(get_terminal_size())
-    cols = size[0] - 2
-    lines = size[1]
-    return (cols, lines)
+    return (size[0] - 2, size[1])
 
 
 randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
@@ -76,15 +75,15 @@ runsys("")  # Idk the purpose of this but it's needed in Windows to display prop
 
 # Parse parms
 argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
-argparser.add_argument("-n", help="number of lines to display", type=int, default=1)
-argparser.add_argument("-c", help="clear the screen when colliding", action="store_true")
-argparser.add_argument("-s", help="delay per screen frame in seconds", type=float, default=0.02)
-argparser.add_argument("-l", help="length of the line. Use '0' to make it infinite", type=int, default=10)
-argparser.add_argument("-d", help="create a new line at every collision with the same color as it's parent", action="store_true")
-argparser.add_argument("-w", help="make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines", action="store_true")
-argparser.add_argument("-r", help="change the color of the line on every frame", action="store_true")
-argparser.add_argument("--debug", help="debug mode", action="store_true")
-argparser.add_argument("--max", help="maximun number of line objects that can be created. Default is 5000", type=int, default=5000)
+argparser.add_argument("-n", help="Number of lines to display", type=int, default=1)
+argparser.add_argument("-c", help="Clear the screen when colliding", action="store_true")
+argparser.add_argument("-s", help="Delay per screen frame in seconds", type=float, default=0.02)
+argparser.add_argument("-l", help="Length of the line. Use '0' to make it infinite", type=int, default=10)
+argparser.add_argument("-d", help="Create a new line at every collision with the same color as it's parent", action="store_true")
+argparser.add_argument("-w", help="Make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines", action="store_true")
+argparser.add_argument("-r", help="Change the color of the line on every frame", action="store_true")
+argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000", type=int, default=5000)
+argparser.add_argument("--debug", help="Debug mode. Displays information about the current session, and appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="store_true")
 args = argparser.parse_args()
 
 invalid = False
@@ -103,6 +102,9 @@ if invalid: exit()
 
 windowSize = getWindowSize()
 terminalOpt("newbuffer", "hidecursor", "clear")
+if args.debug: logfile = open("./pt2.log", "w", buffering=1)
+
+
 
 
 
@@ -121,6 +123,10 @@ class Line:
             elif key == "pos":
                 self._pos = list(value)
 
+        if args.debug:
+            logfile.write(f"Created new \u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mline\u001b[0m.\n")
+            self.logmsg = lambda msg: logfile.write(f"\t\u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m#\u001b[0m {msg}\n")
+
 
     def __str__(self):
         return f"\u001b[H\u001b[0m\u001b[7m\u001b[KLength: {self._llength}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\u001b[K\u001b[27m"
@@ -132,6 +138,8 @@ class Line:
         if args.c:
             terminalOpt("clear")
             self._posHistory.clear()
+        if args.debug:
+            self.logmsg(f"Border collision at {self._pos}")
 
 
     def operate(self):
@@ -158,7 +166,9 @@ class Line:
             for obj in lines:
                 if obj is self.__class__: continue
                 if _nextPos in self._posHistory: continue
-                if _nextPos in obj._posHistory: return
+                if _nextPos in obj._posHistory:
+                    if args.debug: self.logmsg(f"Collision with line at {self._pos}")
+                    return
 
         # Add / Subtract to the current coordinates
         self._pos = _nextPos
@@ -227,4 +237,7 @@ try:
 
 except KeyboardInterrupt:
     terminalOpt("clear", "oldbuffer", "reset", "showcursor")
+    if args.debug:
+        logfile.write("Interrupted.\n")
+        logfile.close()
     exit()

@@ -146,13 +146,14 @@ class Line:
 
 
     def collide(self, axis, state):
-        self._state[axis] = state
+        if args.debug: self.logmsg(f"Border collision at {self._pos}")
         if args.d and len(lines) < args.max: lines.append(Line(color=self._color, char=self._char))
+        self._state[axis] = state
         if args.c:
             terminalOpt("clear")
             self._posHistory.clear()
         if args.r and args.r == 1: self._color = randomColor()
-        if args.debug: self.logmsg(f"Border collision at {self._pos}")
+        
 
 
     def operate(self):

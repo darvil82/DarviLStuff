@@ -153,7 +153,6 @@ class Line:
             terminalOpt("clear")
             self._posHistory.clear()
         if args.r and args.r == 1: self._color = randomColor()
-        
 
 
     def operate(self):

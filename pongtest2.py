@@ -7,8 +7,6 @@ from os import get_terminal_size, system as runsys
 from random import randrange, randint
 import argparse
 
-prjVersion = "1.4"
-
 
 def terminalOpt(*args):
     """
@@ -50,6 +48,7 @@ randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 
 def showMsg(**kwargs):
+    # Display a message with a bit of color.
     for key in kwargs:
         value = kwargs.get(key)
         if key == "error":
@@ -60,6 +59,7 @@ def showMsg(**kwargs):
 
 
 def capValue(value, max=float('inf'), min=float('-inf')):
+    # Clamp a value to a minimun and/or maximun value.
     if value > max:
         return max
     elif value < min:
@@ -70,47 +70,40 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 
 
-runsys("")  # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
 
-# Parse parms
-argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
-argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
-argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
-argparser.add_argument("-s", help="Delay per screen frame in seconds.", type=float, default=0.02)
-argparser.add_argument("-l", help="Length of the line. Use '0' to make it infinite.", type=int, default=10)
-argparser.add_argument("-d", help="Create a new line at every collision with the same color as it's parent.", action="store_true")
-argparser.add_argument("-w", help="Make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines.", action="store_true")
-argparser.add_argument("-r", help="Change the color of the line on every border collision. Double 'r' will change it on every frame.", action="count")
-argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
-argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
-argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
-argparser.add_argument("--debug", help="Debug mode. Displays information about the lines and appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="store_true")
-args = argparser.parse_args()
+def parseArgs():
+    # Parse parms
+    global args, argPos
+    argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
+    argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
+    argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
+    argparser.add_argument("-s", help="Delay per screen frame in seconds.", type=float, default=0.02)
+    argparser.add_argument("-l", help="Length of the line. Use '0' to make it infinite.", type=int, default=10)
+    argparser.add_argument("-d", help="Create a new line at every collision with the same color as it's parent.", action="store_true")
+    argparser.add_argument("-w", help="Make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines.", action="store_true")
+    argparser.add_argument("-r", help="Change the color of the line on every border collision. Double 'r' will change it on every frame.", action="count")
+    argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
+    argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
+    argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
+    argparser.add_argument("--debug", help="Debug mode. Displays information about the lines and appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="store_true")
+    args = argparser.parse_args()
 
-invalid = False
-if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below.")
-if args.l > 500: showMsg(error="Length cannot exceed 500.")
-if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
-if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
-if args.pos:
-    try:
-        argPos = [int(x) for x in args.pos.split(",")]
-        if len(argPos) != 2:
-            showMsg(error="Position X and position Y values required.")
-    except ValueError:
-        showMsg(error="Invalid position value.")
+    invalid = False
+    if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below.")
+    if args.l > 500: showMsg(error="Length cannot exceed 500.")
+    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
+    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
+    if args.pos:
+        try:
+            argPos = [int(x) for x in args.pos.split(",")]
+            if len(argPos) != 2:
+                showMsg(error="Position X and position Y values required.")
+        except ValueError:
+            showMsg(error="Invalid position value.")
 
-if invalid: quit(1)
-
-
-
+    if invalid: quit(1)
 
 
-
-
-windowSize = getWindowSize()
-terminalOpt("newbuffer", "hidecursor", "clear")
-if args.debug: logfile = open("./pt2.log", "w", buffering=1)
 
 
 
@@ -118,12 +111,12 @@ if args.debug: logfile = open("./pt2.log", "w", buffering=1)
 
 class Line:
     def __init__(self, **kwargs):
-        self._length = args.l + 1       # length of the line.
-        self._color = randomColor()       # Color of the line in RGB.
-        self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]      # Position of the line.
-        self._state = [randint(0, 1), randint(0, 1)]        # Bools for controlling when to add or substract to the current pos.
-        self._posHistory = []       # Position history of the line.
-        self._char = args.chars[randint(0,len(args.chars)-1)] * 2
+        self._length = args.l + 1                                                    # Length of the line.
+        self._color = randomColor()                                                  # Color of the line in RGB.
+        self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]    # Position of the line.
+        self._state = [randint(0, 1), randint(0, 1)]                                 # Bools for controlling when to add or substract to the current pos.
+        self._posHistory = []                                                        # Position history of the line.
+        self._char = args.chars[randint(0,len(args.chars)-1)] * 2                    # Character to display as the line body.
 
         for key in kwargs:
             value = kwargs.get(key)
@@ -142,7 +135,7 @@ class Line:
 
 
     def __str__(self):
-        return f"\x1b[H\x1b[0m\x1b[7m\x1b[KLength: {self._length}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\x1b[K\x1b[27m"
+        return f"\x1b[H\x1b[0m\x1b[7m\x1b[KLength: {self._length}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._colorHistory}\x1b[K\x1b[27m"
 
 
     def collide(self, axis, state):
@@ -219,6 +212,7 @@ class Line:
 
             if len(self._posHistory) == self._length:
                 self._oldPos = self._posHistory[-1]
+
                 _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f  "
 
                 if self._oldPos in self._posHistory[0:-2]:
@@ -228,6 +222,7 @@ class Line:
                         if obj._posHistory is self._posHistory: continue
                         if self._oldPos in obj._posHistory:
                             _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
+                            if args.debug: self.logmsg(f"Replaced line body at {self._oldPos}")
                             break
 
                 print(_brush, end="", flush=True)
@@ -239,29 +234,40 @@ class Line:
 
 
 
+if __name__ == "__main__":
+    prjVersion = "1.4.1"
+
+    parseArgs()
+
+    runsys("")  # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
+
+    windowSize = getWindowSize()
+    terminalOpt("newbuffer", "hidecursor", "clear")
+    if args.debug: logfile = open("./pt2.log", "w", buffering=1)
 
 
-lines = []
-for x in range(0, capValue(args.n, args.max)):
-    lines.append(Line())
+    lines = []
+    for x in range(0, capValue(args.n, args.max)):
+        lines.append(Line())
 
-getSizeCounter = 0
-try:
-    while True:
-        if getSizeCounter >= 10:
-            windowSize = getWindowSize()
-            getSizeCounter = 0
 
-        for x in range(0, len(lines)):
-            lines[x].move()
-            if args.debug: print(lines[x])
+    getSizeCounter = 0
+    try:
+        while True:
+            if getSizeCounter >= 10:
+                windowSize = getWindowSize()
+                getSizeCounter = 0
 
-        sleep(args.s)
-        getSizeCounter += 1
+            for x in range(0, len(lines)):
+                lines[x].move()
+                if args.debug: print(lines[x])
 
-except KeyboardInterrupt:
-    terminalOpt("clear", "oldbuffer", "reset", "showcursor")
-    if args.debug:
-        logfile.write("Interrupted.\n")
-        logfile.close()
-    quit(0)
+            sleep(args.s)
+            getSizeCounter += 1
+
+    except KeyboardInterrupt:
+        terminalOpt("clear", "oldbuffer", "reset", "showcursor")
+        if args.debug:
+            logfile.write("Interrupted.\n")
+            logfile.close()
+        quit(0)

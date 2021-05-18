@@ -203,7 +203,7 @@ class Line:
             flush=True
         )
 
-        if args.l >= 0:
+        if args.l > 0:
             """
             Save the current position of the line into posHistory, which will contain an history of coordinates of the line.
             To remove the tail of the line progressively, we get the last value in the list, which is the position of the
@@ -240,7 +240,7 @@ class Line:
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.4"
+    prjVersion = "1.4.5"
 
     parseArgs()
 

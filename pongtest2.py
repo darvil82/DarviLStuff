@@ -85,6 +85,7 @@ def parseArgs():
     argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
     argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
     argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
+    argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
     argparser.add_argument("--debug", help="Debug mode. Displays information about the lines and appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="store_true")
     args = argparser.parse_args()
 
@@ -234,8 +235,11 @@ class Line:
 
 
 
-if __name__ == "__main__":
-    prjVersion = "1.4.1"
+
+
+def main():
+    global prjVersion, windowSize, lines, logfile
+    prjVersion = "1.4.2"
 
     parseArgs()
 
@@ -254,7 +258,7 @@ if __name__ == "__main__":
     getSizeCounter = 0
     try:
         while True:
-            if getSizeCounter >= 10:
+            if getSizeCounter >= args.urate:
                 windowSize = getWindowSize()
                 getSizeCounter = 0
 
@@ -271,3 +275,11 @@ if __name__ == "__main__":
             logfile.write("Interrupted.\n")
             logfile.close()
         quit(0)
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()

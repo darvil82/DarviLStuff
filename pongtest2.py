@@ -136,7 +136,7 @@ class Line:
 
 
     def __str__(self):
-        return f"\x1b[H\x1b[0m\x1b[7m\x1b[KLength: {self._length}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._colorHistory}\x1b[K\x1b[27m"
+        return f"\x1b[H\x1b[0m\x1b[7m\x1b[KLength: {self._length}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\x1b[K\x1b[27m"
 
 
     def collide(self, axis, state):

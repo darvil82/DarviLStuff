@@ -240,7 +240,7 @@ class Line:
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.3"
+    prjVersion = "1.4.4"
 
     parseArgs()
 
@@ -248,7 +248,7 @@ def main():
 
     windowSize = getWindowSize()
     terminalOpt("newbuffer", "hidecursor", "clear")
-    if args.debug and args.debug >= 2: logfile = open("./pt2.log", "w", buffering=1)
+    if args.debug and args.debug >= 2: logfile = open("./pt2.log", "w", buffering=1, encoding='utf-8')
 
 
     lines = []

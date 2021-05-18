@@ -86,7 +86,7 @@ def parseArgs():
     argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
     argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
     argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
-    argparser.add_argument("--debug", help="Debug mode. Displays information about the lines and appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="store_true")
+    argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
     args = argparser.parse_args()
 
     invalid = False
@@ -130,9 +130,9 @@ class Line:
 
         if args.pos: self._pos = argPos
 
-        if args.debug:
-            logfile.write(f"Created new \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mline\x1b[0m.\n")
-            self.logmsg = lambda msg: logfile.write(f"\t\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m#\x1b[0m {msg}\n")
+        if args.debug and args.debug >= 2:
+            logfile.write(f"Created new line \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m.\n")
+            self.logmsg = lambda msg: logfile.write(f"\t\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m → {msg}\x1b[0m\n")
 
 
     def __str__(self):
@@ -140,7 +140,7 @@ class Line:
 
 
     def collide(self, axis, state):
-        if args.debug: self.logmsg(f"Border collision at {self._pos}")
+        if args.debug and args.debug >= 2: self.logmsg(f"Border collision at {self._pos}")
         if args.d and len(lines) < args.max: lines.append(Line(color=self._color, char=self._char))
         self._state[axis] = state
         if args.c:
@@ -174,7 +174,7 @@ class Line:
                 if obj is self.__class__: continue
                 if _nextPos in self._posHistory: continue
                 if _nextPos in obj._posHistory:
-                    if args.debug: self.logmsg(f"Line collision at {self._pos}")
+                    if args.debug and args.debug >= 2: self.logmsg(f"Line collision at {self._pos}")
                     return
 
         # Add / Subtract to the current coordinates
@@ -203,7 +203,7 @@ class Line:
             flush=True
         )
 
-        if not args.l <= 0:
+        if args.l >= 0:
             """
             Save the current position of the line into posHistory, which will contain an history of coordinates of the line.
             To remove the tail of the line progressively, we get the last value in the list, which is the position of the
@@ -218,12 +218,13 @@ class Line:
 
                 if self._oldPos in self._posHistory[0:-2]:
                     _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}"
+                    if args.debug and args.debug >= 2: self.logmsg(f"Replaced self body at {self._oldPos}")
                 else:
                     for obj in lines:
                         if obj._posHistory is self._posHistory: continue
                         if self._oldPos in obj._posHistory:
                             _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
-                            if args.debug: self.logmsg(f"Replaced line body at {self._oldPos}")
+                            if args.debug and args.debug >= 2: self.logmsg(f"Replaced \x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}'s\x1b[0m body at {self._oldPos}")
                             break
 
                 print(_brush, end="", flush=True)
@@ -239,7 +240,7 @@ class Line:
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.2"
+    prjVersion = "1.4.3"
 
     parseArgs()
 
@@ -247,7 +248,7 @@ def main():
 
     windowSize = getWindowSize()
     terminalOpt("newbuffer", "hidecursor", "clear")
-    if args.debug: logfile = open("./pt2.log", "w", buffering=1)
+    if args.debug and args.debug >= 2: logfile = open("./pt2.log", "w", buffering=1)
 
 
     lines = []
@@ -271,7 +272,7 @@ def main():
 
     except KeyboardInterrupt:
         terminalOpt("clear", "oldbuffer", "reset", "showcursor")
-        if args.debug:
+        if args.debug and args.debug >= 2:
             logfile.write("Interrupted.\n")
             logfile.close()
         quit(0)

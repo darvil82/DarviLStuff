@@ -250,7 +250,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.5-2"
+    prjVersion = "1.4.5-3"
 
     parseArgs()
 
@@ -266,12 +266,12 @@ def main():
         lines.append(Line())
 
 
-    getSizeCounter = 0
+    getSizeCounter = 1
     try:
         while True:
             if getSizeCounter >= args.urate:
                 windowSize = getWindowSize()
-                getSizeCounter = 0
+                getSizeCounter = 1
 
             for x in range(0, len(lines)):
                 lines[x].move()

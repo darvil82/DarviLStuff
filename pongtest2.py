@@ -73,7 +73,7 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 def parseArgs():
     # Parse parms
-    global args, argPos
+    global args, argPos, invalid
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
@@ -250,7 +250,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.5-1"
+    prjVersion = "1.4.5-2"
 
     parseArgs()
 

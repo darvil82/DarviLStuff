@@ -150,8 +150,7 @@ class Line:
 
 
     def operate(self):
-        currentPos = list(self._pos)
-        nextPos = currentPos
+        currentPos = nextPos = list(self._pos)
 
         if self._state[0]:
             nextPos[0] = currentPos[0] - 2
@@ -162,6 +161,7 @@ class Line:
             nextPos[1] = currentPos[1] - 1
         else:
             nextPos[1] = currentPos[1] + 1
+
         return nextPos
 
 
@@ -236,11 +236,21 @@ class Line:
 
 
 
+def stopScript():
+    terminalOpt("clear", "oldbuffer", "reset", "showcursor")
+    if args.debug and args.debug >= 2:
+        logfile.write("Interrupted.\n")
+        logfile.close()
+
+
+
+
+
 
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.5"
+    prjVersion = "1.4.5-1"
 
     parseArgs()
 
@@ -271,11 +281,11 @@ def main():
             getSizeCounter += 1
 
     except KeyboardInterrupt:
-        terminalOpt("clear", "oldbuffer", "reset", "showcursor")
-        if args.debug and args.debug >= 2:
-            logfile.write("Interrupted.\n")
-            logfile.close()
-        quit(0)
+        stopScript()
+    
+    except Exception as error:
+        stopScript()
+        showMsg(error=f"An error occurred while trying to run the script:\n\t {error}")
 
 
 

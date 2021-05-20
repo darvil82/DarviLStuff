@@ -288,12 +288,9 @@ def main():
     global prjVersion, windowSize, lines, logfile
     prjVersion = "1.5-1"
 
+    runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()
-
     if not parseArgs(): quit()
-
-    runsys("")          # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
-
     terminalOpt("newbuffer", "hidecursor", "clear")
     if args.debug and args.debug >= 2: logfile = open("./pt2.log", "w", buffering=1, encoding='utf-8')
 

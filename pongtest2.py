@@ -49,10 +49,12 @@ randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 def showMsg(**kwargs):
     # Display a message with a bit of color.
+    global isValid
     for key in kwargs:
         value = kwargs.get(key)
         if key == "error":
             prefix = "\x1b[91mE:\x1b[0m"
+            isValid = False
         print(prefix, value)
 
 
@@ -80,7 +82,7 @@ def lstToInt(list):
 
 def parseArgs():
     # Parse parms
-    global args, argPos, argColor
+    global args, argPos, argColor, isValid
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
@@ -98,10 +100,10 @@ def parseArgs():
     args = argparser.parse_args()
 
     isValid = True
-    if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below."); isValid = False
-    if args.l > 500: showMsg(error="Length cannot exceed 500."); isValid = False
-    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below."); isValid = False
-    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s."); isValid = False
+    if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below.")
+    if args.l > 500: showMsg(error="Length cannot exceed 500.")
+    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
+    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
 
     if args.pos:
         argPos = []
@@ -114,8 +116,8 @@ def parseArgs():
                         posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
                         posAxis += 1
                     except ValueError:
-                        showMsg(error=f"'{posvalue}' is not an intenger."); isValid = False
-            else: showMsg(error="2 values are required."); isValid = False
+                        showMsg(error=f"'{posvalue}' is not an intenger.")
+            else: showMsg(error="2 values are required.")
         
             if isValid: argPos.append(lstToInt(posSplitted))
     
@@ -126,10 +128,10 @@ def parseArgs():
             if len(rgbSplitted) == 3:
                 for rgbvalue in rgbSplitted:
                     try:
-                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'."); isValid = False
+                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'.")
                     except ValueError:
-                        showMsg(error=f"'{rgbvalue}' is not an intenger."); isValid = False
-            else: showMsg(error="3 values are required."); isValid = False
+                        showMsg(error=f"'{rgbvalue}' is not an intenger.")
+            else: showMsg(error="3 values are required.")
         
             argColor.append(rgbSplitted)
 
@@ -284,7 +286,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.5"
+    prjVersion = "1.5-1"
 
     windowSize = getWindowSize()
 

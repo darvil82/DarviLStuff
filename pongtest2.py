@@ -93,8 +93,8 @@ def parseArgs():
     argparser.add_argument("-r", help="Change the color of the line on every border collision. Double 'r' will change it on every frame.", action="count")
     argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
     argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
-    argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
-    argparser.add_argument("--color", help="Color of the lines. RGB formatted like 'RED:GREEN:BLUE,[...]'. If multiple RGB values are supplied, a random one will be selected when creating a new line.", type=str)
+    argparser.add_argument("--pos", help="Start position for all the lines. Position values formatted like 'PosX:PosY,[...]'. If multiple Position values are supplied, a random one will be selected when creating a new line.", type=str)
+    argparser.add_argument("--color", help="Color of the lines. RGB values formatted like 'RED:GREEN:BLUE,[...]'. If multiple RGB values are supplied, a random one will be selected when creating a new line.", type=str)
     argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
     argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
     args = argparser.parse_args()
@@ -286,7 +286,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.5-1"
+    prjVersion = "1.5-2"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

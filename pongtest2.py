@@ -53,8 +53,6 @@ def showMsg(**kwargs):
         value = kwargs.get(key)
         if key == "error":
             prefix = "\x1b[91mE:\x1b[0m"
-            global invalid
-            invalid = True
         print(prefix, value)
 
 
@@ -73,7 +71,7 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 def parseArgs():
     # Parse parms
-    global args, argPos, invalid
+    global args, argPos
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
@@ -89,20 +87,20 @@ def parseArgs():
     argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
     args = argparser.parse_args()
 
-    invalid = False
-    if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below.")
-    if args.l > 500: showMsg(error="Length cannot exceed 500.")
-    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
-    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
+    isValid = True
+    if args.n <= 0: showMsg(error="Number of lines cannot be 0 or below."); isValid = False
+    if args.l > 500: showMsg(error="Length cannot exceed 500."); isValid = False
+    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below."); isValid = False
+    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s."); isValid = False
     if args.pos:
         try:
             argPos = [int(x) for x in args.pos.split(",")]
             if len(argPos) != 2:
-                showMsg(error="Position X and position Y values required.")
+                showMsg(error="Position X and position Y values required."); isValid = False
         except ValueError:
-            showMsg(error="Invalid position value.")
+            showMsg(error="Invalid position value."); isValid = False
 
-    if invalid: quit(1)
+    return isValid
 
 
 
@@ -250,9 +248,9 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.5-3"
+    prjVersion = "1.4.5-4"
 
-    parseArgs()
+    if not parseArgs(): quit()
 
     runsys("")  # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
 

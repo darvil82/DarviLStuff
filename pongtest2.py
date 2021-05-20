@@ -4,7 +4,7 @@
 
 from time import sleep
 from os import get_terminal_size, system as runsys
-from random import randrange, randint
+from random import choice, randrange, randint
 import argparse
 
 
@@ -66,12 +66,21 @@ def capValue(value, max=float('inf'), min=float('-inf')):
         return value
 
 
+def lstToInt(list):
+    # Return list with ints
+    values = []
+    for item in list:
+        values.append(int(item))
+    return values
+
+
+
 
 
 
 def parseArgs():
     # Parse parms
-    global args, argPos
+    global args, argPos, argColor
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
@@ -83,6 +92,7 @@ def parseArgs():
     argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
     argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
     argparser.add_argument("--pos", help="Start position for all the lines. X and Y values separated by ','.", type=str)
+    argparser.add_argument("--color", help="Color of the lines. RGB formatted like 'RED:GREEN:BLUE,[...]'. If multiple RGB values are supplied, a random one will be selected when creating a new line.", type=str)
     argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
     argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
     args = argparser.parse_args()
@@ -92,13 +102,37 @@ def parseArgs():
     if args.l > 500: showMsg(error="Length cannot exceed 500."); isValid = False
     if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below."); isValid = False
     if len(args.chars) <= 0: showMsg(error="Specified invalid character/s."); isValid = False
+
     if args.pos:
-        try:
-            argPos = [int(x) for x in args.pos.split(",")]
-            if len(argPos) != 2:
-                showMsg(error="Position X and position Y values required."); isValid = False
-        except ValueError:
-            showMsg(error="Invalid position value."); isValid = False
+        argPos = []
+        for pos in args.pos.split(","):
+            posSplitted = pos.split(":")
+            if len(posSplitted) == 2:
+                posAxis = 0
+                for posvalue in posSplitted:
+                    try:
+                        posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
+                        posAxis += 1
+                    except ValueError:
+                        showMsg(error=f"'{posvalue}' is not an intenger."); isValid = False
+            else: showMsg(error="2 values are required."); isValid = False
+        
+            if isValid: argPos.append(lstToInt(posSplitted))
+    
+    if args.color:
+        argColor = []
+        for rgb in args.color.split(","):
+            rgbSplitted = rgb.split(":")
+            if len(rgbSplitted) == 3:
+                for rgbvalue in rgbSplitted:
+                    try:
+                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'."); isValid = False
+                    except ValueError:
+                        showMsg(error=f"'{rgbvalue}' is not an intenger."); isValid = False
+            else: showMsg(error="3 values are required."); isValid = False
+        
+            argColor.append(rgbSplitted)
+
 
     return isValid
 
@@ -117,6 +151,10 @@ class Line:
         self._posHistory = []                                                        # Position history of the line.
         self._char = args.chars[randint(0,len(args.chars)-1)] * 2                    # Character to display as the line body.
 
+        if args.pos: self._pos = choice(argPos)
+
+        if args.color: self._color = choice(argColor)
+    
         for key in kwargs:
             value = kwargs.get(key)
             if key == "color":
@@ -125,8 +163,6 @@ class Line:
                 self._pos = list(value)
             elif key == "char":
                 self._char = value
-
-        if args.pos: self._pos = argPos
 
         if args.debug and args.debug >= 2:
             logfile.write(f"Created new line \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m.\n")
@@ -248,13 +284,14 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.4.5-4"
+    prjVersion = "1.5"
+
+    windowSize = getWindowSize()
 
     if not parseArgs(): quit()
 
-    runsys("")  # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
+    runsys("")          # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
 
-    windowSize = getWindowSize()
     terminalOpt("newbuffer", "hidecursor", "clear")
     if args.debug and args.debug >= 2: logfile = open("./pt2.log", "w", buffering=1, encoding='utf-8')
 
@@ -283,7 +320,7 @@ def main():
     
     except Exception as error:
         stopScript()
-        showMsg(error=f"An error occurred while trying to run the script:\n\t {error}")
+        showMsg(error=f"An error occurred while trying to run the script:\n\t{error}")
 
 
 

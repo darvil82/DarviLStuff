@@ -167,12 +167,12 @@ class Line:
                 self._char = value
 
         if args.debug and args.debug >= 2:
-            logfile.write(f"Created new line \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m.\n")
+            logfile.write(f"Created new line \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m at {self._pos}.\n")
             self.logmsg = lambda msg: logfile.write(f"\t\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m → {msg}\x1b[0m\n")
 
 
     def __str__(self):
-        return f"\x1b[H\x1b[0m\x1b[7m\x1b[KLength: {self._length}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\x1b[K\x1b[27m"
+        return f"\x1b[H\x1b[0m\x1b[7mObjects: {len(lines)}\x1b[K\n\x1b[K\n\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mPosHistory: {self._posHistory}\x1b[K\nLength: {self._length}\x1b[K\nColor: {self._color}\x1b[K\nChar: '{self._char}'\x1b[K\nPos: {self._pos}\x1b[K\nState: {self._state}\x1b[K\x1b[27m\n\x1b[K"
 
 
     def collide(self, axis, state):
@@ -219,15 +219,21 @@ class Line:
         if self._pos[1] <= 1: self.collide(1, 0)
         if self._pos[0] == windowSize[0]:
             self.collide(0, 1)
-        elif self._pos[0] > windowSize[0]:
+        elif self._pos[0] > windowSize[0] + 2:
             self.collide(0, 1)
             self._pos[0] = windowSize[0]
+            for pos in self._posHistory:
+                print(f"\x1b[{pos[1]};{pos[0]}f  ", end="", flush=True)
+            self._posHistory.clear()
         
         if self._pos[1] == windowSize[1]:
             self.collide(1, 1)
         elif self._pos[1] > windowSize[1]:
             self.collide(1, 1)
             self._pos[1] = windowSize[1]
+            for pos in self._posHistory:
+                print(f"\x1b[{pos[1]};{pos[0]}f  ", end="", flush=True)
+            self._posHistory.clear()
         
         if not self._pos[0] % 2: self._pos[0] += 1
 
@@ -286,7 +292,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.5-2"
+    prjVersion = "1.5.1"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

@@ -217,15 +217,16 @@ class Line:
         self._pos = _nextPos
         if self._pos[0] <= 1: self.collide(0, 0)
         if self._pos[1] <= 1: self.collide(1, 0)
-        if self._pos[0] == windowSize[0]:
+
+        if self._pos[0] == windowSize[0] or self._pos[0] == windowSize[0] + 1:
             self.collide(0, 1)
-        elif self._pos[0] > windowSize[0] + 2:
+        elif self._pos[0] > windowSize[0]:
             self.collide(0, 1)
             self._pos[0] = windowSize[0]
             for pos in self._posHistory:
                 print(f"\x1b[{pos[1]};{pos[0]}f  ", end="", flush=True)
             self._posHistory.clear()
-        
+
         if self._pos[1] == windowSize[1]:
             self.collide(1, 1)
         elif self._pos[1] > windowSize[1]:

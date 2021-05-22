@@ -236,8 +236,14 @@ class Line:
                 self.clearSegment(pos, True)
             self._posHistory.clear()
 
-        if self._pos[1] >= windowSize[1]:
+        if self._pos[1] == windowSize[1]:
             self.collide(1, 1)
+        elif self._pos[1] > windowSize[1]:
+            self.collide(1, 1)
+            self._pos[1] = windowSize[1]
+            for pos in self._posHistory:
+                self.clearSegment(pos, True)
+            self._posHistory.clear()
         
         if not self._pos[0] % 2: self._pos[0] += 1
 
@@ -299,7 +305,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.6"
+    prjVersion = "1.6-1"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

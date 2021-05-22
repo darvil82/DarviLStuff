@@ -35,12 +35,12 @@ def terminalOpt(*args):
     print(out, end="")
 
 
-def getWindowSize():
+def getWindowSize() -> tuple:
     """
     Returns a list with the size of the terminal.
     Also it subtracts 2 to cols because otherwise the lines won't be aligned or something.
     """
-    size = list(get_terminal_size())
+    size = tuple(get_terminal_size())
     return (size[0] - 2, size[1])
 
 
@@ -68,7 +68,7 @@ def capValue(value, max=float('inf'), min=float('-inf')):
         return value
 
 
-def lstToInt(list):
+def lstToInt(list) -> list:
     # Return list with ints
     values = []
     for item in list:
@@ -80,16 +80,16 @@ def lstToInt(list):
 
 
 
-def parseArgs():
+def parseArgs() -> bool:
     # Parse parms
     global args, argPos, argColor, isValid
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.",epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", help="Number of lines to display.", type=int, default=1)
-    argparser.add_argument("-c", help="Clear the screen when colliding.", action="store_true")
+    argparser.add_argument("-c", help="Clear the line when colliding with a border. Double 'c' will clear the entire screen.", action="count")
     argparser.add_argument("-s", help="Delay per screen frame in seconds.", type=float, default=0.02)
-    argparser.add_argument("-l", help="Length of the line. Use '0' to make it infinite.", type=int, default=10)
+    argparser.add_argument("-l", help="Length of the line. Use '0' to make it infinite. Note: A value of 0 might not be supported with some other options.", type=int, default=10)
     argparser.add_argument("-d", help="Create a new line at every collision with the same color as it's parent.", action="store_true")
-    argparser.add_argument("-w", help="Make lines collide with each other, causing them to wait until the path is free. Not supported with 0 length lines.", action="store_true")
+    argparser.add_argument("-w", help="Make lines collide with each other, causing them to wait until the path is free.", action="store_true")
     argparser.add_argument("-r", help="Change the color of the line on every border collision. Double 'r' will change it on every frame.", action="count")
     argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
     argparser.add_argument("--chars", help="Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.", type=str, default="█")
@@ -116,8 +116,8 @@ def parseArgs():
                         posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
                         posAxis += 1
                     except ValueError:
-                        showMsg(error=f"'{posvalue}' is not an intenger.")
-            else: showMsg(error="2 values are required.")
+                        showMsg(error=f"Position: Value '{posvalue}' is not an intenger.")
+            else: showMsg(error=f"Position: Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ({posSplitted}).")
         
             if isValid: argPos.append(lstToInt(posSplitted))
     
@@ -130,11 +130,10 @@ def parseArgs():
                     try:
                         if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'.")
                     except ValueError:
-                        showMsg(error=f"'{rgbvalue}' is not an intenger.")
-            else: showMsg(error="3 values are required.")
+                        showMsg(error=f"Color: Value '{rgbvalue}' is not an intenger.")
+            else: showMsg(error=f"Color: Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ({rgbSplitted}).")
         
             argColor.append(rgbSplitted)
-
 
     return isValid
 
@@ -175,13 +174,23 @@ class Line:
         return f"\x1b[H\x1b[0m\x1b[7mObjects: {len(lines)}\x1b[K\n\x1b[K\n\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mPosHistory: {self._posHistory}\x1b[K\nLength: {self._length}\x1b[K\nColor: {self._color}\x1b[K\nChar: '{self._char}'\x1b[K\nPos: {self._pos}\x1b[K\nState: {self._state}\x1b[K\x1b[27m\n\x1b[K"
 
 
-    def collide(self, axis, state):
+    def collide(self, axis: list, state: list):
         if args.debug and args.debug >= 2: self.logmsg(f"Border collision at {self._pos}")
         if args.d and len(lines) < args.max: lines.append(Line(color=self._color, char=self._char))
         self._state[axis] = state
+
         if args.c:
-            terminalOpt("clear")
-            self._posHistory.clear()
+
+            if args.c == 1:
+                for pos in self._posHistory:
+                    self.clearSegment(pos, True)
+                self._posHistory.clear()
+
+            elif args.c >= 2:
+                terminalOpt("clear")
+                for obj in lines:
+                    obj._posHistory.clear()
+        
         if args.r and args.r == 1: self._color = randomColor()
 
 
@@ -224,27 +233,15 @@ class Line:
             self.collide(0, 1)
             self._pos[0] = windowSize[0]
             for pos in self._posHistory:
-                print(f"\x1b[{pos[1]};{pos[0]}f  ", end="", flush=True)
+                self.clearSegment(pos, True)
             self._posHistory.clear()
 
-        if self._pos[1] == windowSize[1]:
+        if self._pos[1] >= windowSize[1]:
             self.collide(1, 1)
-        elif self._pos[1] > windowSize[1]:
-            self.collide(1, 1)
-            self._pos[1] = windowSize[1]
-            for pos in self._posHistory:
-                print(f"\x1b[{pos[1]};{pos[0]}f  ", end="", flush=True)
-            self._posHistory.clear()
         
         if not self._pos[0] % 2: self._pos[0] += 1
 
         if args.r and args.r >= 2: self._color = randomColor()
-
-        print(
-            f"\x1b[{self._pos[1]};{self._pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}",
-            end="",
-            flush=True
-        )
 
         if args.l > 0:
             """
@@ -256,23 +253,32 @@ class Line:
 
             if len(self._posHistory) == self._length:
                 self._oldPos = self._posHistory[-1]
-
-                _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f  "
-
-                if self._oldPos in self._posHistory[0:-2]:
-                    _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}"
-                    if args.debug and args.debug >= 2: self.logmsg(f"Replaced self body at {self._oldPos}")
-                else:
-                    for obj in lines:
-                        if obj._posHistory is self._posHistory: continue
-                        if self._oldPos in obj._posHistory:
-                            _brush = f"\x1b[{self._oldPos[1]};{self._oldPos[0]}f\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
-                            if args.debug and args.debug >= 2: self.logmsg(f"Replaced \x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}'s\x1b[0m body at {self._oldPos}")
-                            break
-
-                print(_brush, end="", flush=True)
-
+                self.clearSegment(self._oldPos)
                 self._posHistory.pop(-1)
+
+        print(
+            f"\x1b[{self._pos[1]};{self._pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}",
+            end="",
+            flush=True
+        )
+
+
+    def clearSegment(self, pos: list, ignoreSelf=False):
+        _brush = f"\x1b[{pos[1]};{pos[0]}f  "
+
+        if pos in self._posHistory[0:-2] and ignoreSelf == False:
+            _brush = f"\x1b[{pos[1]};{pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}"
+            if args.debug and args.debug >= 2: self.logmsg(f"Replaced self body at {pos}")
+        else:
+            for obj in lines:
+                if obj._posHistory is self._posHistory: continue
+                if pos in obj._posHistory:
+                    _brush = f"\x1b[{pos[1]};{pos[0]}f\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
+                    if args.debug and args.debug >= 2: self.logmsg(f"Replaced \x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}'s\x1b[0m body at {pos}")
+                    break
+
+        print(_brush, end="", flush=True)
+
 
 
 
@@ -293,7 +299,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.5.1"
+    prjVersion = "1.6"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

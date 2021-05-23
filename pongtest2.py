@@ -4,12 +4,8 @@
 
 from time import sleep
 from os import get_terminal_size, system as runsys
-from random import randrange, randint, choice
+from random import choice, randrange, randint
 import argparse
-from sys import exit
-
-prjVersion = "1.2.1-1"
-
 
 
 def terminalOpt(*args):
@@ -24,22 +20,22 @@ def terminalOpt(*args):
     """
     
     ESCcodes = {
-        "clear": "\u001b[H\u001b[2J",
-        "reset": "\u001b[0m",
-        "newbuffer": "\u001b[?1049h",
-        "oldbuffer": "\u001b[?1049l",
-        "showcursor": "\u001b[?25h",
-        "hidecursor": "\u001b[?25l"
+        "clear": "\x1b[H\x1b[2J",
+        "reset": "\x1b[0m",
+        "newbuffer": "\x1b[?1049h",
+        "oldbuffer": "\x1b[?1049l",
+        "showcursor": "\x1b[?25h",
+        "hidecursor": "\x1b[?25l"
     }
 
     out = ""
     for arg in args:
-        out = out + ESCcodes.get(arg)
+        out += ESCcodes.get(arg)
 
     print(out, end="")
 
 
-def getWindowSize():
+def getWindowSize() -> tuple:
     """
     Returns a tuple with the size of the terminal.
     Also it subtracts 2 to cols because otherwise the lines won't be aligned or something.
@@ -52,14 +48,18 @@ randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 
 def showMsg(**kwargs):
+    # Display a message with a bit of color.
+    global isValid
     for key in kwargs:
         value = kwargs.get(key)
         if key == "error":
-            prefix = "\u001b[91mE:\u001b[0m"
+            prefix = "\x1b[91mE:\x1b[0m"
+            isValid = False
         print(prefix, value)
 
 
 def capValue(value, max=float('inf'), min=float('-inf')):
+    # Clamp a value to a minimun and/or maximun value.
     if value > max:
         return max
     elif value < min:
@@ -151,12 +151,6 @@ def parseArgs() -> bool:
 
 
 
-
-windowSize = getWindowSize()
-terminalOpt("newbuffer", "hidecursor", "clear")
-
-
-
 class Line:
     def __init__(self, **kwargs):
         self._length = args.lenght + 1                                               # Length of the line.
@@ -176,10 +170,16 @@ class Line:
                 self._color = value
             elif key == "pos":
                 self._pos = list(value)
+            elif key == "char":
+                self._char = value
+
+        if args.debug and args.debug >= 2:
+            logfile.write(f"Created new line \x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m at {self._pos}.\n")
+            self.logmsg = lambda msg: logfile.write(f"\t\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[0m → {msg}\x1b[0m\n")
 
 
     def __str__(self):
-        return f"\u001b[H\u001b[0m\u001b[7m\u001b[KLength: {self._llength}\tColor: {self._color}\tPos: {self._pos}\tState: {self._state}\t\tObjects: {len(lines)}\nPosHistory: {self._posHistory}\u001b[K\u001b[27m"
+        return f"\x1b[H\x1b[0m\x1b[7mObjects: {len(lines)}\x1b[K\n\x1b[K\n\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mPosHistory: {self._posHistory}\x1b[K\nLength: {self._length}\x1b[K\nColor: {self._color}\x1b[K\nChar: '{self._char}'\x1b[K\nPos: {self._pos}\x1b[K\nState: {self._state}\x1b[K\x1b[27m\n\x1b[K"
 
 
     def collide(self, axis: list, state: list):
@@ -203,8 +203,7 @@ class Line:
 
 
     def operate(self):
-        currentPos = list(self._pos)
-        nextPos = currentPos
+        currentPos = nextPos = list(self._pos)
 
         if self._state[0]:
             nextPos[0] = currentPos[0] - 2
@@ -215,6 +214,7 @@ class Line:
             nextPos[1] = currentPos[1] - 1
         else:
             nextPos[1] = currentPos[1] + 1
+
         return nextPos
 
 
@@ -235,10 +235,26 @@ class Line:
         self._pos = _nextPos
         if self._pos[0] <= 1: self.collide(0, 0)
         if self._pos[1] <= 1: self.collide(1, 0)
-        if self._pos[0] >= windowSize[0]: self.collide(0, 1)
-        if self._pos[1] >= windowSize[1]: self.collide(1, 1)
 
-        if args.r: self._color = randomColor()
+        if self._pos[0] == windowSize[0] or self._pos[0] == windowSize[0] + 1:
+            self.collide(0, 1)
+        elif self._pos[0] > windowSize[0]:
+            self.collide(0, 1)
+            self._pos[0] = windowSize[0]
+            for pos in self._posHistory:
+                self.clearSegment(pos, True)
+            self._posHistory.clear()
+
+        if self._pos[1] == windowSize[1]:
+            self.collide(1, 1)
+        elif self._pos[1] > windowSize[1]:
+            self.collide(1, 1)
+            self._pos[1] = windowSize[1]
+            for pos in self._posHistory:
+                self.clearSegment(pos, True)
+            self._posHistory.clear()
+        
+        if not self._pos[0] % 2: self._pos[0] += 1
 
         if args.random and args.random >= 2: self._color = randomColor()
 
@@ -246,11 +262,11 @@ class Line:
             """
             Save the current position of the line into posHistory, which will contain an history of coordinates of the line.
             To remove the tail of the line progressively, we get the last value in the list, which is the position of the
-            line -self._llength- steps back.
+            line -self._length- steps back.
             """
             self._posHistory.insert(0, list(self._pos))
 
-            if len(self._posHistory) == self._llength:
+            if len(self._posHistory) == self._length:
                 self._oldPos = self._posHistory[-1]
                 self.clearSegment(self._oldPos)
                 self._posHistory.pop(-1)
@@ -284,18 +300,12 @@ class Line:
             self.clearSegment(pos, True)
         lines.remove(self)
         if args.debug and args.debug >= 2: self.logmsg("Killed self")
-        if self._oldPos in self._posHistory[0:-2]:
-            _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m██"
-        else:
-            for obj in lines:
-                if obj._posHistory is self._posHistory: continue
-                if self._oldPos in obj._posHistory:
-                    _brush = f"\u001b[{self._oldPos[1]};{self._oldPos[0]}f\u001b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m██"
-                    break
 
-        print(_brush, end="", flush=True)
 
-        self._posHistory.pop(-1)
+
+
+
+
 
 def stopScript():
     terminalOpt("clear", "oldbuffer", "reset", "showcursor")
@@ -321,10 +331,16 @@ def main():
 
 
     lines = []
-    getSizeCounter = 0
+    for x in range(0, capValue(args.number, args.max)):
+        lines.append(Line())
+
+
+    getSizeCounter = 1
     try:
-        for x in range(0, capValue(args.number, args.max)):
-            lines.append(Line())
+        while True:
+            if getSizeCounter >= args.urate:
+                windowSize = getWindowSize()
+                getSizeCounter = 1
 
             for obj in lines:
                 obj.move()
@@ -341,24 +357,9 @@ def main():
         showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'")
 
 
-lines = []
-for x in range(0, capValue(args.n, args.max)):
-    lines.append(Line())
 
-getSizeCounter = 0
-try:
-    while True:
-        if getSizeCounter >= 10:
-            windowSize = getWindowSize()
-            getSizeCounter = 0
 
-        for x in range(0, len(lines)):
-            lines[x].move()
-            if args.debug: print(lines[x])
 
-        sleep(args.s)
-        getSizeCounter += 1
 
-except KeyboardInterrupt:
-    terminalOpt("clear", "oldbuffer", "reset", "showcursor")
-    exit()
+if __name__ == "__main__":
+    main()

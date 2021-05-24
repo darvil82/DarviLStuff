@@ -68,26 +68,20 @@ def capValue(value, max=float('inf'), min=float('-inf')):
         return value
 
 
-def lstToInt(list) -> list:
-    # Return list with ints
-    values = []
-    for item in list:
-        values.append(int(item))
-    return values
 
 
 
 
-
-class Parameters():
-    pass
+class ArgValues():
+    pos = None
+    color = None
 
 
 
 
 def parseArgs() -> bool:
     # Parse parms
-    global args, argPos, argColor, isValid
+    global args, isValid
     argparser = argparse.ArgumentParser(description="A small python script to display moving lines in the terminal.", epilog=f"Written by DarviL (David Losantos). Version {prjVersion}.")
     argparser.add_argument("-n", "--number", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-s", "--speed", help="Delay per screen frame in seconds.", type=float, default=0.02)
@@ -102,6 +96,7 @@ def parseArgs() -> bool:
     argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
     argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
     argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
+    argparser.add_argument("--onCollide", type=str)
     args = argparser.parse_args()
 
 
@@ -111,23 +106,27 @@ def parseArgs() -> bool:
     if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
     if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
 
+
     if args.pos:
-        argPos = []
-        for pos in args.pos.split(","):
-            posSplitted = pos.split(":")
-            if len(posSplitted) == 2:
-                posAxis = 0
-                for posvalue in posSplitted:
-                    try:
-                        posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
-                        posAxis += 1
-                    except ValueError:
-                        showMsg(error=f"Position: Value '{posvalue}' is not an intenger.")
-            else: showMsg(error=f"Position: Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ({posSplitted}).")
-        
-            if isValid: setattr(Parameters, "pos", [posSplitted])
+        if args.pos == "center":
+            setattr(ArgValues, "pos", [[int(windowSize[0]/2), int(windowSize[1]/2)]])
+        else:
+            argPos = []
+            for pos in args.pos.split(","):
+                posSplitted = pos.split(":")
+                if len(posSplitted) == 2:
+                    posAxis = 0
+                    for posvalue in posSplitted:
+                        try:
+                            posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
+                            posAxis += 1
+                        except ValueError:
+                            showMsg(error=f"Position: Value '{posvalue}' is not an intenger.")
+                else: showMsg(error=f"Position: Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ({posSplitted}).")
+                argPos.append(posSplitted)
+            
+            if isValid: setattr(ArgValues, "pos", argPos)
     
-    print(Parameters.pos)
 
     if args.color:
         argColor = []
@@ -140,10 +139,15 @@ def parseArgs() -> bool:
                     except ValueError:
                         showMsg(error=f"Color: Value '{rgbvalue}' is not an intenger.")
             else: showMsg(error=f"Color: Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ({rgbSplitted}).")
-        
             argColor.append(rgbSplitted)
+        
+        if isValid: setattr(ArgValues, "color", argColor)
+
 
     return isValid
+
+
+
 
 
 
@@ -160,9 +164,9 @@ class Line:
         self._posHistory = []                                                        # Position history of the line.
         self._char = args.chars[randint(0,len(args.chars)-1)] * 2                    # Character to display as the line body.
 
-        if Parameters.pos: self._pos = choice(Parameters.pos)
+        if ArgValues.pos: self._pos = choice(ArgValues.pos)
 
-        if args.color: self._color = choice(argColor)
+        if args.color: self._color = choice(ArgValues.color)
     
         for key in kwargs:
             value = kwargs.get(key)
@@ -184,7 +188,7 @@ class Line:
 
     def collide(self, axis: list, state: list):
         if args.debug and args.debug >= 2: self.logmsg(f"Border collision at {self._pos}")
-        if args.duplicate and len(lines) < args.max: lines.append(Line(char=self._char))
+        if args.duplicate and len(lines) < args.max: lines.append(Line(char=self._char, color=self._color))
         self._state[axis] = state
 
         if args.clear:
@@ -226,6 +230,7 @@ class Line:
             for obj in lines:
                 if obj is self.__class__: continue
                 if _nextPos in self._posHistory: continue
+                if obj._color == self._color: continue
                 if _nextPos in obj._posHistory:
                     if args.debug and args.debug >= 2: self.logmsg(f"Line collision at {self._pos}")
                     self.kill()

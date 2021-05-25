@@ -5,8 +5,9 @@
 from time import sleep
 from os import get_terminal_size, system as runsys
 from random import choice, randrange, randint
+from textwrap import dedent
 import argparse
-import textwrap
+
 
 
 def terminalOpt(*args):
@@ -37,10 +38,6 @@ def terminalOpt(*args):
 
 
 def getWindowSize() -> tuple:
-    """
-    Returns a tuple with the size of the terminal.
-    Also it subtracts 2 to cols because otherwise the lines won't be aligned or something.
-    """
     size = get_terminal_size()
     return (size[0] - 2, size[1])
 
@@ -49,7 +46,7 @@ randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 
 def showMsg(**kwargs):
-    # Display a message with a bit of color.
+    """Display a message with a bit of color."""
     global isValid
     for key in kwargs:
         value = kwargs.get(key)
@@ -63,7 +60,7 @@ def showMsg(**kwargs):
 
 
 def capValue(value, max=float('inf'), min=float('-inf')):
-    # Clamp a value to a minimun and/or maximun value.
+    """Clamp a value to a minimun and/or maximun value."""
     if value > max:
         return max
     elif value < min:
@@ -77,6 +74,9 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 
 class ArgValues():
+    """
+    Parsed arguments container.
+    """
     pos = None
     color = None
     onBorderCollision = None
@@ -93,7 +93,7 @@ def parseArgs() -> bool:
 
     argparser = argparse.ArgumentParser(
         description="A small python script to display moving lines in the terminal.",
-        epilog=textwrap.dedent(f"""
+        epilog=dedent(f"""
             Conditional actions:
                 To use conditional actions, supply them formatted like 'action,[...]'.
                 Available actions to use:
@@ -111,59 +111,59 @@ def parseArgs() -> bool:
             
 
             Written by DarviL (David Losantos). Version {prjVersion}.
-            """),
+            Repository available at: \x1b[4mhttps://github.com/L89David/DarviLStuff\x1b[24m"""),
         formatter_class=argparse.RawTextHelpFormatter
     )
     argparser.add_argument("-n", "--number", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-s", "--speed", help="Delay per screen frame in seconds.", type=float, default=0.02)
-    argparser.add_argument("-l", "--lenght", help=textwrap.dedent("""\
+    argparser.add_argument("-l", "--lenght", help=dedent("""\
         Length of the line. Use '0' to make it infinite.
         Note: A value of 0 might not be supported with some
         other options. Default value is 10"""), type=int, default=10)
-    argparser.add_argument("-p", "--pos", help=textwrap.dedent("""\
+    argparser.add_argument("-p", "--pos", help=dedent("""\
         Start position for all the lines. Position values
         formatted like 'PosX:PosY,[...]'. If multiple
         Position values are supplied, a random one will be
         selected when creating a new line."""), type=str)
-    argparser.add_argument("-c", "--color", help=textwrap.dedent("""\
+    argparser.add_argument("-c", "--color", help=dedent("""\
         Color of the lines. RGB values formatted like
         'RED:GREEN:BLUE,[...]'. If multiple RGB values are
         supplied, a random one will be selected when creating
         a new line."""), type=str)
-    argparser.add_argument("-C", "--chars", help=textwrap.dedent("""\
+    argparser.add_argument("-C", "--chars", help=dedent("""\
         Select the line character to display. Default is '█'.
         If more than one character is supplied, the character
         will be picked randomly from the string.
 
 
         """), type=str, default="█")
-    argparser.add_argument("--onBorderCollision", help=textwrap.dedent("""\
-        Conditionaly perform a set of actions when the line
+    argparser.add_argument("--onBorderCollision", help=dedent("""\
+        Conditionally perform a set of actions when the line
         collides with the terminal border.
         Conditinal actions are listed below."""), type=str)
-    argparser.add_argument("--onLineCollision", help=textwrap.dedent("""\
-        Conditionaly perform a set of actions when the line
+    argparser.add_argument("--onLineCollision", help=dedent("""\
+        Conditionally perform a set of actions when the line
         collides with another line.
         Conditinal actions are listed below."""), type=str)
-    argparser.add_argument("--onMove", help=textwrap.dedent("""\
-        Conditionaly perform a set of actions when the line
+    argparser.add_argument("--onMove", help=dedent("""\
+        Conditionally perform a set of actions when the line
         moves one pixel.
         Conditinal actions are listed below."""), type=str)
-    argparser.add_argument("--onPathFree", help=textwrap.dedent("""\
-        Conditionaly perform a set of actions when the path
+    argparser.add_argument("--onPathFree", help=dedent("""\
+        Conditionally perform a set of actions when the path
         for the line is free.
         Conditinal actions are listed below.
 
 
         """), type=str)
-    argparser.add_argument("--urate", help=textwrap.dedent("""\
+    argparser.add_argument("--urate", help=dedent("""\
         Update rate of terminal size detection. For example,
         1 will check for the size on every frame, while 10
         will check one time every 10 frames. Default is 10."""), type=int, default=10)
-    argparser.add_argument("--max", help=textwrap.dedent("""\
+    argparser.add_argument("--max", help=dedent("""\
         Maximun number of line objects that can be created.
         Default is 5000."""), type=int, default=5000)
-    argparser.add_argument("--debug", help=textwrap.dedent("""\
+    argparser.add_argument("--debug", help=dedent("""\
         Debug mode. Displays information about the lines on
         screen. If double --debug is used, appends all the
         events to the log file './pt2.log'. It is recommended
@@ -221,6 +221,7 @@ def parseArgs() -> bool:
     condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine"}
 
     def parseConditions():
+        # Go through every condition, and populate the ArgValues class with the variable and values.
         for cond in conditions:
             usrOpts = getattr(args, cond)
             if usrOpts:
@@ -235,7 +236,6 @@ def parseArgs() -> bool:
                 if isValid: setattr(ArgValues, cond, options)
 
     parseConditions()
-            
 
     return isValid
 
@@ -256,7 +256,7 @@ class Line:
         self._state = [randint(0, 1), randint(0, 1)]                                 # Bools for controlling when to add or substract to the current pos.
         self._posHistory = []                                                        # Position history of the line.
         self._char = args.chars[randint(0,len(args.chars)-1)] * 2                    # Character to display as the line body.
-        self._doMove = True
+        self._doMove = True                                                          # Enable/Disable line movement.
 
         if ArgValues.pos: self._pos = choice(ArgValues.pos)
 
@@ -387,9 +387,10 @@ class Line:
         print(_brush, end="", flush=True)
     
 
-    def runOpts(self, argOption: list = None):
-        if argOption:
-            for opt in argOption:
+    def runOpts(self, conditionList: list = None):
+        # Run the selected actions listed on the supplied condition list.
+        if conditionList:
+            for opt in conditionList:
                 if opt == "duplicate" and len(lines) < args.max:
                     lines.append(Line(char=self._char, color=self._color))
                 elif opt == "clear":

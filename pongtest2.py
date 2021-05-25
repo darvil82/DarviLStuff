@@ -119,7 +119,7 @@ def parseArgs() -> bool:
     argparser.add_argument("-l", "--lenght", help=dedent("""\
         Length of the line. Use '0' to make it infinite.
         Note: A value of 0 might not be supported with some
-        other options. Default value is 10"""), type=int, default=10)
+        other options. Default value is 10."""), type=int, default=10)
     argparser.add_argument("-p", "--pos", help=dedent("""\
         Start position for all the lines. Position values
         formatted like 'PosX:PosY,[...]'. If multiple

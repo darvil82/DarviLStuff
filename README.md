@@ -30,4 +30,4 @@ This is the repository that contains some scripts that I do when I'm bored or wh
 ![e190c45b-4eab-4e8c-a8a1-e4cf3feed375](https://user-images.githubusercontent.com/48654552/112477976-c91fec00-8d73-11eb-93f4-3850f7935f08.gif)
 
 ## pongtest2
-![image](https://user-images.githubusercontent.com/48654552/119016295-0da5bd80-b99a-11eb-8a20-09c5cb1c7e00.png)
+![image](https://user-images.githubusercontent.com/48654552/119555505-38c74d00-bd9e-11eb-97ff-0fc3f353cfe6.png)

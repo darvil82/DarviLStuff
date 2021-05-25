@@ -6,6 +6,7 @@ from time import sleep
 from os import get_terminal_size, system as runsys
 from random import choice, randrange, randint
 import argparse
+import textwrap
 
 
 def terminalOpt(*args):
@@ -92,31 +93,81 @@ def parseArgs() -> bool:
 
     argparser = argparse.ArgumentParser(
         description="A small python script to display moving lines in the terminal.",
-        epilog=f"""Conditional actions:
-                    a
-        Written by DarviL (David Losantos). Version {prjVersion}.""",
+        epilog=textwrap.dedent(f"""
+            Conditional actions:
+                To use conditional actions, supply them formatted like 'action,[...]'.
+                Available actions to use:
+
+                - duplicate:    Create a new line like the current line.
+                - destroy:      Destroy the current line.
+                - newColor:     Change the color of the current line.
+                - clear:        Clear all the pixels of the current line.
+                - clearAll:     Clear all the pixels of all the lines.
+                - longer:       Make the current line 1 pixel longer.
+                - shorter:      Make the current line 1 pixel shorter.
+                - stop:         Disable current line movement.
+                - continue:     Enable current line movement.
+                - newLine:      Create a new line.
+            
+
+            Written by DarviL (David Losantos). Version {prjVersion}.
+            """),
         formatter_class=argparse.RawTextHelpFormatter
     )
     argparser.add_argument("-n", "--number", help="Number of lines to display.", type=int, default=1)
     argparser.add_argument("-s", "--speed", help="Delay per screen frame in seconds.", type=float, default=0.02)
-    argparser.add_argument("-l", "--lenght", help="Length of the line. Use '0' to make it infinite. Note: A value of 0 might not be supported with some other options.", type=int, default=10)
-    argparser.add_argument("-p", "--pos", help="Start position for all the lines. Position values formatted like 'PosX:PosY,[...]'. If multiple Position values are supplied, a random one will be selected when creating a new line.", type=str)
-    argparser.add_argument("-c", "--color", help="Color of the lines. RGB values formatted like 'RED:GREEN:BLUE,[...]'. If multiple RGB values are supplied, a random one will be selected when creating a new line.", type=str)
-    argparser.add_argument("-C", "--chars",
-        help="""Select the line character to display. Default is '█'. If more than one character is supplied, the character will be picked randomly from the string.
-        """,
-        type=str, default="█"
-    )
-    argparser.add_argument("--onBorderCollision", help="Conditionaly perform a set of actions when the line collides with the terminal border.", type=str)
-    argparser.add_argument("--onLineCollision", help="Conditionaly perform a set of actions when the line collides with another line.", type=str)
-    argparser.add_argument("--onMove", help="Conditionaly perform a set of actions when the line moves one pixel.", type=str)
-    argparser.add_argument("--onPathFree",
-        help="""Conditionaly perform a set of actions when the path for the line is free.
-        """, type=str
-    )
-    argparser.add_argument("--urate", help="Update rate of terminal size detection. For example, 1 will check for the size on every frame, while 10 will check one time every 10 frames. Default is 10.", type=int, default=10)
-    argparser.add_argument("--max", help="Maximun number of line objects that can be created. Default is 5000.", type=int, default=5000)
-    argparser.add_argument("--debug", help="Debug mode. Displays information about the lines on screen. If double --debug is used, appends all the events to the log file './pt2.log'. It is recommended to use 'tail -f' to view the contents of the file.", action="count")
+    argparser.add_argument("-l", "--lenght", help=textwrap.dedent("""\
+        Length of the line. Use '0' to make it infinite.
+        Note: A value of 0 might not be supported with some
+        other options. Default value is 10"""), type=int, default=10)
+    argparser.add_argument("-p", "--pos", help=textwrap.dedent("""\
+        Start position for all the lines. Position values
+        formatted like 'PosX:PosY,[...]'. If multiple
+        Position values are supplied, a random one will be
+        selected when creating a new line."""), type=str)
+    argparser.add_argument("-c", "--color", help=textwrap.dedent("""\
+        Color of the lines. RGB values formatted like
+        'RED:GREEN:BLUE,[...]'. If multiple RGB values are
+        supplied, a random one will be selected when creating
+        a new line."""), type=str)
+    argparser.add_argument("-C", "--chars", help=textwrap.dedent("""\
+        Select the line character to display. Default is '█'.
+        If more than one character is supplied, the character
+        will be picked randomly from the string.
+
+
+        """), type=str, default="█")
+    argparser.add_argument("--onBorderCollision", help=textwrap.dedent("""\
+        Conditionaly perform a set of actions when the line
+        collides with the terminal border.
+        Conditinal actions are listed below."""), type=str)
+    argparser.add_argument("--onLineCollision", help=textwrap.dedent("""\
+        Conditionaly perform a set of actions when the line
+        collides with another line.
+        Conditinal actions are listed below."""), type=str)
+    argparser.add_argument("--onMove", help=textwrap.dedent("""\
+        Conditionaly perform a set of actions when the line
+        moves one pixel.
+        Conditinal actions are listed below."""), type=str)
+    argparser.add_argument("--onPathFree", help=textwrap.dedent("""\
+        Conditionaly perform a set of actions when the path
+        for the line is free.
+        Conditinal actions are listed below.
+
+
+        """), type=str)
+    argparser.add_argument("--urate", help=textwrap.dedent("""\
+        Update rate of terminal size detection. For example,
+        1 will check for the size on every frame, while 10
+        will check one time every 10 frames. Default is 10."""), type=int, default=10)
+    argparser.add_argument("--max", help=textwrap.dedent("""\
+        Maximun number of line objects that can be created.
+        Default is 5000."""), type=int, default=5000)
+    argparser.add_argument("--debug", help=textwrap.dedent("""\
+        Debug mode. Displays information about the lines on
+        screen. If double --debug is used, appends all the
+        events to the log file './pt2.log'. It is recommended
+        to use 'tail -f' to view the contents of the file."""), action="count")
 
     args = argparser.parse_args()
 
@@ -167,10 +218,9 @@ def parseArgs() -> bool:
 
 
     conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
-    condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "wait", "continue", "newLine"}
+    condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine"}
 
     def parseConditions():
-
         for cond in conditions:
             usrOpts = getattr(args, cond)
             if usrOpts:
@@ -365,7 +415,7 @@ class Line:
                         if self._posHistory:
                             self.clearSegment(self._posHistory[-1])
                             self._posHistory.pop(-1)
-                elif opt == "wait":
+                elif opt == "stop":
                     self._doMove = False
                 elif opt == "continue":
                     self._doMove = True
@@ -394,7 +444,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "1.6-1"
+    prjVersion = "2.0"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()
@@ -425,9 +475,9 @@ def main():
     except KeyboardInterrupt:
         stopScript()
     
-    # except Exception as error:
-    #     stopScript()
-    #     showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'")
+    except Exception as error:
+        stopScript()
+        showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'")
 
 
 

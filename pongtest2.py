@@ -407,20 +407,20 @@ class Line:
 
 
     def clearSegment(self, pos: list, ignoreSelf=False):
-        _brush = f"\x1b[{pos[1]};{pos[0]}f  "
+        _brush = "  "
 
         if pos in self._posHistory[0:-2] and ignoreSelf == False:
-            _brush = f"\x1b[{pos[1]};{pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}"
+            _brush = f"\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}"
             if args.debug and args.debug >= 2: self.logmsg(f"Replaced self body at {pos}")
         else:
             for obj in lines:
                 if obj._posHistory is self._posHistory: continue
                 if pos in obj._posHistory:
-                    _brush = f"\x1b[{pos[1]};{pos[0]}f\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
+                    _brush = f"\x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}"
                     if args.debug and args.debug >= 2: self.logmsg(f"Replaced \x1b[38;2;{obj._color[0]};{obj._color[1]};{obj._color[2]}m{obj._char}'s\x1b[0m body at {pos}")
                     break
 
-        print(_brush, end="", flush=True)
+        print(f"\x1b[{pos[1]};{pos[0]}f" + _brush, end="", flush=True)
     
 
     def runOpts(self, conditionList: list = None):

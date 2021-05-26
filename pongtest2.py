@@ -36,7 +36,7 @@ def terminalOpt(*args):
 
     out = ""
     for arg in args:
-        out += ESCcodes.get(arg)
+        if arg: out += ESCcodes.get(arg)
 
     print(out, end="")
 
@@ -160,10 +160,13 @@ def parseArgs() -> bool:
     argparser.add_argument("-C", "--chars", help=dedent("""\
         Select the line character to display. Default is '█'.
         If more than one character is supplied, the character
-        will be picked randomly from the string.
+        will be picked randomly from the string."""), type=str, default="█")
+    argparser.add_argument("-i", "--ignore", help=dedent("""\
+        Don't collide with lines with the same color as the
+        current line.
 
 
-        """), type=str, default="█")
+        """), action="store_true")
     argparser.add_argument("--onBorderCollision", help=dedent("""\
         Conditionally perform a set of actions when the line
         collides with the terminal border.
@@ -195,19 +198,16 @@ def parseArgs() -> bool:
         screen. If double --debug is used, appends all the
         events to the log file './pt2.log'. It is recommended
         to use 'tail -f' to view the contents of the file."""), action="count")
-    argparser.add_argument("--update", help=dedent("""\
-        Update the script with the latest version and exit.
-        If no file path is specified, this will overwrite the
-        currently running script."""), action="store_true")
+    argparser.add_argument("--update", help="Update the script with the latest version and exit.", action="store_true")
 
     args = argparser.parse_args()
 
 
     isValid = True
-    if args.number <= 0: showMsg(error="Number of lines cannot be 0 or below.")
-    if args.lenght > 500: showMsg(error="Length cannot exceed 500.")
-    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.")
-    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
+    if args.number <= 0: showMsg(error="Number of lines cannot be 0 or below.", type="Number")
+    if args.lenght > 500: showMsg(error="Length cannot exceed 500.", type="Lenght")
+    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.", type="Max")
+    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.", type="Chars")
 
 
     if args.pos:
@@ -345,7 +345,8 @@ class Line:
             for obj in lines:
                 if obj is self.__class__: continue
                 if _nextPos in self._posHistory: continue
-                if obj._color == self._color: continue
+                if args.ignore:
+                    if obj._color == self._color: continue
                 if _nextPos in obj._posHistory:
                     if args.debug and args.debug >= 2: self.logmsg(f"Line collision at {self._pos}")
                     self.runOpts(ArgValues.onLineCollision)
@@ -399,7 +400,7 @@ class Line:
                 self._posHistory.pop(-1)
 
         print(
-            f"\x1b[{self._pos[1]};{self._pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}",
+            f"\x1b[{self._pos[1]};{self._pos[0]}f\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}m{self._char}\x1b[H",
             end="",
             flush=True
         )
@@ -425,6 +426,7 @@ class Line:
     def runOpts(self, conditionList: list = None):
         # Run the selected actions listed on the supplied condition list.
         if conditionList:
+            if args.debug and args.debug >= 2: self.logmsg(f"Run action/s: " + ", ".join(conditionList) + ".")
             for opt in conditionList:
                 if opt == "duplicate" and len(lines) < args.max:
                     lines.append(Line(char=self._char, color=self._color))
@@ -442,7 +444,6 @@ class Line:
                         for pos in self._posHistory:
                             self.clearSegment(pos, True)
                         lines.remove(self)
-                        if args.debug and args.debug >= 2: self.logmsg("Killed self")
                 elif opt == "longer":
                     if self._length < 500: self._length += 1
                 elif opt == "shorter":
@@ -457,6 +458,7 @@ class Line:
                     self._doMove = True
                 elif opt == "newLine":
                     lines.append(Line())
+            
 
 
 
@@ -480,7 +482,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "2.1"
+    prjVersion = "2.2"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()
@@ -508,12 +510,13 @@ def main():
             sleep(args.speed)
             getSizeCounter += 1
 
+
     except KeyboardInterrupt:
         stopScript()
     
     except Exception as error:
         stopScript()
-        showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'")
+        showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'", type="Runtime")
 
 
 

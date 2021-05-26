@@ -149,9 +149,11 @@ def parseArgs() -> bool:
         other options. Default value is 10."""), type=int, default=10)
     argparser.add_argument("-p", "--pos", help=dedent("""\
         Start position for all the lines. Position values
-        formatted like 'PosX:PosY,[...]'. If multiple
-        Position values are supplied, a random one will be
-        selected when creating a new line."""), type=str)
+        formatted like 'PosX:PosY,[...]'. PosX and PosY can
+        have a value of 'center' to make the line appear in
+        the center of that axis. If multiple Position values
+        are supplied, a random one will be selected when
+        creating a new line."""), type=str)
     argparser.add_argument("-c", "--color", help=dedent("""\
         Color of the lines. RGB values formatted like
         'RED:GREEN:BLUE,[...]'. If multiple RGB values are
@@ -211,24 +213,22 @@ def parseArgs() -> bool:
 
 
     if args.pos:
-        if args.pos == "center":
-            setattr(ArgValues, "pos", [[int(windowSize[0]/2), int(windowSize[1]/2)]])
-        else:
-            argPos = []
-            for pos in args.pos.split(","):
-                posSplitted = pos.split(":")
-                if len(posSplitted) == 2:
-                    posAxis = 0
-                    for posvalue in posSplitted:
-                        try:
-                            posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
-                            posAxis += 1
-                        except ValueError:
-                            showMsg(error=f"Value '{posvalue}' is not an intenger.", type="Position")
-                else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + ", ".join(posSplitted) + "').", type="Position")
-                argPos.append(posSplitted)
-            
-            if isValid: setattr(ArgValues, "pos", argPos)
+        argPos = []
+        for pos in args.pos.split(","):
+            posSplitted = pos.split(":")
+            if len(posSplitted) == 2:
+                posAxis = 0
+                for posvalue in posSplitted:
+                    if posvalue == "center": posvalue = int(windowSize[posAxis]/2)
+                    try:
+                        posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
+                        posAxis += 1
+                    except ValueError:
+                        showMsg(error=f"Value '{posvalue}' is not an intenger.", type="Position")
+            else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + ", ".join(posSplitted) + "').", type="Position")
+            argPos.append(posSplitted)
+        
+        if isValid: setattr(ArgValues, "pos", argPos)
     
 
     if args.color:
@@ -482,7 +482,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "2.2-1"
+    prjVersion = "2.3"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

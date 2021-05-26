@@ -6,7 +6,11 @@ from time import sleep
 from os import get_terminal_size, system as runsys
 from random import choice, randrange, randint
 from textwrap import dedent
+from sys import argv
+from urllib import request
 import argparse
+
+
 
 
 
@@ -48,15 +52,21 @@ randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 def showMsg(**kwargs):
     """Display a message with a bit of color."""
     global isValid
+
     for key in kwargs:
         value = kwargs.get(key)
         if key == "error":
             prefix = "\x1b[91mE"
             msg = value
             isValid = False
+        elif key == "good":
+            prefix = "\x1b[92m✓"
+            msg = value
+        
         if key == "type":
             prefix += f": {value}"
-    print(prefix + ":\x1b[0m", msg)
+        
+    print(f" {prefix}:\x1b[0m", msg)
 
 
 def capValue(value, max=float('inf'), min=float('-inf')):
@@ -67,6 +77,23 @@ def capValue(value, max=float('inf'), min=float('-inf')):
         return min
     else:
         return value
+
+
+def updateScript(filepath):
+    # filepath = path.abspath(filepath)
+
+    try:
+        with request.urlopen("https://raw.githubusercontent.com/DarviL82/DarviLStuff/master/pongtest2.py") as rawData:
+            with open(filepath, "wb") as file:
+                file.write(rawData.read())
+    except PermissionError:
+        showMsg(error=f"Unable to write on the file '{filepath}'.", type="Update")
+        return
+    except Exception:
+        showMsg(error="An error ocurred while downloading the file.", type="Update")
+        return
+    showMsg(good=f"Downloaded latest version as '{filepath}'.", type="Update")
+
 
 
 
@@ -168,6 +195,10 @@ def parseArgs() -> bool:
         screen. If double --debug is used, appends all the
         events to the log file './pt2.log'. It is recommended
         to use 'tail -f' to view the contents of the file."""), action="count")
+    argparser.add_argument("--update", help=dedent("""\
+        Update the script with the latest version and exit.
+        If no file path is specified, this will overwrite the
+        currently running script."""), action="store_true")
 
     args = argparser.parse_args()
 
@@ -236,6 +267,10 @@ def parseArgs() -> bool:
                 if isValid: setattr(ArgValues, cond, options)
 
     parseConditions()
+    
+    if args.update:
+        updateScript(argv[0])
+        quit()
 
     return isValid
 
@@ -445,7 +480,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "2.0"
+    prjVersion = "2.1"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

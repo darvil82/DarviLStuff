@@ -225,7 +225,7 @@ def parseArgs() -> bool:
                             posAxis += 1
                         except ValueError:
                             showMsg(error=f"Value '{posvalue}' is not an intenger.", type="Position")
-                else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ({posSplitted}).", type="Position")
+                else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + ", ".join(posSplitted) + "').", type="Position")
                 argPos.append(posSplitted)
             
             if isValid: setattr(ArgValues, "pos", argPos)
@@ -241,7 +241,7 @@ def parseArgs() -> bool:
                         if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'.")
                     except ValueError:
                         showMsg(error=f"Value '{rgbvalue}' is not an intenger.", type="Color")
-            else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ({rgbSplitted}).", type="Color")
+            else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + ", ".join(rgbSplitted) + "').", type="Color")
             argColor.append(rgbSplitted)
         
         if isValid: setattr(ArgValues, "color", argColor)
@@ -482,7 +482,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "2.2"
+    prjVersion = "2.2-1"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

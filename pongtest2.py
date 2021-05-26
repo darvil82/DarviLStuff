@@ -122,20 +122,19 @@ def parseArgs() -> bool:
         description="A small python script to display moving lines in the terminal.",
         epilog=dedent(f"""
             Conditional actions:
-                To use conditional actions, supply them formatted like 'action,[...]'.
-                Available actions to use:
+                To use conditional actions with the condition parameters, supply them
+                formatted like 'action,[...]'. Available actions to use:
 
-                - duplicate     Create a new line like the current line.
-                - destroy       Destroy the current line.
-                - newColor      Change the color of the current line.
-                - clear         Clear all the pixels of the current line.
-                - clearAll      Clear all the pixels of all the lines.
-                - longer        Make the current line 1 pixel longer.
-                - shorter       Make the current line 1 pixel shorter.
-                - stop          Disable current line movement.
-                - continue      Enable current line movement.
-                - newLine       Create a new line.
-            
+                    - duplicate     Create a new line like the current line.
+                    - destroy       Destroy the current line.
+                    - newColor      Change the color of the current line.
+                    - clear         Clear all the pixels of the current line.
+                    - clearAll      Clear all the pixels of all the lines.
+                    - longer        Make the current line 1 pixel longer.
+                    - shorter       Make the current line 1 pixel shorter.
+                    - stop          Disable current line movement.
+                    - continue      Enable current line movement.
+                    - newLine       Create a new line.
 
             Written by DarviL (David Losantos). Version {prjVersion}.
             Repository available at: \x1b[4mhttps://github.com/L89David/DarviLStuff\x1b[24m"""),

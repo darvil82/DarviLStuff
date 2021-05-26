@@ -125,16 +125,16 @@ def parseArgs() -> bool:
                 To use conditional actions, supply them formatted like 'action,[...]'.
                 Available actions to use:
 
-                - duplicate:    Create a new line like the current line.
-                - destroy:      Destroy the current line.
-                - newColor:     Change the color of the current line.
-                - clear:        Clear all the pixels of the current line.
-                - clearAll:     Clear all the pixels of all the lines.
-                - longer:       Make the current line 1 pixel longer.
-                - shorter:      Make the current line 1 pixel shorter.
-                - stop:         Disable current line movement.
-                - continue:     Enable current line movement.
-                - newLine:      Create a new line.
+                - duplicate     Create a new line like the current line.
+                - destroy       Destroy the current line.
+                - newColor      Change the color of the current line.
+                - clear         Clear all the pixels of the current line.
+                - clearAll      Clear all the pixels of all the lines.
+                - longer        Make the current line 1 pixel longer.
+                - shorter       Make the current line 1 pixel shorter.
+                - stop          Disable current line movement.
+                - continue      Enable current line movement.
+                - newLine       Create a new line.
             
 
             Written by DarviL (David Losantos). Version {prjVersion}.

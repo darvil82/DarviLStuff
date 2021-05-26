@@ -64,25 +64,25 @@ done
 #It also selects a random delay, apart from clearing the screen (if enabled).
 function Collide {
 	case `expr $RANDOM % 14` in
-		0)	color="\e[34m";;
-		1)	color="\e[32m";;
-		2)	color="\e[36m";;
-		3)	color="\e[31m";;
-		4)	color="\e[35m";;
-		5)	color="\e[33m";;
-		6)	color="\e[37m";;
-		7)	color="\e[90m";;
-		8)	color="\e[94m";;
-		9)	color="\e[92m";;
-		10)	color="\e[96m";;
-		11)	color="\e[91m";;
-		12)	color="\e[95m";;
-		13)	color="\e[93m";;
-		14)	color="\e[97m";;
+		0)	color="[34m";;
+		1)	color="[32m";;
+		2)	color="[36m";;
+		3)	color="[31m";;
+		4)	color="[35m";;
+		5)	color="[33m";;
+		6)	color="[37m";;
+		7)	color="[90m";;
+		8)	color="[94m";;
+		9)	color="[92m";;
+		10)	color="[96m";;
+		11)	color="[91m";;
+		12)	color="[95m";;
+		13)	color="[93m";;
+		14)	color="[97m";;
 	esac
 
 	let delay=`expr $RANDOM % $maxSpeed`
-	[[ -n $show_debug ]] && echo "${color}Collision! Setting delay to $delay.\e[0m" >> log
+	[[ -n $show_debug ]] && echo "${color}Collision! Setting delay to $delay.[0m" >> log
 	[[ ! -n $noClear ]] && clear
 }
 
@@ -92,7 +92,7 @@ function Collide {
 clear
 mode_Y="+"
 mode_X="+"
-color="\e[97m"
+color="[97m"
 let cursor_X=-1
 
 while true; do
@@ -113,8 +113,8 @@ while true; do
 	[[ $cursor_X -le 1 ]] && { mode_X="+"; Collide; }
 
 	#Show the sprite on screen with the color and coordinates processed.
-	[[ -n $show_debug ]] && echo -e "\e[0m\e[7m\e[HPOS: X$cursor_X Y$cursor_Y\e[0m\e[K"
-	echo -ne "$color\e[$cursor_Y;${cursor_X}f██"
+	[[ -n $show_debug ]] && echo "[0m[7m[HPOS: X$cursor_X Y$cursor_Y[0m[K"
+	printf "$color[$cursor_Y;${cursor_X}f██"
 
 	#Realizar una pequeña espera por cada vuelta al bucle.
 	for x in `seq 0 $delay`; do

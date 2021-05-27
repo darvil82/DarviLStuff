@@ -260,11 +260,12 @@ def parseArgs() -> bool:
     
 
 
-    conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
-    condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine"}
 
     def parseConditions():
         # Go through every condition, and populate the ArgValues class with the variable and values.
+        conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
+        condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine"}
+
         for cond in conditions:
             usrOpts = getattr(args, cond)
             if usrOpts:

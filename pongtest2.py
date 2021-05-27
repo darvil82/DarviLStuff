@@ -273,7 +273,7 @@ def parseArgs() -> bool:
                 options = []
                 for opt in usrOpts:
                     if opt.strip() in condOptions:
-                        options.append(opt)
+                        options.append(opt.strip())
                     else:
                         showMsg(error=f"'{opt}' is not a valid option. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)
                         break
@@ -301,13 +301,13 @@ def parseArgs() -> bool:
 
 class Line:
     def __init__(self, **kwargs):
-        self._length = args.lenght + 1                                               # Length of the line.
-        self._color = randomColor()                                                  # Color of the line in RGB.
-        self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]    # Position of the line.
-        self._state = [randint(0, 1), randint(0, 1)]                                 # Bools for controlling when to add or substract to the current pos.
-        self._posHistory = []                                                        # Position history of the line.
-        self._char = args.chars[randint(0,len(args.chars)-1)] * 2                    # Character to display as the line body.
-        self._doMove = True                                                          # Enable/Disable line movement.
+        self._length = args.lenght + 1                                                  # Length of the line.
+        self._color = randomColor()                                                     # Color of the line in RGB.
+        self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]       # Position of the line.
+        self._state = [randint(0, 1), randint(0, 1)]                                    # Bools for controlling when to add or substract to the current pos.
+        self._posHistory = []                                                           # Position history of the line.
+        self._char = args.chars[randint(0,len(args.chars)-1)] * 2                       # Character to display as the line body.
+        self._doMove = True                                                             # Enable/Disable line movement.
 
         if ArgValues.pos: self._pos = choice(ArgValues.pos)
 

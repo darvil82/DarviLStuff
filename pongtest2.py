@@ -60,7 +60,7 @@ def showMsg(**kwargs):
             msg = value
             isValid = False
         elif key == "good":
-            prefix = "\x1b[92m✓"
+            prefix = "\x1b[92m√"
             msg = value
         
         if key == "type":

@@ -81,7 +81,6 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 def updateScript(filepath):
     # filepath = path.abspath(filepath)
-
     try:
         with request.urlopen("https://raw.githubusercontent.com/DarviL82/DarviLStuff/master/pongtest2.py") as rawData:
             with open(filepath, "wb") as file:
@@ -211,19 +210,29 @@ def parseArgs() -> bool:
     if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.", type="Chars")
 
 
+    def formatError(lst, index, delimiter=":") -> str:
+        """
+        Return a colored string positioned at a given index inside a list.
+        """
+        item = lst[index]
+        string = delimiter.join(str(x) for x in lst)
+        itemPos = (string.index(item), string.index(item) + len(item))
+        return string[:itemPos[0]] + "\x1b[91m" + string[itemPos[0]:itemPos[1]] + "\x1b[0m" + string[itemPos[1]:]
+
+
     if args.pos:
         argPos = []
         for pos in args.pos.split(","):
             posSplitted = pos.split(":")
             if len(posSplitted) == 2:
-                posAxis = 0
                 for posvalue in posSplitted:
-                    if posvalue == "center": posvalue = int(windowSize[posAxis]/2)
+                    valueIndex = posSplitted.index(posvalue)
+                    if posvalue == "center": posvalue = int(windowSize[valueIndex]/2)
                     try:
-                        posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
-                        posAxis += 1
+                        posSplitted[valueIndex] = capValue(int(posvalue), windowSize[valueIndex], 2)
                     except ValueError:
-                        showMsg(error=f"Value '{posvalue}' is not an intenger.", type="Position")
+                        showMsg(error=f"Value '{posvalue}' is not an intenger. ({formatError(posSplitted, valueIndex)})", type="Position")
+                        break
             else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + ", ".join(posSplitted) + "').", type="Position")
             argPos.append(posSplitted)
         
@@ -236,10 +245,14 @@ def parseArgs() -> bool:
             rgbSplitted = rgb.split(":")
             if len(rgbSplitted) == 3:
                 for rgbvalue in rgbSplitted:
+                    valueIndex = rgbSplitted.index(rgbvalue)
                     try:
-                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'.")
+                        if int(rgbvalue) not in range(0,256):
+                            showMsg(error=f"'{rgbvalue}' is not a value between '0' and '255'. ({formatError(rgbSplitted, valueIndex)})")
+                            break
                     except ValueError:
-                        showMsg(error=f"Value '{rgbvalue}' is not an intenger.", type="Color")
+                        showMsg(error=f"Value '{rgbvalue}' is not an intenger. ({formatError(rgbSplitted, valueIndex)})", type="Color")
+                        break
             else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + ", ".join(rgbSplitted) + "').", type="Color")
             argColor.append(rgbSplitted)
         
@@ -255,13 +268,14 @@ def parseArgs() -> bool:
         for cond in conditions:
             usrOpts = getattr(args, cond)
             if usrOpts:
+                usrOpts = usrOpts.split(",")
                 options = []
-                for opt in usrOpts.split(","):
-                    opt = opt.strip()
-                    if opt in condOptions:
+                for opt in usrOpts:
+                    if opt.strip() in condOptions:
                         options.append(opt)
                     else:
-                        showMsg(error=f"'{opt}' is not a valid option.", type=cond)
+                        showMsg(error=f"'{opt}' is not a valid option. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)
+                        break
                 
                 if isValid: setattr(ArgValues, cond, options)
 

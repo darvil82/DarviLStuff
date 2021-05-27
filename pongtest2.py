@@ -280,6 +280,8 @@ def parseArgs() -> bool:
                 
                 if isValid: setattr(ArgValues, cond, options)
 
+
+
     parseConditions()
     
     if args.update:

@@ -179,25 +179,38 @@ def parseArgs() -> bool:
     if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.")
 
 
+
+    def formatError(lst, index, delimiter=":") -> str:
+        """
+        Return the word at the index provided colored in red as a string.
+        """
+        item = lst[index]
+        string = delimiter.join(str(x) for x in lst)
+        itemPos = (string.index(item), string.index(item) + len(item))
+        return string[:itemPos[0]] + "\x1b[91m" + string[itemPos[0]:itemPos[1]] +  "\x1b[0m" + string[itemPos[1]:]
+        
+
+
+
     if args.pos:
-        if args.pos == "center":
-            setattr(ArgValues, "pos", [[int(windowSize[0]/2), int(windowSize[1]/2)]])
-        else:
-            argPos = []
-            for pos in args.pos.split(","):
-                posSplitted = pos.split(":")
-                if len(posSplitted) == 2:
-                    posAxis = 0
-                    for posvalue in posSplitted:
-                        try:
-                            posSplitted[posAxis] = capValue(int(posvalue), windowSize[posAxis], 2)
-                            posAxis += 1
-                        except ValueError:
-                            showMsg(error=f"Value '{posvalue}' is not an intenger.", type="Position")
-                else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ({posSplitted}).", type="Position")
-                argPos.append(posSplitted)
-            
-            if isValid: setattr(ArgValues, "pos", argPos)
+        argPos = []
+        for pos in args.pos.split(","):
+            posSplitted = pos.split(":")
+            if len(posSplitted) == 2:
+                for posvalue in posSplitted:
+                    valueIndex = posSplitted.index(posvalue)
+                    if posvalue == "center": posvalue = int(windowSize[valueIndex]/2)
+                    try:
+                        posSplitted[valueIndex] = capValue(int(posvalue), windowSize[valueIndex], 2)
+                    except ValueError:
+                        showMsg(error=f"Value '{posvalue}' at position {valueIndex + 1} is not an intenger. ({formatError(posSplitted, valueIndex)})", type="Position")
+                        break
+            else:
+                showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + "', '".join(posSplitted) + "').", type="Position")
+                break
+            argPos.append(posSplitted)
+        
+        if isValid: setattr(ArgValues, "pos", argPos)
     
 
     if args.color:
@@ -207,10 +220,12 @@ def parseArgs() -> bool:
             if len(rgbSplitted) == 3:
                 for rgbvalue in rgbSplitted:
                     try:
-                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' in not a value between '0' and '255'.")
+                        if int(rgbvalue) not in range(0,256): showMsg(error=f"'{rgbvalue}' at position {rgbSplitted.index(rgbvalue) + 1} is not a value between '0' and '255'.")
                     except ValueError:
-                        showMsg(error=f"Value '{rgbvalue}' is not an intenger.", type="Color")
-            else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ({rgbSplitted}).", type="Color")
+                        showMsg(error=f"Value '{rgbvalue}' at position {rgbSplitted.index(rgbvalue) + 1} is not an intenger. {formatError(rgbSplitted, rgbSplitted.index(rgbvalue))}", type="Color")
+            else:
+                showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + "', '".join(rgbSplitted) + "').", type="Color")
+                break
             argColor.append(rgbSplitted)
         
         if isValid: setattr(ArgValues, "color", argColor)
@@ -232,6 +247,7 @@ def parseArgs() -> bool:
                         options.append(opt)
                     else:
                         showMsg(error=f"'{opt}' is not a valid option.", type=cond)
+                        break
                 
                 if isValid: setattr(ArgValues, cond, options)
 

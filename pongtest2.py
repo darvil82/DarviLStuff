@@ -217,7 +217,7 @@ def parseArgs() -> bool:
     if len(args.chars) <= 0: showMsg(error="Cannot use a null value.", type="Chars")
     if args.chars:
         for char in args.chars:
-            if char in {"\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v", ""}:
+            if char in {"\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v"}:
                 showMsg(error="Specified invalid character/s.", type="Chars")
 
 

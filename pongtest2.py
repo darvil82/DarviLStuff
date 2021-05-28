@@ -196,9 +196,12 @@ def parseArgs() -> bool:
         Update rate of terminal size detection. For example,
         1 will check for the size on every frame, while 10
         will check one time every 10 frames. Default is 10."""), type=int, default=10)
-    argparser.add_argument("--max", help=dedent("""\
+    argparser.add_argument("--maxN", help=dedent("""\
         Maximun number of line objects that can be created.
         Default is 5000."""), type=int, default=5000)
+    argparser.add_argument("--maxL", help=dedent("""\
+        Maximun number of line pixels that a line can have.
+        Default is 500."""), type=int, default=500)
     argparser.add_argument("--debug", help=dedent("""\
         Debug mode. Displays information about the lines on
         screen. If double --debug is used, appends all the
@@ -210,8 +213,7 @@ def parseArgs() -> bool:
 
     isValid = True
     if args.number <= 0: showMsg(error="Number of lines cannot be 0 or below.", type="Number")
-    if args.lenght > 500: showMsg(error="Length cannot exceed 500.", type="Lenght")
-    if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.", type="Max")
+    if args.maxN <= 0: showMsg(error="Number of max lines cannot be 0 or below.", type="Max")
     if len(args.chars) <= 0: showMsg(error="Cannot use a null value.", type="Chars")
     if args.chars:
         for char in args.chars:
@@ -285,7 +287,7 @@ def parseArgs() -> bool:
                     if opt.strip() in condOptions:
                         options.append(opt.strip())
                     else:
-                        showMsg(error=f"'{opt}' is not a valid option. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)
+                        showMsg(error=f"'{opt}' is not a valid action. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)
                         break
                 
                 if isValid: setattr(ArgValues, cond, options)
@@ -314,7 +316,7 @@ class Line(object):
     Class for a line object.
     """
     def __init__(self, **kwargs):
-        self._length = args.lenght + 1                                                  # Length of the line.
+        self._length = capValue(args.lenght, args.maxL) + 1                             # Length of the line.
         self._color = randomColor()                                                     # Color of the line in RGB.
         self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]       # Position of the line.
         self._state = [randint(0, 1), randint(0, 1)]                                    # Bools for controlling when to add or substract to the current pos.
@@ -472,7 +474,7 @@ class Line(object):
         if conditionList:
             if args.debug and args.debug >= 2: self.logmsg(f"Run action/s: " + ", ".join(conditionList) + ".")
             for opt in conditionList:
-                if opt == "duplicate" and len(lines) < args.max:
+                if opt == "duplicate" and len(lines) < args.maxN:
                     lines.append(Line(char=self._char, color=self._color))
                 elif opt == "clear":
                     for pos in self._posHistory:
@@ -494,7 +496,7 @@ class Line(object):
                             self.clearSegment(pos, True)
                         lines.remove(self)
                 elif opt == "longer":
-                    if self._length < 500: self._length += 1
+                    if self._length < args.maxL: self._length += 1
                 elif opt == "shorter":
                     if self._length > 2:
                         self._length -= 1
@@ -546,7 +548,7 @@ def main():
 
 
     lines = []
-    for x in range(0, capValue(args.number, args.max)):
+    for x in range(0, capValue(args.number, args.maxN)):
         lines.append(Line())
 
 

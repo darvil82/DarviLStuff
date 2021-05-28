@@ -6,7 +6,7 @@ from time import sleep
 from os import get_terminal_size, system as runsys
 from random import choice, randrange, randint
 from textwrap import dedent
-from sys import argv
+from sys import argv, stdin
 from urllib import request
 import argparse
 
@@ -99,7 +99,7 @@ def updateScript(filepath):
 
 
 
-class ArgValues():
+class ArgValues(object):
     """
     Parsed arguments container.
     """
@@ -127,6 +127,8 @@ def parseArgs() -> bool:
                     - duplicate     Create a new line like the current line.
                     - destroy       Destroy the current line.
                     - newColor      Change the color of the current line.
+                    - newChar       Change the character of the current line.
+                    - newPos        Change the position of the current line.
                     - clear         Clear all the pixels of the current line.
                     - clearAll      Clear all the pixels of all the lines.
                     - longer        Make the current line 1 pixel longer.
@@ -161,6 +163,10 @@ def parseArgs() -> bool:
         Select the line character to display. Default is '█'.
         If more than one character is supplied, the character
         will be picked randomly from the string."""), type=str, default="█")
+    argparser.add_argument("-b", "--noBorders", help=dedent("""\
+        Do not let lines collide with the borders of the
+        terminal. Instead, lines will teleport to the other
+        side."""), action="store_true")
     argparser.add_argument("-i", "--ignore", help=dedent("""\
         Don't collide with lines with the same color as the
         current line.
@@ -202,7 +208,6 @@ def parseArgs() -> bool:
 
     args = argparser.parse_args()
 
-
     isValid = True
     if args.number <= 0: showMsg(error="Number of lines cannot be 0 or below.", type="Number")
     if args.lenght > 500: showMsg(error="Length cannot exceed 500.", type="Lenght")
@@ -210,7 +215,7 @@ def parseArgs() -> bool:
     if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.", type="Chars")
 
 
-    def formatError(lst, index, delimiter=":") -> str:
+    def formatError(lst=[], index=0, delimiter=":") -> str:
         """
         Return a colored string positioned at a given index inside a list.
         """
@@ -233,7 +238,7 @@ def parseArgs() -> bool:
                     except ValueError:
                         showMsg(error=f"Value '{posvalue}' is not an intenger. ({formatError(posSplitted, valueIndex)})", type="Position")
                         break
-            else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + ", ".join(posSplitted) + "').", type="Position")
+            else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + "', '".join(posSplitted) + "').", type="Position")
             argPos.append(posSplitted)
         
         if isValid: setattr(ArgValues, "pos", argPos)
@@ -248,12 +253,12 @@ def parseArgs() -> bool:
                     valueIndex = rgbSplitted.index(rgbvalue)
                     try:
                         if int(rgbvalue) not in range(0,256):
-                            showMsg(error=f"'{rgbvalue}' is not a value between '0' and '255'. ({formatError(rgbSplitted, valueIndex)})")
+                            showMsg(error=f"'{rgbvalue}' is not a value between '0' and '255'. ({formatError(rgbSplitted, valueIndex)})", type="Color")
                             break
                     except ValueError:
                         showMsg(error=f"Value '{rgbvalue}' is not an intenger. ({formatError(rgbSplitted, valueIndex)})", type="Color")
                         break
-            else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + ", ".join(rgbSplitted) + "').", type="Color")
+            else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + "', '".join(rgbSplitted) + "').", type="Color")
             argColor.append(rgbSplitted)
         
         if isValid: setattr(ArgValues, "color", argColor)
@@ -264,7 +269,7 @@ def parseArgs() -> bool:
     def parseConditions():
         # Go through every condition, and populate the ArgValues class with the variable and values.
         conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
-        condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine"}
+        condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine", "newChar", "newPos"}
 
         for cond in conditions:
             usrOpts = getattr(args, cond)
@@ -299,14 +304,17 @@ def parseArgs() -> bool:
 
 
 
-class Line:
+class Line(object):
+    """
+    Class for a line object.
+    """
     def __init__(self, **kwargs):
         self._length = args.lenght + 1                                                  # Length of the line.
         self._color = randomColor()                                                     # Color of the line in RGB.
         self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]       # Position of the line.
         self._state = [randint(0, 1), randint(0, 1)]                                    # Bools for controlling when to add or substract to the current pos.
         self._posHistory = []                                                           # Position history of the line.
-        self._char = args.chars[randint(0,len(args.chars)-1)] * 2                       # Character to display as the line body.
+        self._char = choice(args.chars) * 2                                             # Character to display as the line body.
         self._doMove = True                                                             # Enable/Disable line movement.
 
         if ArgValues.pos: self._pos = choice(ArgValues.pos)
@@ -338,6 +346,7 @@ class Line:
 
 
     def operate(self):
+        # Add / Subtract to the current coordinates
         currentPos = nextPos = list(self._pos)
 
         if self._state[0]:
@@ -373,13 +382,24 @@ class Line:
 
         if not self._doMove: return
 
-        # Add / Subtract to the current coordinates
+        # Change the state of the position axles.
         self._pos = _nextPos
-        if self._pos[0] <= 1: self.collide(0, 0)
-        if self._pos[1] <= 1: self.collide(1, 0)
+        if self._pos[0] <= 1:
+            if args.noBorders:
+                self._pos[0] = windowSize[0] - 1
+            else:
+                self.collide(0, 0)
+        if self._pos[1] <= 1:
+            if args.noBorders:
+                self._pos[1] = windowSize[1] - 1
+            else:
+                self.collide(1, 0)
 
         if self._pos[0] == windowSize[0] or self._pos[0] == windowSize[0] + 1:
-            self.collide(0, 1)
+            if args.noBorders:
+                self._pos[0] = 2
+            else:
+                self.collide(0, 1)
         elif self._pos[0] > windowSize[0]:
             self.collide(0, 1)
             self._pos[0] = windowSize[0]
@@ -388,7 +408,10 @@ class Line:
             self._posHistory.clear()
 
         if self._pos[1] == windowSize[1]:
-            self.collide(1, 1)
+            if args.noBorders:
+                self._pos[1] = 2
+            else:
+                self.collide(1, 1)
         elif self._pos[1] > windowSize[1]:
             self.collide(1, 1)
             self._pos[1] = windowSize[1]
@@ -454,7 +477,12 @@ class Line:
                     for obj in lines:
                         terminalOpt("clear")
                         obj._posHistory.clear()
-                elif opt == "newColor": self._color = randomColor()
+                elif opt == "newColor":
+                    if args.color:
+                        self._color = choice(ArgValues.color)
+                    else:
+                        self._color = randomColor()
+                elif opt == "newChar": self._char = choice(args.chars) * 2
                 elif opt == "destroy":
                     if self in lines:
                         for pos in self._posHistory:
@@ -474,6 +502,11 @@ class Line:
                     self._doMove = True
                 elif opt == "newLine":
                     lines.append(Line())
+                elif opt == "newPos":
+                    if args.pos:
+                        self._pos = choice(ArgValues(pos))
+                    else:
+                        self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]
             
 
 

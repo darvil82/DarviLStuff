@@ -119,7 +119,7 @@ def parseArgs() -> bool:
 
     argparser = argparse.ArgumentParser(
         description="A small python script to display moving lines in the terminal.",
-        epilog=dedent(f"""
+        epilog=dedent(f"""\
             Conditional actions:
                 To use conditional actions with the condition parameters, supply them
                 formatted like 'action,[...]'. Available actions to use:
@@ -212,7 +212,12 @@ def parseArgs() -> bool:
     if args.number <= 0: showMsg(error="Number of lines cannot be 0 or below.", type="Number")
     if args.lenght > 500: showMsg(error="Length cannot exceed 500.", type="Lenght")
     if args.max <= 0: showMsg(error="Number of max lines cannot be 0 or below.", type="Max")
-    if len(args.chars) <= 0: showMsg(error="Specified invalid character/s.", type="Chars")
+    if len(args.chars) <= 0: showMsg(error="Cannot use a null value.", type="Chars")
+    if args.chars:
+        for char in args.chars:
+            if char in {"\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v", ""}:
+                showMsg(error="Specified invalid character/s.", type="Chars")
+
 
 
     def formatError(lst=[], index=0, delimiter=":") -> str:
@@ -504,7 +509,7 @@ class Line(object):
                     lines.append(Line())
                 elif opt == "newPos":
                     if args.pos:
-                        self._pos = choice(ArgValues(pos))
+                        self._pos = choice(ArgValues.pos)
                     else:
                         self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]
             

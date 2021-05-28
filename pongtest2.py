@@ -276,7 +276,7 @@ def parseArgs() -> bool:
     def parseConditions():
         # Go through every condition, and populate the ArgValues class with the variable and values.
         conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
-        condOptions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine", "newChar", "newPos"}
+        condActions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine", "newChar", "newPos"}
 
         for cond in conditions:
             usrOpts = getattr(args, cond)
@@ -284,7 +284,7 @@ def parseArgs() -> bool:
                 usrOpts = usrOpts.split(",")
                 options = []
                 for opt in usrOpts:
-                    if opt.strip() in condOptions:
+                    if opt.strip() in condActions:
                         options.append(opt.strip())
                     else:
                         showMsg(error=f"'{opt}' is not a valid action. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)

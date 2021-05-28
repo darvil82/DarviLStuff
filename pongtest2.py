@@ -6,7 +6,7 @@ from time import sleep
 from os import get_terminal_size, system as runsys
 from random import choice, randrange, randint
 from textwrap import dedent
-from sys import argv, stdin
+from sys import argv
 from urllib import request
 import argparse
 

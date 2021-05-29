@@ -81,10 +81,11 @@ def capValue(value, max=float('inf'), min=float('-inf')):
 
 def updateScript(filepath):
     # filepath = path.abspath(filepath)
+    url = "https://raw.githubusercontent.com/DarviL82/DarviLStuff/master/pongtest2.py"
     try:
-        with request.urlopen("https://raw.githubusercontent.com/DarviL82/DarviLStuff/master/pongtest2.py") as rawData:
-            with open(filepath, "wb") as file:
-                file.write(rawData.read())
+        with request.urlopen(url) as rawData, open(filepath, "wb") as file:
+            file.write(rawData.read())
+    
     except PermissionError:
         showMsg(error=f"Unable to write on the file '{filepath}'.", type="Update")
         return
@@ -538,7 +539,7 @@ def stopScript():
 
 def main():
     global prjVersion, windowSize, lines, logfile
-    prjVersion = "2.3"
+    prjVersion = "2.4"
 
     runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()

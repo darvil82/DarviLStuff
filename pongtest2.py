@@ -217,8 +217,9 @@ def parseArgs() -> bool:
     if args.maxN <= 0: showMsg(error="Number of max lines cannot be 0 or below.", type="Max")
     if len(args.chars) <= 0: showMsg(error="Cannot use a null value.", type="Chars")
     for char in args.chars:
-        if char in {"\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v"}:
+        if char in {"\a", "\b", "\e", "\f", "\n", "\r", "\t", "\v", " "}:
             showMsg(error="Specified invalid character/s.", type="Chars")
+            break
 
 
 

@@ -10,8 +10,8 @@ set "temp1=%temp%\virint.tmp"
 set "wip1=%temp%\virint_wip!random!.tmp"
 set "cfg1=%~dp0vrnt.cfg" & rem '%~dp0' is a parameter extension, which acts here as the directory where VIRINT is located.
 
-set ver=3.4
-set /a build=52
+set ver=3.4.1
+set /a build=53
 
 ::Setting default values.
 set /a brush_X=5
@@ -24,13 +24,21 @@ set /a canvas_X=32
 set /a canvas_Y=24
 set draw_filename_state=
 
+
 call :mode_get
 
 
 ::Remove temporary files ONLY if there's no more than one instance of VIRINT running (including the current one)
-for /f "usebackq" %%G in (`tasklist /fi "imagename eq cmd.exe" /v ^| find "!self_name!"`) do set /a instanceCounter += 1
+for /f "usebackq" %%G in (`tasklist /fi "imagename eq cmd.exe" /v ^| find "cmd.exe"`) do set /a instanceCounter += 1
 if !instanceCounter! LEQ 1 if exist "%temp%\virint*.tmp*" del /f /q "%temp%\virint*.tmp*" 2> nul
 
+
+::Read the cfg file if it exists.
+if exist "!cfg1!" (
+    for /f "usebackq tokens=1-2 delims==" %%G in (`findstr /v /r /c:"^^#" "!cfg1!"`) do (
+        if "%%H"=="0" (set "%%G=") else (set "%%G=%%H")
+    )
+)
 
 
 ::Check for parameters.
@@ -38,12 +46,6 @@ set "self_filename=%~nx0"
 set "self_name=%~n0"
 set "file_extension=.vrnt"
 if exist %1 set "file_load_input=%1"
-
-if exist "!cfg1!" (
-    for /f "usebackq tokens=1-2 delims==" %%G in (`findstr /v /r /c:"^^#" "!cfg1!"`) do (
-        if "%%H"=="0" (set "%%G=") else (set "%%G=%%H")
-    )
-)
 
 if not defined parms_array set "parms_array=%*"
 for %%G in (!parms_array!) do (

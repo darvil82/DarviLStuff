@@ -10,8 +10,8 @@ set "temp1=%temp%\pbar.tmp"
 set "save1=%temp%\pbar_save.tmp"
 
 
-set ver=1.4.2-1
-set /a build=30
+set ver=1.4.2-2
+set /a build=31
 
 if /i "%1"=="/?" goto help
 if /i "%1"=="/CHKUP" call :chkup pbar & exit /b
@@ -232,7 +232,7 @@ exit /b 0
 :help
 	echo Script that allows the user to display progress bars easily.
 	echo Written by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
-	echo Repository available at: "https://github.com/L89David/DarviLStuff"
+	echo Repository available at: "https://github.com/DarviL82/DarviLStuff"
 	echo:
 	echo PBAR [/LOAD] [/R n1-n2] [/T "string"] [/Y n1-n2-n3] [/S number] [/N] [/O] [/P] [/SAVE]
 	echo:
@@ -260,6 +260,6 @@ exit /b 0
 	echo     PBAR in. Pressing ENTER without entering a path will select the default option, which is the folder that
 	echo     contains the currently running script, overriding the old version.
 	echo   - Use 'CMD /C' before this script if used in a batch file.
-	echo   - More help available at 'https://github.com/L89David/DarviLStuff/wiki/PBAR'
+	echo   - More help available at 'https://github.com/DarviL82/DarviLStuff/wiki/PBAR'
 
 exit /b 0

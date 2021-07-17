@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 set "temp1=%temp%\echoc.tmp"
 
 
-set ver=2.12.3
-set /a build=62
+set ver=2.12.3-1
+set /a build=63
 
 if /i "%1"=="/?" goto help
 
@@ -388,7 +388,7 @@ exit /b 1
 	echo ^(foreground and background^), supporting displaying normal strings, content of files, and also changing
 	echo the colors that the CLI is using at the moment.
 	echo [90mWritten by DarviL (David Losantos) in batch. Using version !ver! (Build !build!)
-	echo Repository available at: "[4mhttps://github.com/L89David/DarviLStuff[24m"[0m
+	echo Repository available at: "[4mhttps://github.com/DarviL82/DarviLStuff[24m"[0m
 	echo:
 	echo [96mECHOC[0m [33m/S [93mstring [COLOR] [/U] [0m^| [33m/F [93mfilename [COLOR] [LINES] [/A] [/U] [/V] [/L] [0m^| [33m/T [93m(COLOR [/U] ^| /R) [0m^| 
 	echo       [33m/P [93mstring [COLOR] [0m^| [33m/Z [93mstring[0m 

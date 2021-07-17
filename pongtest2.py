@@ -24,7 +24,7 @@ def terminalOpt(*args):
         - newbuffer / oldbuffer
         - showcursor / hidecursor
     """
-    
+
     ESCcodes = {
         "clear": "\x1b[H\x1b[2J",
         "reset": "\x1b[0m",
@@ -41,16 +41,25 @@ def terminalOpt(*args):
     print(out, end="")
 
 
+
+
 def getWindowSize() -> tuple:
+    """Returns the size of the terminal window"""
+
     size = get_terminal_size()
     return (size[0] - 2, size[1])
+
+
 
 
 randomColor = lambda: [randint(0,255), randint(0,255), randint(0,255)]
 
 
+
+
 def showMsg(**kwargs):
     """Display a message with a bit of color."""
+
     global isValid
 
     for key in kwargs:
@@ -62,15 +71,18 @@ def showMsg(**kwargs):
         elif key == "good":
             prefix = "\x1b[92m√"
             msg = value
-        
+
         if key == "type":
             prefix += f": {value}"
-        
+
     print(f" {prefix}:\x1b[0m", msg)
+
+
 
 
 def capValue(value, max=float('inf'), min=float('-inf')):
     """Clamp a value to a minimun and/or maximun value."""
+
     if value > max:
         return max
     elif value < min:
@@ -79,13 +91,16 @@ def capValue(value, max=float('inf'), min=float('-inf')):
         return value
 
 
-def updateScript(filepath):
-    # filepath = path.abspath(filepath)
+
+
+def updateScript(filepath: str):
+    """Downloads and replaces the script with the latest version"""
+
     url = "https://raw.githubusercontent.com/DarviL82/DarviLStuff/master/pongtest2.py"
     try:
         with request.urlopen(url) as rawData, open(filepath, "wb") as file:
             file.write(rawData.read())
-    
+
     except PermissionError:
         showMsg(error=f"Unable to write on the file '{filepath}'.", type="Update")
         return
@@ -100,10 +115,10 @@ def updateScript(filepath):
 
 
 
+
 class ArgValues(object):
-    """
-    Parsed arguments container.
-    """
+    """Parsed arguments container."""
+
     pos = None
     color = None
     onBorderCollision = None
@@ -115,7 +130,8 @@ class ArgValues(object):
 
 
 def parseArgs() -> bool:
-    # Parse parms
+    """Parse the parameters passed to the script"""
+
     global args, isValid
 
     argparser = argparse.ArgumentParser(
@@ -139,7 +155,7 @@ def parseArgs() -> bool:
                     - newLine       Create a new line.
 
             Written by DarviL (David Losantos). Version {prjVersion}.
-            Repository available at: \x1b[4mhttps://github.com/L89David/DarviLStuff\x1b[24m"""),
+            Repository available at: \x1b[4mhttps://github.com/DarviL82/DarviLStuff\x1b[24m"""),
         formatter_class=argparse.RawTextHelpFormatter
     )
     argparser.add_argument("-n", "--number", help="Number of lines to display.", type=int, default=1)
@@ -224,9 +240,8 @@ def parseArgs() -> bool:
 
 
     def formatError(lst=[], index=0, delimiter=":") -> str:
-        """
-        Return a colored string positioned at a given index inside a list.
-        """
+        """Return a colored string positioned at a given index inside a list."""
+
         item = lst[index]
         string = delimiter.join(str(x) for x in lst)
         itemPos = (string.index(item), string.index(item) + len(item))
@@ -248,9 +263,9 @@ def parseArgs() -> bool:
                         break
             else: showMsg(error=f"Values X and Y are required (2), but {len(posSplitted)} value/s were supplied ('" + "', '".join(posSplitted) + "').", type="Position")
             argPos.append(posSplitted)
-        
+
         if isValid: setattr(ArgValues, "pos", argPos)
-    
+
 
     if args.color:
         argColor = []
@@ -268,14 +283,15 @@ def parseArgs() -> bool:
                         break
             else: showMsg(error=f"Values R, G and B are required (3), but {len(rgbSplitted)} value/s were supplied ('" + "', '".join(rgbSplitted) + "').", type="Color")
             argColor.append(rgbSplitted)
-        
+
         if isValid: setattr(ArgValues, "color", argColor)
-    
+
 
 
 
     def parseConditions():
-        # Go through every condition, and populate the ArgValues class with the variable and values.
+        """Go through every condition, and populate the ArgValues class with the variable and values."""
+
         conditions = {"onBorderCollision", "onMove", "onLineCollision", "onPathFree"}
         condActions = {"duplicate", "destroy", "newColor", "clear", "clearAll", "longer", "shorter", "stop", "continue", "newLine", "newChar", "newPos"}
 
@@ -290,13 +306,11 @@ def parseArgs() -> bool:
                     else:
                         showMsg(error=f"'{opt}' is not a valid action. ({formatError(usrOpts, usrOpts.index(opt), ',')})", type=cond)
                         break
-                
+
                 if isValid: setattr(ArgValues, cond, options)
 
-
-
     parseConditions()
-    
+
     if args.update:
         updateScript(argv[0])
         quit()
@@ -310,13 +324,12 @@ def parseArgs() -> bool:
 
 
 
-
-
 class Line(object):
-    """
-    Class for a line object.
-    """
+    """Class for a line object."""
+
     def __init__(self, **kwargs):
+        """Initialization of line object"""
+
         self._length = capValue(args.lenght, args.maxL) + 1                             # Length of the line.
         self._color = randomColor()                                                     # Color of the line in RGB.
         self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]       # Position of the line.
@@ -328,7 +341,7 @@ class Line(object):
         if ArgValues.pos: self._pos = choice(ArgValues.pos)
 
         if args.color: self._color = choice(ArgValues.color)
-    
+
         for key in kwargs:
             value = kwargs.get(key)
             if key == "color":
@@ -344,17 +357,22 @@ class Line(object):
 
 
     def __str__(self):
+        """String returned when printing all the values required in debug mode"""
+
         return f"\x1b[H\x1b[0m\x1b[7mObjects: {len(lines)}\x1b[K\n\x1b[K\n\x1b[38;2;{self._color[0]};{self._color[1]};{self._color[2]}mPosHistory: {self._posHistory}\x1b[K\nLength: {self._length}\x1b[K\nColor: {self._color}\x1b[K\nChar: '{self._char}'\x1b[K\nPos: {self._pos}\x1b[K\nState: {self._state}\x1b[K\x1b[27m\n\x1b[K"
 
 
     def collide(self, axis: bool, state: bool):
+        """Changes the state of the line, and runs the condition actions for border collisions"""
+
         self._state[axis] = state
         if args.debug and args.debug >= 2: self.logmsg(f"Border collision at {self._pos}")
         self.runOpts(ArgValues.onBorderCollision)
 
 
     def operate(self):
-        # Add / Subtract to the current coordinates
+        """Add / Subtract to the current coordinates"""
+
         currentPos = nextPos = list(self._pos)
 
         if self._state[0]:
@@ -371,6 +389,8 @@ class Line(object):
 
 
     def move(self):
+        """All the stuff related to the movement of the line. This is hacky and ugly as hell and I feel kinda bad for it"""
+
         _nextPos = self.operate()
 
         # Line to line collision detection
@@ -426,11 +446,13 @@ class Line(object):
             for pos in self._posHistory:
                 self.clearSegment(pos, True)
             self._posHistory.clear()
-        
+
         if self not in lines: return
-        
+
+        # Oh god, I know.
         if not self._pos[0] % 2: self._pos[0] += 1
 
+        # We run the condition actions when moving it.
         self.runOpts(ArgValues.onMove)
 
 
@@ -454,6 +476,7 @@ class Line(object):
 
 
     def clearSegment(self, pos: list, ignoreSelf=False):
+        """Clear a segment of the line on the specified position. This will also detect if there's another line on that coordinate."""
         _brush = "  "
 
         if pos in self._posHistory[0:-2] and ignoreSelf == False:
@@ -468,13 +491,15 @@ class Line(object):
                     break
 
         print(f"\x1b[{pos[1]};{pos[0]}f" + _brush, end="", flush=True)
-    
 
-    def runOpts(self, conditionList: list = None):
-        # Run the selected actions listed on the supplied condition list.
+
+    def runOpts(self, conditionList: tuple = None):
+        """Run the selected actions listed on the supplied condition list."""
+
         if conditionList:
             if args.debug and args.debug >= 2: self.logmsg(f"Run action/s: " + ", ".join(conditionList) + ".")
             for opt in conditionList:
+                # *I need you, Python 3.10*
                 if opt == "duplicate" and len(lines) < args.maxN:
                     lines.append(Line(char=self._char, color=self._color))
                 elif opt == "clear":
@@ -515,8 +540,6 @@ class Line(object):
                         self._pos = choice(ArgValues.pos)
                     else:
                         self._pos = [randrange(1, windowSize[0], 2), randrange(1, windowSize[1])]
-            
-
 
 
 
@@ -526,6 +549,8 @@ class Line(object):
 
 
 def stopScript():
+    """Close the script"""
+
     terminalOpt("clear", "oldbuffer", "reset", "showcursor")
     if args.debug and args.debug >= 2:
         logfile.write("Interrupted.\n")
@@ -534,14 +559,11 @@ def stopScript():
 
 
 
-
-
-
 def main():
     global prjVersion, windowSize, lines, logfile
     prjVersion = "2.4"
 
-    runsys("")                      # Idk the purpose of this but it's needed in Windows to display proper VT100 sequences... (Windows dumb)
+    runsys("")                      # Needed in Windows to display proper VT100 sequences... (Windows dumb)
     windowSize = getWindowSize()
     if not parseArgs(): quit()
     terminalOpt("newbuffer", "hidecursor", "clear")
@@ -570,12 +592,10 @@ def main():
 
     except KeyboardInterrupt:
         stopScript()
-    
+
     except Exception as error:
         stopScript()
         showMsg(error=f"Unhandled exception while running the script:\n\t'{error}'", type="Runtime")
-
-
 
 
 

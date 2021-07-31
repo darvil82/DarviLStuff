@@ -72,5 +72,8 @@ def main():
 
 
 if __name__ == "__main__":
-	parseArgs()
-	main()
+	try:
+		parseArgs()
+		main()
+	except KeyboardInterrupt:
+		quit()

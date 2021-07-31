@@ -30,39 +30,65 @@ def parseArgs():
 
 
 
+def capValue(value, max=float('inf'), min=float('-inf')):
+    """Clamp a value to a minimun and/or maximun value."""
+
+    if value > max:
+        return max
+    elif value < min:
+        return min
+    else:
+        return value
+
+
+
+
+
 
 def main():
-	byteLst = []
+	byteArr: list = []
+	positions: list = []
+
 
 	if args.string:
 		for char in args.file:
-			byteLst.append(str.encode(char))
+			byteArr.append(str.encode(char))
 	else:
 		with open(args.file, "rb") as f:
 			# Iterate over every byte and append it to a bytelist
 			byte = f.read(1)
 			while byte:
-				byteLst.append(byte)
+				byteArr.append(byte)
 				byte = f.read(1)
 
 
-	# Replace a random byte on the array with a random value on every pass
-	for x in range(0, args.passes):
-		rnd = bytes([randint(0, 255)])
-		index = randint(0, len(byteLst)) - 1
+	# Generate unique positions for all passes
+	maxPasses = capValue(args.passes, len(byteArr))
+	for nxt in range(0, maxPasses):
+		rnd = randint(0, len(byteArr)) - 1
 
-		byteLst.pop(index)
-		byteLst.insert(index, rnd)
+		while rnd in positions:
+			rnd = randint(0, len(byteArr)) - 1
+
+		positions.append(rnd)
+
+
+	# Replace a random byte on the array with a random value on every pass
+	for index in positions:
+		rnd = bytes([randint(0, 255)])
+
+		byteArr.pop(index)
+		byteArr.insert(index, rnd)
 
 
 	if not args.quiet:
-		for byte in byteLst:
+		for byte in byteArr:
 			print(str(byte.decode("utf-8", "replace")), end="")
 		print()
 
 	if args.output:
 		with open(args.output, "wb") as out:
-			for byte in byteLst:
+			for byte in byteArr:
 				out.write(byte)
 
 

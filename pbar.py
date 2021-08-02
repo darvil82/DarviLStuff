@@ -3,11 +3,11 @@
 
 from typing import Union
 from os import get_terminal_size as _get_terminal_size
-import time
 
 
 
 __all__ = ["pBar"]
+__author__ = "David Losantos (DarviL)"
 
 
 
@@ -344,7 +344,7 @@ class pBar():
 	def step(self, steps: int = 1, overwrite: bool = True):
 		"""Add `steps` to the first value in range, then draw the bar.
 		Overwrites the already drawn bar by default"""
-		self._range[0] += _capValue(steps)
+		self._range[0] += _capValue(steps, self._range[1] - self._range[0])
 		self._draw(overwrite)
 
 
@@ -605,8 +605,9 @@ class pBar():
 
 
 if __name__ == "__main__":
-	mybar = pBar(range=[0, 10], text="Loading...", colorset="green-red")
+	from time import sleep
 
-	while mybar.percentage < 100:
-		mybar.step()
-		time.sleep(0.1)
+	mybar = pBar(range=[4, 2], text="Loading...")
+
+	mybar.step(1)
+	sleep(0.1)

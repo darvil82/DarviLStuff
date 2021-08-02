@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from collections.abc import Sequence
-from typing import Any, NamedTuple, Optional, Set, SupportsInt, TypeVar, Union, cast
+from typing import Any, Optional, SupportsInt, TypeVar, Union, cast
 from os import get_terminal_size as _get_terminal_size
 
 
@@ -447,7 +447,17 @@ class PBar():
 
 		return set
 
+	@property
+	def _charsetCorner(self) -> dict[str, str]:
+		"""
+		type checker does not understand that CharSet["corner"] is always dict[str, str]
+		"""
+		return cast(dict[str, str], self._charset["corner"])
 
+	def _char(self, key: str) -> str:
+		assert(key != "corner")
+
+		return cast(str, self._charset[key]) 
 
 
 	def _getColorset(self, colorset: Any) -> ColorSet:
@@ -482,7 +492,24 @@ class PBar():
 
 		return set
 
+	@property
+	def _colorsetCorner(self) -> dict[str, Color]:
+		"""
+		type checker does not understand that ColorSet["corner"] is always dict[str, Color]
+		"""
+		return cast(dict[str, Color], self._colorset["corner"])
 
+	@property
+	def _colorsetText(self) -> dict[str, Color]:
+		"""
+		type checker does not understand that ColorSet["text"] is always dict[str, Color]
+		"""
+		return cast(dict[str, Color], self._colorset["text"])
+
+	def _color(self, key: str) -> Color:
+		assert(key != "corner" and key != "text")
+
+		return cast(Color, self._colorset[key]) 
 
 
 	def _getFormat(self, formatset: Any) -> FormatSet:
@@ -546,11 +573,11 @@ class PBar():
 
 		# Build all the parts of the progress bar
 		def buildTop() -> str:
-			left = VT100.color(self._colorset["corner"]["tleft"]) + self._charset["corner"]["tleft"] + VT100.reset
-			middle = VT100.color(self._colorset["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
-			right = VT100.color(self._colorset["corner"]["tright"]) + self._charset["corner"]["tright"] + VT100.reset
+			left = VT100.color(self._colorsetCorner["tleft"]) + self._charsetCorner["tleft"] + VT100.reset
+			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
+			right = VT100.color(self._colorsetCorner["tleft"]) + self._charsetCorner["tright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, [centerOffset, 0]) + left + middle + right
+			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 0)) + left + middle + right
 
 
 
@@ -558,43 +585,43 @@ class PBar():
 			segmentsFull = self._segments
 			segmentsEmpty = self._length - segmentsFull
 
-			vert = VT100.color(self._colorset["vert"]) + self._charset["vert"] + VT100.reset
-			middle = VT100.color(self._colorset["full"]) + self._charset["full"] * segmentsFull + VT100.reset + VT100.color(self._colorset["empty"]) + self._charset["empty"] * segmentsEmpty + VT100.reset
+			vert = VT100.color(self._color("vert")) + self._char("vert") + VT100.reset
+			middle = VT100.color(self._color("full")) + self._char("full") * segmentsFull + VT100.reset + VT100.color(self._color("empty")) + self._char("empty") * segmentsEmpty + VT100.reset
 
 			# ---------- Build the content outside the bar ----------
 			extra = parseFormat("outside")
-			extraFormatted = VT100.color(self._colorset["text"]["outside"]) + extra + VT100.reset
+			extraFormatted = VT100.color(self._colorsetText["outside"]) + extra + VT100.reset
 
 
 			# ---------- Build the content inside the bar ----------
 			info = parseFormat("inside")
-			infoFormatted = VT100.color(self._colorset["text"]["inside"])
+			infoFormatted = VT100.color(self._colorsetText["inside"])
 
 			if self.percentage < 50:
 				if self._charset["empty"] == "█":
 					infoFormatted += VT100.invert
-				infoFormatted += VT100.color(self._colorset["empty"])
+				infoFormatted += VT100.color(self._color("empty"))
 			else:
 				if self._charset["full"] == "█":
 					infoFormatted += VT100.invert
-				infoFormatted += VT100.color(self._colorset["full"])
+				infoFormatted += VT100.color(self._color("full"))
 
 			infoFormatted += parseFormat("inside") + VT100.reset
 			# ---------- //////////////////////////////// ----------
 
 
 			return (
-				VT100.clearLine + VT100.pos(self._pos, [centerOffset, 1]) + vert + " " + middle + " " + vert + " " + extraFormatted +
+				VT100.clearLine + VT100.pos(self._pos, (centerOffset, 1)) + vert + " " + middle + " " + vert + " " + extraFormatted +
 				VT100.moveHoriz(centerOffset - len(info) / 2 - 2 - len(extra)) + infoFormatted
 			)
 
 
 		def buildBottom() -> str:
-			left = VT100.color(self._colorset["corner"]["bleft"]) + self._charset["corner"]["bleft"] + VT100.reset
-			middle = VT100.color(self._colorset["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
-			right = VT100.color(self._colorset["corner"]["bright"]) + self._charset["corner"]["bright"] + VT100.reset
+			left = VT100.color(self._colorsetCorner["bleft"]) + self._charsetCorner["bleft"] + VT100.reset
+			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
+			right = VT100.color(self._colorsetCorner["bright"]) + self._charsetCorner["bright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, [centerOffset, 2]) + left + middle + right
+			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 2)) + left + middle + right
 
 
 		if redraw and self._drawtimes > 0: print(VT100.moveVert(-3), end="")

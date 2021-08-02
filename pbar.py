@@ -1,8 +1,11 @@
 #!/bin/python3
 
 
+from multiprocessing.context import Process
 from typing import Union
-from os import get_terminal_size
+from os import get_terminal_size as _get_terminal_size
+from time import sleep as _sleep
+
 
 
 __all__ = ["pBar"]
@@ -108,21 +111,28 @@ def _capValue(value, max=float('inf'), min=float('-inf')):
 class VT100():
 	"""Class for using VT100 sequences a bit easier"""
 
-	def pos(pos: list = None, offset: list = [0, 0]):
+	def pos(pos: list, offset: list = [0, 0]):
 		if pos and len(pos) == 2:
-			for index, value in enumerate(pos):
+			position = list(pos)
+			for index, value in enumerate(position):
 				if isinstance(value, str):
 					if value == "center":
-						pos[index] = int(get_terminal_size()[index] / 2)
+						position[index] = int(_get_terminal_size()[index] / 2)
 					else:
 						return ""
+				elif isinstance(value, int):
+					pass
 				else:
-					if value < 0: return ""
-			return f"\x1b[{pos[1] + offset[1]};{pos[0] + offset[0]}f"
+					raise TypeError("Invalid type for position value")
+
+				if isinstance(position[index], int):
+					position[index] += offset[index]
+
+			return f"\x1b[{position[1]};{position[0]}f"
 		else:
 			return ""
 
-	def color(RGB: list = None):
+	def color(RGB: list):
 		if RGB and len(RGB) == 3:
 			for value in RGB:
 				if value not in range(0, 256): return ""
@@ -130,7 +140,18 @@ class VT100():
 		else:
 			return ""
 
+	def moveHoriz(pos: int):
+		if pos < 0:
+			return f"\x1b[{abs(pos)}D"
+		else:
+			return f"\x1b[{pos}C"
+
+
+	cursorStore = "\x1b7"
+	cursorLoad = "\x1b8"
 	reset = "\x1b[0m"
+	invert = "\x1b[7m"
+	revert = "\x1b[27m"
 
 
 
@@ -168,7 +189,7 @@ class pBar():
 		) -> None:
 		self._range = range
 		self._test = text
-		self._length = _capValue(length, get_terminal_size()[0] - 15, 2)
+		self._length = _capValue(length, 255, 2)
 		self._charset = self.getCharset(charset)
 		self._colors = self.getColorset(colorset)
 		self._pos = position
@@ -237,8 +258,7 @@ class pBar():
 
 
 
-	def getSegments(self, range: list = [0, 1], length: int = 20):
-		# (val1*100/val2)*(size*10)
+	def getSegments(self, range: list, length: int):
 		return int((_capValue(range[0], range[1], 0) / _capValue(range[1], min=1)) * length)
 
 
@@ -272,13 +292,18 @@ class pBar():
 			segmentsEmpty = self._length - segmentsFull
 
 			vert = VT100.color(self._colors["vert"]) + self._charset["vert"] + VT100.reset
-
-			if self.isOption(self.options.TEXT_INSIDE):
-				print("yuh")
-
 			middle = VT100.color(self._colors["full"]) + self._charset["full"] * segmentsFull + VT100.reset + VT100.color(self._colors["empty"]) + self._charset["empty"] * segmentsEmpty + VT100.reset
 
-			return VT100.pos(self._pos, [centerPos, 1]) + vert + " " + middle + " " + vert
+			percent = VT100.moveHoriz(centerPos - len(str(self.percent)))
+
+			if self.percent < 50:
+				percent += VT100.color(self._colors["empty"])
+			else:
+				percent += VT100.invert + VT100.color(self._colors["full"])
+
+			percent += str(self.percent) + "%" + VT100.reset
+
+			return VT100.pos(self._pos, [centerPos, 1]) + vert + " " + middle + " " + vert + percent
 
 
 		def buildBottom():
@@ -287,6 +312,10 @@ class pBar():
 			right = VT100.color(self._colors["corner"]["bright"]) + self._charset["corner"]["bright"] + VT100.reset
 
 			return VT100.pos(self._pos, [centerPos, 2]) + left + middle + right
+
+
+
+		print(VT100.cursorStore, end="")
 
 
 		print(
@@ -304,10 +333,9 @@ class pBar():
 
 
 test = pBar(
+	range=[1, 3],
 	charset="normal",
-	range=[2, 3],
-	colorset="green-red",
-	options=[pBar.options.VERTICAL, pBar.options.TEXT_INSIDE]
+	colorset="default",
+	length=50
 	)
-
 

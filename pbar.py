@@ -305,21 +305,26 @@ class pBar():
 	# --------- Properties / Methods the user should use. ----------
 
 	def draw(self):
+		"""Print the progress bar on screen"""
 		self._draw()
 
 
 	def step(self, steps: int = 1, overwrite: bool = True):
+		"""Add `steps` to the first value in range, then draw the bar.
+		Overwrites the already drawn bar by default"""
 		self._range[0] += _capValue(steps)
 		self._draw(overwrite)
 
 
 	@property
 	def percentage(self):
+		"""Percentage of the progress of the current range"""
 		return int((self._range[0] * 100) / self._range[1])
 
 
 	@property
 	def text(self):
+		"""Text to be displayed on the bar"""
 		return self._text
 	@text.setter
 	def text(self, text: str):
@@ -328,6 +333,7 @@ class pBar():
 
 	@property
 	def range(self):
+		"""Range for the bar progress"""
 		return self._range
 	@range.setter
 	def range(self, range: list):
@@ -336,6 +342,7 @@ class pBar():
 
 	@property
 	def charset(self):
+		"""Set of characters for the bar"""
 		return self._charset
 	@charset.setter
 	def charset(self, charset):
@@ -344,6 +351,7 @@ class pBar():
 
 	@property
 	def colors(self):
+		"""Set of colors for the bar"""
 		return self._colors
 	@colors.setter
 	def colors(self, colors):
@@ -352,6 +360,7 @@ class pBar():
 
 	@property
 	def format(self):
+		"""Formatting used for the bar"""
 		return self._format
 	@format.setter
 	def format(self, format):

@@ -3,7 +3,6 @@
 
 from typing import Union
 from os import get_terminal_size as _get_terminal_size
-from time import sleep as _sleep
 
 
 
@@ -82,7 +81,6 @@ _DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
 
 
 
-
 _DEFAULT_FORMATTING: "dict[str, list[int]]" = {
 	"empty": {
 		"inside":	"",
@@ -96,9 +94,12 @@ _DEFAULT_FORMATTING: "dict[str, list[int]]" = {
 
 	"all-out": {
 		"outside":	"<percentage>, <range>, <text>"
+	},
+
+	"all-in": {
+		"inside":	"<percentage>, <range>, <text>"
 	}
 }
-
 
 
 
@@ -116,10 +117,6 @@ def _capValue(value, max=float('inf'), min=float('-inf')):
         return min
     else:
         return value
-
-
-
-
 
 
 
@@ -188,17 +185,109 @@ class VT100():
 
 
 class pBar():
-	"""hoho progress bar"""
+	"""
+	# pBar - Progress bar
+
+	pBar is an object for managing progress bars in python.
+
+	---
+
+	## Initialization
+
+	>>> mybar = pBar()
+
+	- A progress bar will be initialized with all the default values. For customization, use the arguments or the properties available.
+
+	---
+
+	## Methods
+
+	- mybar.draw()
+	- mybar.step()
+
+	---
+
+	## Properties
+
+	- mybar.percentage
+	- mybar.text
+	- mybar.range
+	- mybar.charset
+	- mybar.colors
+	- mybar.format
+	"""
 
 	def __init__(self,
 			range: "list[int, int]" = [0, 1],
 			text: str = None,
 			length: int = 20,
-			charset: Union[str, dict] = None,
+			charset: "Union[str, dict[str, str]]" = None,
 			colorset: "Union[str, dict[str, list[int, int, int]]]" = None,
 			position: "list[int, int]" = None,
-			format: "dict[list[int]]" = None
+			format: "Union[str, dict[str, str]]" = None
 		) -> None:
+		"""
+		>>> range: list[int, int]:
+
+		- This list will specify the range of two values to display in the progress bar.
+		---
+
+		>>> text: str:
+
+		- String to show in the progress bar.
+		---
+
+		>>> length: int:
+
+		- Intenger that specifies how long the bar will be.
+		---
+
+		>>> charset: Union[str, dict[str, str]]:
+
+		- Set of characters to use when drawing the progress bar. This value can either be a
+		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
+			- Available default character sets: `normal`, `basic`, `slim` and `circles`.
+			- Custom character set dictionary:
+
+				![image](https://user-images.githubusercontent.com/48654552/127887419-acee1b4f-de1b-4cc7-a1a6-1be75c7f97c9.png)
+
+			Note: It is not needed to specify all the keys and values.
+
+		---
+
+		>>> Union[str, dict[str, list[int, int, int]]]:
+
+		- Set of colors to use when drawing the progress bar. This value can either be a
+		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
+			- Available default color sets: `green-red`.
+			- Custom color set dictionary:
+
+				![image](https://user-images.githubusercontent.com/48654552/127890682-efe94666-49c9-4cd4-98c5-f470e1a251bf.png)
+
+			Note: It is not needed to specify all the keys and values.
+
+		---
+
+		>>> position: list[int, int]:
+
+		- List containing the position (X and Y axles) of the progress bar on the terminal.
+		If a value is `center`, the bar will be positioned at the center of the terminal on that axis.
+		---
+
+		>>> format: Union[str, dict[str, str]]:
+
+		- Formatting used when displaying the values inside and outside the bar. This value can either be a
+		string which will specify a default formatting set to use, or a dictionary, which should specify the custom formats:
+			- Available default formatting sets: `default`, `all-out` and `all-in`.
+			- Custom color set dictionary:
+
+				![image](https://user-images.githubusercontent.com/48654552/127889950-9b31d7eb-9a52-442b-be7f-8b9df23b15ae.png)
+
+			Note: It is not needed to specify all the keys and values.
+
+		- Available formatting keys: `<percentage>`, `<range>` and `<text>`.
+		"""
+
 		self._range = range
 		self._text = text
 		self._length = _capValue(length, 255, 5)
@@ -207,6 +296,8 @@ class pBar():
 		self._pos = position
 		self._format = self._getFormat(format)
 
+		self._drawtimes = 0
+		# self._draw()
 
 
 
@@ -217,9 +308,9 @@ class pBar():
 		self._draw()
 
 
-	def step(self, steps: int = 1):
+	def step(self, steps: int = 1, overwrite: bool = True):
 		self._range[0] += _capValue(steps)
-		self._draw(True)
+		self._draw(overwrite)
 
 
 	@property
@@ -230,7 +321,6 @@ class pBar():
 	@property
 	def text(self):
 		return self._text
-
 	@text.setter
 	def text(self, text: str):
 		self._text = str(text)
@@ -239,7 +329,6 @@ class pBar():
 	@property
 	def range(self):
 		return self._range
-
 	@range.setter
 	def range(self, range: list):
 		self._range = range
@@ -248,7 +337,6 @@ class pBar():
 	@property
 	def charset(self):
 		return self._charset
-
 	@charset.setter
 	def charset(self, charset):
 		self._charset = self._getCharset(charset)
@@ -257,7 +345,6 @@ class pBar():
 	@property
 	def colors(self):
 		return self._colors
-
 	@colors.setter
 	def colors(self, colors):
 		self._colors = self._getCharset(colors)
@@ -266,7 +353,6 @@ class pBar():
 	@property
 	def format(self):
 		return self._format
-
 	@format.setter
 	def format(self, format):
 		self._format = self._getFormat(format)
@@ -354,7 +440,6 @@ class pBar():
 
 
 
-
 	def _draw(self, redraw: bool = False):
 		centerOffset = int((self._length + 2) / -2)
 		self._segments = self._getSegments(self._range, self._length)
@@ -374,7 +459,8 @@ class pBar():
 						elif tempStr == "range":
 							endStr += f"{self._range[0]}/{self._range[1]}"
 						elif tempStr == "text":
-							endStr += self._text
+							if self._text:
+								endStr += self._text
 
 						foundOpen = False
 						tempStr = ""
@@ -436,9 +522,9 @@ class pBar():
 			return VT100.pos(self._pos, [centerOffset, 2]) + left + middle + right
 
 
-		if redraw: print(VT100.moveVert(-3), end="")
+		if redraw and self._drawtimes > 0: print(VT100.moveVert(-3), end="")
 
-
+		# Draw the bar
 		print(
 			buildTop(),
 			buildMid(),
@@ -447,3 +533,18 @@ class pBar():
 			sep="\n",
 			end="\n"
 		)
+
+		self._drawtimes += 1
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+	mybar = pBar(range=[3,5], text="Loading...")
+	mybar.draw()

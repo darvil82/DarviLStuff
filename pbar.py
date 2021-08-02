@@ -6,7 +6,7 @@ from os import get_terminal_size as _get_terminal_size
 
 
 
-__all__ = ["pBar"]
+__all__ = ["PBar"]
 __author__ = "David Losantos (DarviL)"
 __version__ = "1.0"
 

@@ -3,6 +3,7 @@
 
 from typing import Union
 from os import get_terminal_size as _get_terminal_size
+import time
 
 
 
@@ -52,7 +53,25 @@ _DEFAULT_CHARSETS: "dict[str, dict[str, Union[str, dict]]]" = {
 	"circles": {
 		"empty":	"○",
 		"full":		"●"
-	}
+	},
+
+	"basic2": {
+		"empty":	".",
+		"full":		"#",
+		"vert":		"|",
+		"horiz":	"-",
+		"corner": {
+			"tleft":	"+",
+			"tright":	"+",
+			"bleft":	"+",
+			"bright":	"+"
+		}
+	},
+
+	"full": {
+		"empty":	"█",
+		"full":		"█"
+	},
 }
 
 
@@ -76,6 +95,19 @@ _DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
 		"empty":	[255, 0, 0],
 		"full":		[0, 255, 0]
 	},
+
+	"darvil": {
+		"empty":	[0, 103, 194],
+		"full":		[15, 219, 162],
+		"vert":		[247, 111, 152],
+		"horiz":	[247, 111, 152],
+		"corner":	{
+			"tleft":	[247, 111, 152],
+			"tright":	[247, 111, 152],
+			"bleft":	[247, 111, 152],
+			"bright":	[247, 111, 152]
+		}
+	}
 }
 
 
@@ -246,7 +278,7 @@ class pBar():
 
 		- Set of characters to use when drawing the progress bar. This value can either be a
 		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
-			- Available default character sets: `normal`, `basic`, `slim` and `circles`.
+			- Available default character sets: `normal`, `basic`, `basic2`, `slim` and `circles`.
 			- Custom character set dictionary:
 
 				![image](https://user-images.githubusercontent.com/48654552/127887419-acee1b4f-de1b-4cc7-a1a6-1be75c7f97c9.png)
@@ -507,11 +539,16 @@ class pBar():
 
 			# ---------- Build the content inside the bar ----------
 			info = parseFormat("inside")
+			infoFormatted = ""
 
 			if self.percentage < 50:
-				infoFormatted = VT100.color(self._colors["empty"])
+				if self._charset["empty"] == "█":
+					infoFormatted = VT100.invert
+				infoFormatted += VT100.color(self._colors["empty"])
 			else:
-				infoFormatted = VT100.invert + VT100.color(self._colors["full"])
+				if self._charset["full"] == "█":
+					infoFormatted = VT100.invert
+				infoFormatted += VT100.color(self._colors["full"])
 
 			infoFormatted += parseFormat("inside") + VT100.reset
 			# ---------- //////////////////////////////// ----------
@@ -554,6 +591,22 @@ class pBar():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
-	mybar = pBar(range=[3,5], text="Loading...")
-	mybar.draw()
+	mybar = pBar(range=[0, 10], text="Loading...", colorset="green-red")
+
+	while mybar.percentage < 100:
+		mybar.step()
+		time.sleep(0.1)

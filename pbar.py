@@ -3,6 +3,7 @@
 
 from typing import Union
 from os import get_terminal_size as _get_terminal_size
+from time import sleep as _sleep
 
 
 
@@ -89,9 +90,13 @@ _DEFAULT_FORMATTING: "dict[str, list[int]]" = {
 	},
 
 	"default": {
-		"inside":	"<percent>",
+		"inside":	"<percentage>",
 		"outside":	"<text>"
 	},
+
+	"all-out": {
+		"outside":	"<percentage>, <range>, <text>"
+	}
 }
 
 
@@ -162,12 +167,18 @@ class VT100():
 		else:
 			return f"\x1b[{pos}C"
 
+	def moveVert(pos: int):
+		pos = int(pos)
+		if pos < 0:
+			return f"\x1b[{abs(pos)}A"
+		else:
+			return f"\x1b[{pos}B"
 
-	cursorStore = "\x1b7"
-	cursorLoad = "\x1b8"
+
 	reset = "\x1b[0m"
 	invert = "\x1b[7m"
 	revert = "\x1b[27m"
+	clearRight = "\x1b[K"
 
 
 
@@ -179,18 +190,6 @@ class VT100():
 class pBar():
 	"""hoho progress bar"""
 
-	class options():
-		"""### Available options:
-			- `VERTICAL`:		Show the progress bar vertically.
-			- `NO_PERCENT`:		Do not show the percentage.
-			- `SHOW_RANGE`:		Show the range specified.
-			- `NO_OVERRIDE`:	Do not override the bar when drawing again.
-			- `TEXT_INSIDE`:	Show the specified text inside the bar.
-		"""
-		VERTICAL	= 0
-		NO_OVERRIDE	= 1
-
-
 	def __init__(self,
 			range: "list[int, int]" = [0, 1],
 			text: str = None,
@@ -198,26 +197,86 @@ class pBar():
 			charset: Union[str, dict] = None,
 			colorset: "Union[str, dict[str, list[int, int, int]]]" = None,
 			position: "list[int, int]" = None,
-			options: "list[int]" = [],
-			format: "dict[list[int]]" = _DEFAULT_FORMATTING["default"]
+			format: "dict[list[int]]" = None
 		) -> None:
 		self._range = range
 		self._text = text
-		self._length = _capValue(length, 255, 2)
-		self._charset = self.getCharset(charset)
-		self._colors = self.getColorset(colorset)
+		self._length = _capValue(length, 255, 5)
+		self._charset = self._getCharset(charset)
+		self._colors = self._getColorset(colorset)
 		self._pos = position
-		self._options = options
-		self._format = self.getFormat(format)
-
-		self._segments = self.getSegments(self._range, self._length)
-
-		self.draw()
+		self._format = self._getFormat(format)
 
 
 
 
-	def getCharset(self, charset):
+
+	# --------- Properties / Methods the user should use. ----------
+
+	def draw(self):
+		self._draw()
+
+
+	def step(self, steps: int = 1):
+		self._range[0] += _capValue(steps)
+		self._draw(True)
+
+
+	@property
+	def percentage(self):
+		return int((self._range[0] * 100) / self._range[1])
+
+
+	@property
+	def text(self):
+		return self._text
+
+	@text.setter
+	def text(self, text: str):
+		self._text = str(text)
+
+
+	@property
+	def range(self):
+		return self._range
+
+	@range.setter
+	def range(self, range: list):
+		self._range = range
+
+
+	@property
+	def charset(self):
+		return self._charset
+
+	@charset.setter
+	def charset(self, charset):
+		self._charset = self._getCharset(charset)
+
+
+	@property
+	def colors(self):
+		return self._colors
+
+	@colors.setter
+	def colors(self, colors):
+		self._colors = self._getCharset(colors)
+
+
+	@property
+	def format(self):
+		return self._format
+
+	@format.setter
+	def format(self, format):
+		self._format = self._getFormat(format)
+
+	# --------- ///////////////////////////////////////// ----------
+
+
+
+
+	def _getCharset(self, charset):
 		if charset:
 			if isinstance(charset, str):
 				charset = _DEFAULT_CHARSETS.get(charset, _DEFAULT_CHARSETS["normal"])
@@ -244,7 +303,7 @@ class pBar():
 
 
 
-	def getColorset(self, colorset):
+	def _getColorset(self, colorset):
 		if colorset:
 			if isinstance(colorset, str):
 				colorset = _DEFAULT_COLORSETS.get(colorset, _DEFAULT_COLORSETS["empty"])
@@ -271,40 +330,35 @@ class pBar():
 
 
 
-	def getFormat(self, formatset):
+	def _getFormat(self, formatset):
 		if formatset:
 			if isinstance(formatset, str):
 				formatset = _DEFAULT_FORMATTING.get(formatset, _DEFAULT_FORMATTING["empty"])
-				set = {**_DEFAULT_FORMATTING["empty"], **formatset}
 
-			set = {**_DEFAULT_COLORSETS["empty"], **formatset}
+			set = {**_DEFAULT_FORMATTING["empty"], **formatset}
 		else:
-			set = _DEFAULT_FORMATTING["empty"]
+			set = _DEFAULT_FORMATTING["default"]
 
 		return set
 
 
 
 
-	def getSegments(self, range: list, length: int):
+	def _getSegments(self, range: list, length: int):
 		return int((_capValue(range[0], range[1], 0) / _capValue(range[1], min=1)) * length)
 
 
 
-	def isOption(self, option: int):
-		return option in self._options
-
-
-
-	@property
-	def percent(self):
-		return int((self._range[0] * 100) / self._range[1])
 
 
 
 
-	def draw(self):
-		centerPos = int((self._length + 2) / -2)
+
+
+	def _draw(self, redraw: bool = False):
+		centerOffset = int((self._length + 2) / -2)
+		self._segments = self._getSegments(self._range, self._length)
+
 
 		def parseFormat(type: str):
 			string = self._format[type]
@@ -315,8 +369,8 @@ class pBar():
 			for char in string:
 				if foundOpen:
 					if char == ">":
-						if tempStr == "percent":
-							endStr += f"{str(self.percent)}%"
+						if tempStr == "percentage":
+							endStr += f"{str(self.percentage)}%"
 						elif tempStr == "range":
 							endStr += f"{self._range[0]}/{self._range[1]}"
 						elif tempStr == "text":
@@ -335,14 +389,14 @@ class pBar():
 
 
 
-
-		# cbt
+		# Build all the parts of the progress bar
 		def buildTop():
 			left = VT100.color(self._colors["corner"]["tleft"]) + self._charset["corner"]["tleft"] + VT100.reset
 			middle = VT100.color(self._colors["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
 			right = VT100.color(self._colors["corner"]["tright"]) + self._charset["corner"]["tright"] + VT100.reset
 
-			return VT100.pos(self._pos, [centerPos, 0]) + left + middle + right
+			return VT100.pos(self._pos, [centerOffset, 0]) + left + middle + right
+
 
 
 		def buildMid():
@@ -352,18 +406,26 @@ class pBar():
 			vert = VT100.color(self._colors["vert"]) + self._charset["vert"] + VT100.reset
 			middle = VT100.color(self._colors["full"]) + self._charset["full"] * segmentsFull + VT100.reset + VT100.color(self._colors["empty"]) + self._charset["empty"] * segmentsEmpty + VT100.reset
 
+			# ---------- Build the content outside the bar ----------
+			extra = parseFormat("outside")
+
+
+			# ---------- Build the content inside the bar ----------
 			info = parseFormat("inside")
 
-			if self.percent < 50:
+			if self.percentage < 50:
 				infoFormatted = VT100.color(self._colors["empty"])
 			else:
 				infoFormatted = VT100.invert + VT100.color(self._colors["full"])
 
 			infoFormatted += parseFormat("inside") + VT100.reset
+			# ---------- //////////////////////////////// ----------
 
 
-
-			return VT100.pos(self._pos, [centerPos, 1]) + vert + " " + middle + " " + vert + VT100.moveHoriz(centerPos - len(info) / 2) + infoFormatted
+			return (
+				VT100.pos(self._pos, [centerOffset, 1]) + vert + " " + middle + " " +vert + " " + extra +
+				VT100.clearRight + VT100.moveHoriz(centerOffset - len(info) / 2 - 2 - len(extra)) + infoFormatted
+			)
 
 
 		def buildBottom():
@@ -371,11 +433,10 @@ class pBar():
 			middle = VT100.color(self._colors["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
 			right = VT100.color(self._colors["corner"]["bright"]) + self._charset["corner"]["bright"] + VT100.reset
 
-			return VT100.pos(self._pos, [centerPos, 2]) + left + middle + right
+			return VT100.pos(self._pos, [centerOffset, 2]) + left + middle + right
 
 
-
-		print(VT100.cursorStore, end="")
+		if redraw: print(VT100.moveVert(-3), end="")
 
 
 		print(
@@ -386,17 +447,3 @@ class pBar():
 			sep="\n",
 			end="\n"
 		)
-
-
-
-
-
-
-test = pBar(
-	range=[1, 3],
-	charset="normal",
-	colorset="default",
-	length=50,
-	text="hola"
-	)
-

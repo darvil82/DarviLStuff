@@ -8,7 +8,7 @@ from os import get_terminal_size as _get_terminal_size
 
 __all__ = ["PBar"]
 __author__ = "David Losantos (DarviL)"
-__version__ = "1.0"
+__version__ = "0.1"
 
 
 
@@ -254,7 +254,7 @@ class PBar():
 	- mybar.text
 	- mybar.range
 	- mybar.charset
-	- mybar.colors
+	- mybar.colorset
 	- mybar.format
 	"""
 
@@ -391,12 +391,12 @@ class PBar():
 
 
 	@property
-	def colors(self):
+	def colorset(self):
 		"""Set of colors for the bar"""
 		return self._colorset
-	@colors.setter
-	def colors(self, colors):
-		self._colorset = self._getCharset(colors)
+	@colorset.setter
+	def colorset(self, colorset):
+		self._colorset = self._getCharset(colorset)
 
 
 	@property
@@ -561,7 +561,7 @@ class PBar():
 
 			# ---------- Build the content outside the bar ----------
 			extra = parseFormat("outside")
-			extraFormatted = VT100.color(self._colorset["text"]["outside"]) + extra
+			extraFormatted = VT100.color(self._colorset["text"]["outside"]) + extra + VT100.reset
 
 
 			# ---------- Build the content inside the bar ----------
@@ -634,16 +634,16 @@ class PBar():
 if __name__ == "__main__":
 	from time import sleep
 
-	mybar = PBar(
-		range=[0, 100],
-		colorset="darvil",
-		charset="default",
-		length=200,
+	mibarra = PBar(
+		range=[0, 50],
+		text="Querido Hijo",
+		charset="slim",
 		format="all-out",
-		position=["center", 5]
+		length=50
 	)
 
-	while mybar.percentage < 100:
-		mybar.length = 100 - mybar.percentage
-		mybar.step(1)
-		sleep(0.05)
+	mibarra.draw()
+
+	while mibarra.percentage < 100:
+		sleep(0.1)
+		mibarra.step(1)

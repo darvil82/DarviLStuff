@@ -1,10 +1,8 @@
 #!/bin/python3
 
 
-from multiprocessing.context import Process
 from typing import Union
 from os import get_terminal_size as _get_terminal_size
-from time import sleep as _sleep
 
 
 
@@ -61,7 +59,7 @@ _DEFAULT_CHARSETS: "dict[str, dict[str, Union[str, dict]]]" = {
 
 
 _DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
-	"default": {
+	"empty": {
 		"empty":	None,
 		"full":		None,
 		"vert":		None,
@@ -77,6 +75,22 @@ _DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
 	"green-red": {
 		"empty":	[255, 0, 0],
 		"full":		[0, 255, 0]
+	},
+}
+
+
+
+
+
+_DEFAULT_FORMATTING: "dict[str, list[int]]" = {
+	"empty": {
+		"inside":	"",
+		"outside":	""
+	},
+
+	"default": {
+		"inside":	"<percent>",
+		"outside":	"<text>"
 	},
 }
 
@@ -108,6 +122,7 @@ def _capValue(value, max=float('inf'), min=float('-inf')):
 
 
 
+
 class VT100():
 	"""Class for using VT100 sequences a bit easier"""
 
@@ -121,7 +136,7 @@ class VT100():
 					else:
 						return ""
 				elif isinstance(value, int):
-					pass
+					value = int(value)
 				else:
 					raise TypeError("Invalid type for position value")
 
@@ -141,6 +156,7 @@ class VT100():
 			return ""
 
 	def moveHoriz(pos: int):
+		pos = int(pos)
 		if pos < 0:
 			return f"\x1b[{abs(pos)}D"
 		else:
@@ -172,10 +188,7 @@ class pBar():
 			- `TEXT_INSIDE`:	Show the specified text inside the bar.
 		"""
 		VERTICAL	= 0
-		NO_PERCENT	= 1
-		SHOW_RANGE	= 2
-		NO_OVERRIDE	= 3
-		TEXT_INSIDE	= 4
+		NO_OVERRIDE	= 1
 
 
 	def __init__(self,
@@ -185,15 +198,17 @@ class pBar():
 			charset: Union[str, dict] = None,
 			colorset: "Union[str, dict[str, list[int, int, int]]]" = None,
 			position: "list[int, int]" = None,
-			options: "list[int]" = []
+			options: "list[int]" = [],
+			format: "dict[list[int]]" = _DEFAULT_FORMATTING["default"]
 		) -> None:
 		self._range = range
-		self._test = text
+		self._text = text
 		self._length = _capValue(length, 255, 2)
 		self._charset = self.getCharset(charset)
 		self._colors = self.getColorset(colorset)
 		self._pos = position
 		self._options = options
+		self._format = self.getFormat(format)
 
 		self._segments = self.getSegments(self._range, self._length)
 
@@ -206,7 +221,6 @@ class pBar():
 		if charset:
 			if isinstance(charset, str):
 				charset = _DEFAULT_CHARSETS.get(charset, _DEFAULT_CHARSETS["normal"])
-				set = {**_DEFAULT_CHARSETS["empty"], **charset}
 			elif isinstance(charset, dict):
 				if "corner" in charset.keys():
 					if isinstance(charset["corner"], str):
@@ -218,10 +232,10 @@ class pBar():
 						}
 					elif isinstance(charset["corner"], dict):
 						charset["corner"] = {**_DEFAULT_CHARSETS["empty"]["corner"], **charset["corner"]}
-
-				set = {**_DEFAULT_CHARSETS["empty"], **charset}
 			else:
 				raise ValueError(f"Invalid type ({type(charset)}) for charset")
+
+			set = {**_DEFAULT_CHARSETS["empty"], **charset}
 		else:
 			set = _DEFAULT_CHARSETS["normal"]
 
@@ -233,8 +247,7 @@ class pBar():
 	def getColorset(self, colorset):
 		if colorset:
 			if isinstance(colorset, str):
-				colorset = _DEFAULT_COLORSETS.get(colorset, _DEFAULT_COLORSETS["default"])
-				set = {**_DEFAULT_COLORSETS["default"], **colorset}
+				colorset = _DEFAULT_COLORSETS.get(colorset, _DEFAULT_COLORSETS["empty"])
 			elif isinstance(colorset, dict):
 				if "corner" in colorset.keys():
 					if isinstance(colorset["corner"], list):
@@ -245,13 +258,28 @@ class pBar():
 							"bright": colorset["corner"]
 						}
 					elif isinstance(colorset["corner"], dict):
-						colorset["corner"] = {**_DEFAULT_COLORSETS["default"]["corner"], **colorset["corner"]}
-
-				set = {**_DEFAULT_COLORSETS["default"], **colorset}
+						colorset["corner"] = {**_DEFAULT_COLORSETS["empty"]["corner"], **colorset["corner"]}
 			else:
 				raise ValueError(f"Invalid type ({type(colorset)}) for colorset")
+
+			set = {**_DEFAULT_COLORSETS["empty"], **colorset}
 		else:
-			set = _DEFAULT_COLORSETS["default"]
+			set = _DEFAULT_COLORSETS["empty"]
+
+		return set
+
+
+
+
+	def getFormat(self, formatset):
+		if formatset:
+			if isinstance(formatset, str):
+				formatset = _DEFAULT_FORMATTING.get(formatset, _DEFAULT_FORMATTING["empty"])
+				set = {**_DEFAULT_FORMATTING["empty"], **formatset}
+
+			set = {**_DEFAULT_COLORSETS["empty"], **formatset}
+		else:
+			set = _DEFAULT_FORMATTING["empty"]
 
 		return set
 
@@ -278,6 +306,36 @@ class pBar():
 	def draw(self):
 		centerPos = int((self._length + 2) / -2)
 
+		def parseFormat(type: str):
+			string = self._format[type]
+			foundOpen = False
+			tempStr = ""
+			endStr = ""
+
+			for char in string:
+				if foundOpen:
+					if char == ">":
+						if tempStr == "percent":
+							endStr += f"{str(self.percent)}%"
+						elif tempStr == "range":
+							endStr += f"{self._range[0]}/{self._range[1]}"
+						elif tempStr == "text":
+							endStr += self._text
+
+						foundOpen = False
+						tempStr = ""
+					else:
+						tempStr += char
+				elif char == "<":
+					foundOpen = True
+				else:
+					endStr += char
+
+			return endStr
+
+
+
+
 		# cbt
 		def buildTop():
 			left = VT100.color(self._colors["corner"]["tleft"]) + self._charset["corner"]["tleft"] + VT100.reset
@@ -294,16 +352,18 @@ class pBar():
 			vert = VT100.color(self._colors["vert"]) + self._charset["vert"] + VT100.reset
 			middle = VT100.color(self._colors["full"]) + self._charset["full"] * segmentsFull + VT100.reset + VT100.color(self._colors["empty"]) + self._charset["empty"] * segmentsEmpty + VT100.reset
 
-			percent = VT100.moveHoriz(centerPos - len(str(self.percent)))
+			info = parseFormat("inside")
 
 			if self.percent < 50:
-				percent += VT100.color(self._colors["empty"])
+				infoFormatted = VT100.color(self._colors["empty"])
 			else:
-				percent += VT100.invert + VT100.color(self._colors["full"])
+				infoFormatted = VT100.invert + VT100.color(self._colors["full"])
 
-			percent += str(self.percent) + "%" + VT100.reset
+			infoFormatted += parseFormat("inside") + VT100.reset
 
-			return VT100.pos(self._pos, [centerPos, 1]) + vert + " " + middle + " " + vert + percent
+
+
+			return VT100.pos(self._pos, [centerPos, 1]) + vert + " " + middle + " " + vert + VT100.moveHoriz(centerPos - len(info) / 2) + infoFormatted
 
 
 		def buildBottom():
@@ -336,6 +396,7 @@ test = pBar(
 	range=[1, 3],
 	charset="normal",
 	colorset="default",
-	length=50
+	length=50,
+	text="hola"
 	)
 

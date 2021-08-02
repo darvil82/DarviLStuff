@@ -1,7 +1,7 @@
 #!/bin/python3
 
-
-from typing import Union
+from collections.abc import Sequence
+from typing import Any, Optional, SupportsInt, TypeVar, Union, cast
 from os import get_terminal_size as _get_terminal_size
 
 
@@ -11,9 +11,10 @@ __author__ = "David Losantos (DarviL)"
 __version__ = "0.1"
 
 
+CharSetEntry = Union[str, dict[str, str]]
+CharSet = dict[str, Union[str, CharSetEntry]]
 
-
-_DEFAULT_CHARSETS: "dict[str, dict[str, Union[str, dict]]]" = {
+_DEFAULT_CHARSETS: dict[str, CharSet] = {
 	"empty": {
 		"empty":	" ",
 		"full":		" ",
@@ -75,10 +76,10 @@ _DEFAULT_CHARSETS: "dict[str, dict[str, Union[str, dict]]]" = {
 	},
 }
 
+Color = Optional[tuple[int, int, int]]
+ColorSet = dict[str, Union[Color, dict[str, Color]]]
 
-
-
-_DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
+_DEFAULT_COLORSETS: dict[str, ColorSet] = {
 	"empty": {
 		"empty":	None,
 		"full":		None,
@@ -97,32 +98,32 @@ _DEFAULT_COLORSETS: "dict[str, Union[list[int, int, int], dict]]" = {
 	},
 
 	"green-red": {
-		"empty":	[255, 0, 0],
-		"full":		[0, 255, 0]
+		"empty":	(255, 0, 0),
+		"full":		(0, 255, 0)
 	},
 
 	"darvil": {
-		"empty":	[0, 103, 194],
-		"full":		[15, 219, 162],
-		"vert":		[247, 111, 152],
-		"horiz":	[247, 111, 152],
+		"empty":	(0, 103, 194),
+		"full":		(15, 219, 162),
+		"vert":		(247, 111, 152),
+		"horiz":	(247, 111, 152),
 		"corner":	{
-			"tleft":	[247, 111, 152],
-			"tright":	[247, 111, 152],
-			"bleft":	[247, 111, 152],
-			"bright":	[247, 111, 152]
+			"tleft":	(247, 111, 152),
+			"tright":	(247, 111, 152),
+			"bleft":	(247, 111, 152),
+			"bright":	(247, 111, 152)
 		},
 		"text": {
-			"outside":	[247, 111, 152],
+			"outside":	(247, 111, 152),
 			"inside":	None
 		}
 	}
 }
 
 
+FormatSet = dict[str, str]
 
-
-_DEFAULT_FORMATTING: "dict[str, list[int]]" = {
+_DEFAULT_FORMATTING: dict[str, FormatSet] = {
 	"empty": {
 		"inside":	"",
 		"outside":	""
@@ -145,16 +146,14 @@ _DEFAULT_FORMATTING: "dict[str, list[int]]" = {
 
 
 
+Num = TypeVar("Num", int, float)
 
-
-
-
-def _capValue(value, max=float('inf'), min=float('-inf')):
+def _capValue(value: Num, max: Optional[Num]=None, min: Optional[Num]=None) -> Num:
     """Clamp a value to a minimun and/or maximun value."""
 
-    if value > max:
+    if max and value > max:
         return max
-    elif value < min:
+    elif min and value < min:
         return min
     else:
         return value
@@ -169,7 +168,8 @@ def _capValue(value, max=float('inf'), min=float('-inf')):
 class VT100():
 	"""Class for using VT100 sequences a bit easier"""
 
-	def pos(pos: list, offset: list = [0, 0]):
+	@staticmethod
+	def pos(pos: Optional[Sequence[Any]], offset: tuple[int, int] = (0, 0)):
 		if pos and len(pos) == 2:
 			position = list(pos)
 			for index, value in enumerate(position):
@@ -190,7 +190,8 @@ class VT100():
 		else:
 			return ""
 
-	def color(RGB: list):
+	@staticmethod
+	def color(RGB: Optional[Sequence[int]]):
 		if RGB and len(RGB) == 3:
 			for value in RGB:
 				if value not in range(0, 256): return ""
@@ -198,14 +199,16 @@ class VT100():
 		else:
 			return ""
 
-	def moveHoriz(pos: int):
+	@staticmethod
+	def moveHoriz(pos: SupportsInt):
 		pos = int(pos)
 		if pos < 0:
 			return f"\x1b[{abs(pos)}D"
 		else:
 			return f"\x1b[{pos}C"
 
-	def moveVert(pos: int):
+	@staticmethod
+	def moveVert(pos: SupportsInt):
 		pos = int(pos)
 		if pos < 0:
 			return f"\x1b[{abs(pos)}A"
@@ -259,13 +262,13 @@ class PBar():
 	"""
 
 	def __init__(self,
-			range: "list[int, int]" = [0, 1],
+			range: tuple[int, int] = (0, 1),
 			text: str = "",
 			length: int = 20,
-			charset: "Union[str, dict[str, str]]" = None,
-			colorset: "Union[str, dict[str, list[int, int, int]]]" = None,
-			position: "list[int, int]" = None,
-			format: "Union[str, dict[str, str]]" = None
+			charset: Union[None, str, dict[str, str]] = None,
+			colorset: Union[None, str, dict[str, tuple[int, int, int]]] = None,
+			position: Optional[tuple[int, int]] = None,
+			format: Union[None, str, dict[str, str]] = None
 		) -> None:
 		"""
 		>>> range: list[int, int]:
@@ -329,7 +332,7 @@ class PBar():
 		- Available formatting keys: `<percentage>`, `<range>` and `<text>`.
 		"""
 
-		self._range = range
+		self._range = list(range)
 		self._text = str(text)
 		self._length = _capValue(length, 255, 5)
 		self._charset = self._getCharset(charset)
@@ -373,30 +376,30 @@ class PBar():
 
 
 	@property
-	def range(self):
+	def range(self) -> tuple[int, int]:
 		"""Range for the bar progress"""
-		return self._range
+		return self._range[0], self._range[1]
 	@range.setter
-	def range(self, range: list):
-		self._range = range
+	def range(self, range: tuple[int, int]):
+		self._range = list(range)
 
 
 	@property
-	def charset(self):
+	def charset(self) -> CharSet:
 		"""Set of characters for the bar"""
 		return self._charset
 	@charset.setter
-	def charset(self, charset):
+	def charset(self, charset: Any):
 		self._charset = self._getCharset(charset)
 
 
 	@property
-	def colorset(self):
+	def colorset(self) -> ColorSet:
 		"""Set of colors for the bar"""
 		return self._colorset
 	@colorset.setter
-	def colorset(self, colorset):
-		self._colorset = self._getCharset(colorset)
+	def colorset(self, colorset: Any):
+		self._colorset = self._getColorset(colorset)
 
 
 	@property
@@ -404,7 +407,7 @@ class PBar():
 		"""Formatting used for the bar"""
 		return self._format
 	@format.setter
-	def format(self, format):
+	def format(self, format: Any):
 		self._format = self._getFormat(format)
 
 
@@ -420,8 +423,7 @@ class PBar():
 
 
 
-
-	def _getCharset(self, charset):
+	def _getCharset(self, charset: Any) -> CharSet:
 		if charset:
 			if isinstance(charset, str):
 				charset = _DEFAULT_CHARSETS.get(charset, _DEFAULT_CHARSETS["normal"])
@@ -435,20 +437,30 @@ class PBar():
 							"bright": charset["corner"]
 						}
 					elif isinstance(charset["corner"], dict):
-						charset["corner"] = {**_DEFAULT_CHARSETS["empty"]["corner"], **charset["corner"]}
+						charset["corner"] |= cast(dict[str, str], _DEFAULT_CHARSETS["empty"]["corner"])
 			else:
 				raise ValueError(f"Invalid type ({type(charset)}) for charset")
 
-			set = {**_DEFAULT_CHARSETS["empty"], **charset}
+			set: CharSet = {**_DEFAULT_CHARSETS["empty"], **charset}
 		else:
 			set = _DEFAULT_CHARSETS["normal"]
 
 		return set
 
+	@property
+	def _charsetCorner(self) -> dict[str, str]:
+		"""
+		type checker does not understand that CharSet["corner"] is always dict[str, str]
+		"""
+		return cast(dict[str, str], self._charset["corner"])
+
+	def _char(self, key: str) -> str:
+		assert(key != "corner")
+
+		return cast(str, self._charset[key]) 
 
 
-
-	def _getColorset(self, colorset):
+	def _getColorset(self, colorset: Any) -> ColorSet:
 		if colorset:
 			if isinstance(colorset, str):
 				colorset = _DEFAULT_COLORSETS.get(colorset, _DEFAULT_COLORSETS["empty"])
@@ -462,7 +474,7 @@ class PBar():
 							"bright": colorset["corner"]
 						}
 					elif isinstance(colorset["corner"], dict):
-						colorset["corner"] = {**_DEFAULT_COLORSETS["empty"]["corner"], **colorset["corner"]}
+						colorset["corner"] |= cast(dict[str, Color], _DEFAULT_COLORSETS["empty"]["corner"])
 				if "text" in colorset.keys():
 					if isinstance(colorset["text"], list):
 						colorset["text"] = {
@@ -470,20 +482,37 @@ class PBar():
 							"outside": colorset["text"]
 						}
 					elif isinstance(colorset["text"], dict):
-						colorset["text"] = {**_DEFAULT_COLORSETS["empty"]["text"], **colorset["text"]}
+						colorset["text"] |= cast(dict[str, Color], _DEFAULT_COLORSETS["empty"]["text"])
 			else:
 				raise ValueError(f"Invalid type ({type(colorset)}) for colorset")
 
-			set = {**_DEFAULT_COLORSETS["empty"], **colorset}
+			set: ColorSet = {**_DEFAULT_COLORSETS["empty"], **colorset}
 		else:
 			set = _DEFAULT_COLORSETS["empty"]
 
 		return set
 
+	@property
+	def _colorsetCorner(self) -> dict[str, Color]:
+		"""
+		type checker does not understand that ColorSet["corner"] is always dict[str, Color]
+		"""
+		return cast(dict[str, Color], self._colorset["corner"])
+
+	@property
+	def _colorsetText(self) -> dict[str, Color]:
+		"""
+		type checker does not understand that ColorSet["text"] is always dict[str, Color]
+		"""
+		return cast(dict[str, Color], self._colorset["text"])
+
+	def _color(self, key: str) -> Color:
+		assert(key != "corner" and key != "text")
+
+		return cast(Color, self._colorset[key]) 
 
 
-
-	def _getFormat(self, formatset):
+	def _getFormat(self, formatset: Any) -> FormatSet:
 		if formatset:
 			if isinstance(formatset, str):
 				formatset = _DEFAULT_FORMATTING.get(formatset, _DEFAULT_FORMATTING["empty"])
@@ -497,7 +526,7 @@ class PBar():
 
 
 
-	def _getSegments(self, range: list, length: int):
+	def _getSegments(self, range: tuple[int, int], length: int):
 		return int((_capValue(range[0], range[1], 0) / _capValue(range[1], min=1)) * length)
 
 
@@ -509,7 +538,7 @@ class PBar():
 
 	def _draw(self, redraw: bool = False):
 		centerOffset = int((self._length + 2) / -2)
-		self._segments = self._getSegments(self._range, self._length)
+		self._segments = self._getSegments(self.range, self._length)
 
 
 		def parseFormat(type: str):
@@ -543,56 +572,56 @@ class PBar():
 
 
 		# Build all the parts of the progress bar
-		def buildTop():
-			left = VT100.color(self._colorset["corner"]["tleft"]) + self._charset["corner"]["tleft"] + VT100.reset
-			middle = VT100.color(self._colorset["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
-			right = VT100.color(self._colorset["corner"]["tright"]) + self._charset["corner"]["tright"] + VT100.reset
+		def buildTop() -> str:
+			left = VT100.color(self._colorsetCorner["tleft"]) + self._charsetCorner["tleft"] + VT100.reset
+			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
+			right = VT100.color(self._colorsetCorner["tleft"]) + self._charsetCorner["tright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, [centerOffset, 0]) + left + middle + right
+			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 0)) + left + middle + right
 
 
 
-		def buildMid():
+		def buildMid() -> str:
 			segmentsFull = self._segments
 			segmentsEmpty = self._length - segmentsFull
 
-			vert = VT100.color(self._colorset["vert"]) + self._charset["vert"] + VT100.reset
-			middle = VT100.color(self._colorset["full"]) + self._charset["full"] * segmentsFull + VT100.reset + VT100.color(self._colorset["empty"]) + self._charset["empty"] * segmentsEmpty + VT100.reset
+			vert = VT100.color(self._color("vert")) + self._char("vert") + VT100.reset
+			middle = VT100.color(self._color("full")) + self._char("full") * segmentsFull + VT100.reset + VT100.color(self._color("empty")) + self._char("empty") * segmentsEmpty + VT100.reset
 
 			# ---------- Build the content outside the bar ----------
 			extra = parseFormat("outside")
-			extraFormatted = VT100.color(self._colorset["text"]["outside"]) + extra + VT100.reset
+			extraFormatted = VT100.color(self._colorsetText["outside"]) + extra + VT100.reset
 
 
 			# ---------- Build the content inside the bar ----------
 			info = parseFormat("inside")
-			infoFormatted = VT100.color(self._colorset["text"]["inside"])
+			infoFormatted = VT100.color(self._colorsetText["inside"])
 
 			if self.percentage < 50:
 				if self._charset["empty"] == "█":
 					infoFormatted += VT100.invert
-				infoFormatted += VT100.color(self._colorset["empty"])
+				infoFormatted += VT100.color(self._color("empty"))
 			else:
 				if self._charset["full"] == "█":
 					infoFormatted += VT100.invert
-				infoFormatted += VT100.color(self._colorset["full"])
+				infoFormatted += VT100.color(self._color("full"))
 
 			infoFormatted += parseFormat("inside") + VT100.reset
 			# ---------- //////////////////////////////// ----------
 
 
 			return (
-				VT100.clearLine + VT100.pos(self._pos, [centerOffset, 1]) + vert + " " + middle + " " + vert + " " + extraFormatted +
+				VT100.clearLine + VT100.pos(self._pos, (centerOffset, 1)) + vert + " " + middle + " " + vert + " " + extraFormatted +
 				VT100.moveHoriz(centerOffset - len(info) / 2 - 2 - len(extra)) + infoFormatted
 			)
 
 
-		def buildBottom():
-			left = VT100.color(self._colorset["corner"]["bleft"]) + self._charset["corner"]["bleft"] + VT100.reset
-			middle = VT100.color(self._colorset["horiz"]) + self._charset["horiz"] * (self._length + 2) + VT100.reset
-			right = VT100.color(self._colorset["corner"]["bright"]) + self._charset["corner"]["bright"] + VT100.reset
+		def buildBottom() -> str:
+			left = VT100.color(self._colorsetCorner["bleft"]) + self._charsetCorner["bleft"] + VT100.reset
+			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
+			right = VT100.color(self._colorsetCorner["bright"]) + self._charsetCorner["bright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, [centerOffset, 2]) + left + middle + right
+			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 2)) + left + middle + right
 
 
 		if redraw and self._drawtimes > 0: print(VT100.moveVert(-3), end="")
@@ -635,7 +664,7 @@ if __name__ == "__main__":
 	from time import sleep
 
 	mibarra = PBar(
-		range=[0, 50],
+		range=(0, 50),
 		text="Querido Hijo",
 		charset="slim",
 		format="all-out",

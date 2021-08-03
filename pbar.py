@@ -319,7 +319,7 @@ class PBar():
 
 		>>> position: Optional[tuple[int, int]]:
 
-		- Tuple containing the position (X and Y axles) of the progress bar on the terminal.
+		- Tuple containing the position (X and Y axles of the center) of the progress bar on the terminal.
 		If a value is `center`, the bar will be positioned at the center of the terminal on that axis.
 		---
 

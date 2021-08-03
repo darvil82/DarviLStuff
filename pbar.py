@@ -219,6 +219,8 @@ class VT100():
 	invert = "\x1b[7m"
 	revert = "\x1b[27m"
 	clearLine = "\x1b[2K"
+	cursorShow = "\x1b[?25h"
+	cursorHide = "\x1b[?25l"
 
 
 
@@ -618,11 +620,13 @@ class PBar():
 			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 2)) + left + middle + right
 
 
-		if redraw and self._drawtimes > 0: print(VT100.moveVert(-3), end="")
+		preSeqs = ""
+		if redraw and self._drawtimes > 0: preSeqs = VT100.moveVert(-3)
+
 
 		# Draw the bar
 		print(
-			buildTop(),
+			preSeqs + buildTop(),
 			buildMid(),
 			buildBottom(),
 
@@ -668,13 +672,13 @@ if __name__ == "__main__":
 	while mybar.percentage < 100:
 		sleep(0.1)
 		mybar.colorset = {
-			"full":		[0, mybar.percentage * 2, 0],
-			"empty":	[255 - mybar.percentage * 2, 0, 0]
+			"full":		(0, mybar.percentage * 2, 0),
+			"empty":	(255 - mybar.percentage * 2, 0, 0)
 		}
 		mybar.step()
 	else:
 		mybar.text = "Done!"
 		mybar.colorset |= {
-			"text": {"outside":		[0, 255, 0]}
+			"text": {"outside":		(0, 255, 0)}
 		}
 		mybar.step()

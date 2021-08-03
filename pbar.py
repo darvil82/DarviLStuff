@@ -253,6 +253,7 @@ class PBar():
 
 	- mybar.draw()
 	- mybar.step()
+	- mybar.clear()
 
 	---
 
@@ -360,11 +361,20 @@ class PBar():
 
 
 	def step(self, steps: int = 1):
-		"""Add `steps` to the first value in range, then draw the bar.
-		Overwrites the already drawn bar by default"""
+		"""Add `steps` to the first value in range, then draw the bar"""
 		if not self._range[0] >= self._range[1]:
 			self._range[0] += _capValue(steps, self._range[1] - self._range[0])
 		self._draw(self._requiresClear)
+
+
+	def clear(self):
+		"""Clear the progress bar"""
+		# well this is kinda hacky or ugly, but it's probably the easiest way to do it (just switch to the empty sets temporary)
+		prevsets = (self._charset, self._colorset, self._format)
+		self._charset, self._colorset, self._format = _DEFAULT_CHARSETS["empty"], _DEFAULT_COLORSETS["empty"], _DEFAULT_FORMATTING["empty"]
+		self._draw()
+		self._charset, self._colorset, self._format = prevsets
+
 
 
 	@property
@@ -426,6 +436,7 @@ class PBar():
 	def length(self, length: int):
 		newlen = _capValue(length, 255, 5)
 		if newlen < self._length:
+			# since the bar is gonna be smaller, we need to redraw it while clearing everything at the sides.
 			self._requiresClear = True
 		self._length = newlen
 
@@ -434,24 +445,30 @@ class PBar():
 
 
 	def _getCharset(self, charset: Any) -> CharSet:
+		"""Return a full valid character set"""
 		if charset:
 			if isinstance(charset, str):
+				# it is a string, so we just get the default character set with that name
 				charset = _DEFAULT_CHARSETS.get(charset, _DEFAULT_CHARSETS["normal"])
 			elif isinstance(charset, dict):
+				# it is a dict
 				if "corner" in charset.keys():
-					if isinstance(charset["corner"], str):
+					if isinstance(charset["corner"], str):	# this is only a str, so we just make all corners the value of this str
 						charset["corner"] = {
-							"tleft": charset["corner"],
-							"tright": charset["corner"],
-							"bleft": charset["corner"],
-							"bright": charset["corner"]
+							"tleft":	charset["corner"][0],
+							"tright":	charset["corner"][0],
+							"bleft":	charset["corner"][0],
+							"bright":	charset["corner"][0]
 						}
 					elif isinstance(charset["corner"], dict):
-						charset["corner"] = _DEFAULT_CHARSETS["empty"]["corner"] | cast(dict[str, str], charset["corner"])
+						# janky way of just getting the first character
+						for key in charset["corner"].keys():
+							charset["corner"][key] = charset["corner"][key][0]
+						charset["corner"] = _DEFAULT_CHARSETS["empty"]["corner"] | charset["corner"]	# Merge corners into default dict
 			else:
 				raise ValueError(f"Invalid type ({type(charset)}) for charset")
 
-			set: CharSet = _DEFAULT_CHARSETS["empty"] | charset
+			set: CharSet = _DEFAULT_CHARSETS["empty"] | charset		# merge charset into default dict
 		else:
 			set = _DEFAULT_CHARSETS["normal"]
 
@@ -459,18 +476,17 @@ class PBar():
 
 	@property
 	def _charsetCorner(self) -> dict[str, str]:
-		"""
-		type checker does not understand that CharSet["corner"] is always dict[str, str]
-		"""
+		"""type checker does not understand that CharSet["corner"] is always dict[str, str]"""
 		return cast(dict[str, str], self._charset["corner"])
 
 	def _char(self, key: str) -> str:
 		assert(key != "corner")
 
-		return cast(str, self._charset[key])
+		return cast(str, self._charset[key][0])
 
 
 	def _getColorset(self, colorset: Any) -> ColorSet:
+		"""Return a full valid color set"""
 		if colorset:
 			if isinstance(colorset, str):
 				colorset = _DEFAULT_COLORSETS.get(colorset, _DEFAULT_COLORSETS["empty"])
@@ -478,21 +494,21 @@ class PBar():
 				if "corner" in colorset.keys():
 					if isinstance(colorset["corner"], list):
 						colorset["corner"] = {
-							"tleft": colorset["corner"],
-							"tright": colorset["corner"],
-							"bleft": colorset["corner"],
-							"bright": colorset["corner"]
+							"tleft": 	colorset["corner"],
+							"tright": 	colorset["corner"],
+							"bleft": 	colorset["corner"],
+							"bright": 	colorset["corner"]
 						}
 					elif isinstance(colorset["corner"], dict):
-						colorset["corner"] = _DEFAULT_COLORSETS["empty"]["corner"] = cast(dict[str, Color], colorset["corner"])
+						colorset["corner"] = _DEFAULT_COLORSETS["empty"]["corner"] = colorset["corner"]
 				if "text" in colorset.keys():
 					if isinstance(colorset["text"], list):
 						colorset["text"] = {
-							"inside": colorset["text"],
-							"outside": colorset["text"]
+							"inside":	colorset["text"],
+							"outside":	colorset["text"]
 						}
 					elif isinstance(colorset["text"], dict):
-						colorset["text"] = _DEFAULT_COLORSETS["empty"]["text"] | cast(dict[str, Color], colorset["text"])
+						colorset["text"] = _DEFAULT_COLORSETS["empty"]["text"] | colorset["text"]
 			else:
 				raise ValueError(f"Invalid type ({type(colorset)}) for colorset")
 
@@ -519,6 +535,7 @@ class PBar():
 
 
 	def _getFormat(self, formatset: Any) -> FormatSet:
+		"""Return a full valid formatting set"""
 		if formatset:
 			if isinstance(formatset, str):
 				formatset = _DEFAULT_FORMATTING.get(formatset, _DEFAULT_FORMATTING["empty"])
@@ -530,10 +547,6 @@ class PBar():
 		return set
 
 
-	def _getSegments(self, range: tuple[int, int], length: int):
-		return int((_capValue(range[0], range[1], 0) / _capValue(range[1], min=1)) * length)
-
-
 
 
 
@@ -541,19 +554,23 @@ class PBar():
 
 
 	def _draw(self, clearAll: bool = False):
-		centerOffset = int((self._length + 2) / -2)
-		segments = self._getSegments(self.range, self._length)
+		"""Draw the progress bar. clearAll will clear the lines used by the bar."""
+		centerOffset = int((self._length + 2) / -2)		# Number of characters from the end of the bar to the center
+		segments = int((_capValue(self._range[0], self._range[1], 0) / _capValue(self._range[1], min=1)) * self._length)	# Number of character for the full part of the bar
 
 
-		def parseFormat(type: str):
+		def parseFormat(type: str) -> str:
+			"""Parse a string that may contain formatting keys"""
 			string = self._format[type]
-			foundOpen = False
-			tempStr = ""
-			endStr = ""
+			foundOpen = False	# Did we find a '<'?
+			tempStr = ""		# String that contains the current value inside < >
+			endStr = ""			# Final string that will be returned
 
 			for char in string:
 				if foundOpen:
+					# Found '<'. Now we add every char to tempStr until we find a '>'.
 					if char == ">":
+						# Found '>'. Now just add the formatting keys.
 						if tempStr == "percentage":
 							endStr += f"{str(self.percentage)}%"
 						elif tempStr == "range":
@@ -565,10 +582,12 @@ class PBar():
 						foundOpen = False
 						tempStr = ""
 					else:
+						# No '>' encountered, we can just add another character.
 						tempStr += char.lower()
 				elif char == "<":
 					foundOpen = True
 				else:
+					# It is just a normal character that doesn't belong to any formatting key, so just append it to the end string.
 					endStr += char
 
 			return endStr
@@ -680,7 +699,7 @@ if __name__ == "__main__":
 	mybar = PBar(
 		range=(0, 25),
 		text="Loading...",
-		charset="full",
+		charset="normal",
 		length=50,
 		position=("center", "center")
 	)
@@ -700,5 +719,8 @@ if __name__ == "__main__":
 			"text": {"outside":		(0, 255, 0)}
 		}
 		mybar.step()
+
+		sleep(1)
+		mybar.clear()
 
 	print("AFTER")

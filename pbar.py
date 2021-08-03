@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/bin/python3.9
 
 from collections.abc import Sequence
 from typing import Any, Optional, SupportsInt, TypeVar, Union, cast
@@ -193,8 +193,7 @@ class VT100():
 	@staticmethod
 	def color(RGB: Optional[Sequence[int]]):
 		if RGB and len(RGB) == 3:
-			for value in RGB:
-				if value not in range(0, 256): return ""
+			RGB = [_capValue(value, 255, 0) for value in RGB]
 			return f"\x1b[38;2;{RGB[0]};{RGB[1]};{RGB[2]}m"
 		else:
 			return ""
@@ -290,7 +289,7 @@ class PBar():
 
 		- Set of characters to use when drawing the progress bar. This value can either be a
 		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
-			- Available default character sets: `empty`, `normal`, `basic`, `basic2`, `slim` and `circles`.
+			- Available default character sets: `empty`, `normal`, `basic`, `basic2`, `slim`, `circles` and `full`.
 			- Custom character set dictionary:
 
 				![image](https://user-images.githubusercontent.com/48654552/127887419-acee1b4f-de1b-4cc7-a1a6-1be75c7f97c9.png)
@@ -356,7 +355,8 @@ class PBar():
 	def step(self, steps: int = 1, overwrite: bool = True):
 		"""Add `steps` to the first value in range, then draw the bar.
 		Overwrites the already drawn bar by default"""
-		self._range[0] += _capValue(steps, self._range[1] - self._range[0])
+		if not self._range[0] >= self._range[1]:
+			self._range[0] += _capValue(steps, self._range[1] - self._range[0])
 		self._draw(overwrite)
 
 
@@ -437,11 +437,11 @@ class PBar():
 							"bright": charset["corner"]
 						}
 					elif isinstance(charset["corner"], dict):
-						charset["corner"] |= cast(dict[str, str], _DEFAULT_CHARSETS["empty"]["corner"])
+						charset["corner"] = _DEFAULT_CHARSETS["empty"]["corner"] | cast(dict[str, str], charset["corner"])
 			else:
 				raise ValueError(f"Invalid type ({type(charset)}) for charset")
 
-			set: CharSet = {**_DEFAULT_CHARSETS["empty"], **charset}
+			set: CharSet = _DEFAULT_CHARSETS["empty"] | charset
 		else:
 			set = _DEFAULT_CHARSETS["normal"]
 
@@ -457,7 +457,7 @@ class PBar():
 	def _char(self, key: str) -> str:
 		assert(key != "corner")
 
-		return cast(str, self._charset[key]) 
+		return cast(str, self._charset[key])
 
 
 	def _getColorset(self, colorset: Any) -> ColorSet:
@@ -474,7 +474,7 @@ class PBar():
 							"bright": colorset["corner"]
 						}
 					elif isinstance(colorset["corner"], dict):
-						colorset["corner"] |= cast(dict[str, Color], _DEFAULT_COLORSETS["empty"]["corner"])
+						colorset["corner"] = _DEFAULT_COLORSETS["empty"]["corner"] = cast(dict[str, Color], colorset["corner"])
 				if "text" in colorset.keys():
 					if isinstance(colorset["text"], list):
 						colorset["text"] = {
@@ -482,11 +482,11 @@ class PBar():
 							"outside": colorset["text"]
 						}
 					elif isinstance(colorset["text"], dict):
-						colorset["text"] |= cast(dict[str, Color], _DEFAULT_COLORSETS["empty"]["text"])
+						colorset["text"] = _DEFAULT_COLORSETS["empty"]["text"] | cast(dict[str, Color], colorset["text"])
 			else:
 				raise ValueError(f"Invalid type ({type(colorset)}) for colorset")
 
-			set: ColorSet = {**_DEFAULT_COLORSETS["empty"], **colorset}
+			set: ColorSet = _DEFAULT_COLORSETS["empty"] | colorset
 		else:
 			set = _DEFAULT_COLORSETS["empty"]
 
@@ -494,22 +494,18 @@ class PBar():
 
 	@property
 	def _colorsetCorner(self) -> dict[str, Color]:
-		"""
-		type checker does not understand that ColorSet["corner"] is always dict[str, Color]
-		"""
+		"""type checker does not understand that ColorSet["corner"] is always dict[str, Color]"""
 		return cast(dict[str, Color], self._colorset["corner"])
 
 	@property
 	def _colorsetText(self) -> dict[str, Color]:
-		"""
-		type checker does not understand that ColorSet["text"] is always dict[str, Color]
-		"""
+		"""type checker does not understand that ColorSet["text"] is always dict[str, Color]"""
 		return cast(dict[str, Color], self._colorset["text"])
 
 	def _color(self, key: str) -> Color:
 		assert(key != "corner" and key != "text")
 
-		return cast(Color, self._colorset[key]) 
+		return cast(Color, self._colorset[key])
 
 
 	def _getFormat(self, formatset: Any) -> FormatSet:
@@ -517,13 +513,11 @@ class PBar():
 			if isinstance(formatset, str):
 				formatset = _DEFAULT_FORMATTING.get(formatset, _DEFAULT_FORMATTING["empty"])
 
-			set = {**_DEFAULT_FORMATTING["empty"], **formatset}
+			set: FormatSet = _DEFAULT_FORMATTING["empty"] | formatset
 		else:
 			set = _DEFAULT_FORMATTING["default"]
 
 		return set
-
-
 
 
 	def _getSegments(self, range: tuple[int, int], length: int):
@@ -663,16 +657,24 @@ class PBar():
 if __name__ == "__main__":
 	from time import sleep
 
-	mibarra = PBar(
-		range=(0, 50),
-		text="Querido Hijo",
-		charset="slim",
-		format="all-out",
+	mybar = PBar(
+		range=(0, 25),
+		text="Loading...",
+		charset="full",
 		length=50
 	)
 
-	mibarra.draw()
 
-	while mibarra.percentage < 100:
+	while mybar.percentage < 100:
 		sleep(0.1)
-		mibarra.step(1)
+		mybar.colorset = {
+			"full":		[0, mybar.percentage * 2, 0],
+			"empty":	[255 - mybar.percentage * 2, 0, 0]
+		}
+		mybar.step()
+	else:
+		mybar.text = "Done!"
+		mybar.colorset |= {
+			"text": {"outside":		[0, 255, 0]}
+		}
+		mybar.step()

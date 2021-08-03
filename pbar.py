@@ -219,8 +219,12 @@ class VT100():
 	invert = "\x1b[7m"
 	revert = "\x1b[27m"
 	clearLine = "\x1b[2K"
+	clearRight = "\x1b[0K"
+	clearLeft = "\x1b[1K"
 	cursorShow = "\x1b[?25h"
 	cursorHide = "\x1b[?25l"
+	cursorSave = "\x1b7"
+	cursorLoad = "\x1b8"
 
 
 
@@ -272,9 +276,9 @@ class PBar():
 			format: Union[None, str, dict[str, str]] = None
 		) -> None:
 		"""
-		>>> range: list[int, int]:
+		>>> range: tuple[int, int]:
 
-		- This list will specify the range of two values to display in the progress bar.
+		- This tuple will specify the range of two values to display in the progress bar.
 		---
 
 		>>> text: str:
@@ -287,7 +291,7 @@ class PBar():
 		- Intenger that specifies how long the bar will be.
 		---
 
-		>>> charset: Union[str, dict[str, str]]:
+		>>> charset: Union[None, str, dict[str, str]]:
 
 		- Set of characters to use when drawing the progress bar. This value can either be a
 		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
@@ -300,7 +304,7 @@ class PBar():
 
 		---
 
-		>>> colorset: Union[str, dict[str, list[int, int, int]]]:
+		>>> colorset: Union[None, str, dict[str, tuple[int, int, int]]]:
 
 		- Set of colors to use when drawing the progress bar. This value can either be a
 		string which will specify a default character set to use, or a dictionary, which should specify the custom characters:
@@ -313,13 +317,13 @@ class PBar():
 
 		---
 
-		>>> position: list[int, int]:
+		>>> position: Optional[tuple[int, int]]:
 
-		- List containing the position (X and Y axles) of the progress bar on the terminal.
+		- Tuple containing the position (X and Y axles) of the progress bar on the terminal.
 		If a value is `center`, the bar will be positioned at the center of the terminal on that axis.
 		---
 
-		>>> format: Union[str, dict[str, str]]:
+		>>> format: Union[None, str, dict[str, str]]:
 
 		- Formatting used when displaying the values inside and outside the bar. This value can either be a
 		string which will specify a default formatting set to use, or a dictionary, which should specify the custom formats:
@@ -342,6 +346,7 @@ class PBar():
 		self._format = self._getFormat(format)
 
 		self._drawtimes = 0
+		self._requiresClear = False
 		# self._draw()
 
 
@@ -351,15 +356,15 @@ class PBar():
 
 	def draw(self):
 		"""Print the progress bar on screen"""
-		self._draw()
+		self._draw(self._requiresClear)
 
 
-	def step(self, steps: int = 1, overwrite: bool = True):
+	def step(self, steps: int = 1):
 		"""Add `steps` to the first value in range, then draw the bar.
 		Overwrites the already drawn bar by default"""
 		if not self._range[0] >= self._range[1]:
 			self._range[0] += _capValue(steps, self._range[1] - self._range[0])
-		self._draw(overwrite)
+		self._draw(self._requiresClear)
 
 
 	@property
@@ -419,7 +424,10 @@ class PBar():
 		return self._length
 	@length.setter
 	def length(self, length: int):
-		self._length = _capValue(length, 255, 5)
+		newlen = _capValue(length, 255, 5)
+		if newlen < self._length:
+			self._requiresClear = True
+		self._length = newlen
 
 	# --------- ///////////////////////////////////////// ----------
 
@@ -532,9 +540,9 @@ class PBar():
 
 
 
-	def _draw(self, redraw: bool = False):
+	def _draw(self, clearAll: bool = False):
 		centerOffset = int((self._length + 2) / -2)
-		self._segments = self._getSegments(self.range, self._length)
+		segments = self._getSegments(self.range, self._length)
 
 
 		def parseFormat(type: str):
@@ -557,7 +565,7 @@ class PBar():
 						foundOpen = False
 						tempStr = ""
 					else:
-						tempStr += char
+						tempStr += char.lower()
 				elif char == "<":
 					foundOpen = True
 				else:
@@ -573,12 +581,15 @@ class PBar():
 			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
 			right = VT100.color(self._colorsetCorner["tleft"]) + self._charsetCorner["tright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 0)) + left + middle + right
+			rtnExtra = ""
+			if clearAll: rtnExtra = VT100.clearLine
+
+			return rtnExtra + VT100.pos(self._pos, (centerOffset, 0)) + left + middle + right
 
 
 
 		def buildMid() -> str:
-			segmentsFull = self._segments
+			segmentsFull = segments
 			segmentsEmpty = self._length - segmentsFull
 
 			vert = VT100.color(self._color("vert")) + self._char("vert") + VT100.reset
@@ -586,7 +597,7 @@ class PBar():
 
 			# ---------- Build the content outside the bar ----------
 			extra = parseFormat("outside")
-			extraFormatted = VT100.color(self._colorsetText["outside"]) + extra + VT100.reset
+			extraFormatted = VT100.clearRight + VT100.color(self._colorsetText["outside"]) + extra + VT100.reset
 
 
 			# ---------- Build the content inside the bar ----------
@@ -605,9 +616,11 @@ class PBar():
 			infoFormatted += parseFormat("inside") + VT100.reset
 			# ---------- //////////////////////////////// ----------
 
+			rtnExtra = ""
+			if clearAll: rtnExtra = VT100.clearLine
 
 			return (
-				VT100.clearLine + VT100.pos(self._pos, (centerOffset, 1)) + vert + " " + middle + " " + vert + " " + extraFormatted +
+				rtnExtra + VT100.pos(self._pos, (centerOffset, 1)) + vert + " " + middle + " " + vert + " " + extraFormatted +
 				VT100.moveHoriz(centerOffset - len(info) / 2 - 2 - len(extra)) + infoFormatted
 			)
 
@@ -617,16 +630,16 @@ class PBar():
 			middle = VT100.color(self._color("horiz")) + self._char("horiz") * (self._length + 2) + VT100.reset
 			right = VT100.color(self._colorsetCorner["bright"]) + self._charsetCorner["bright"] + VT100.reset
 
-			return VT100.clearLine + VT100.pos(self._pos, (centerOffset, 2)) + left + middle + right
+			rtnExtra = ""
+			if clearAll: rtnExtra = VT100.clearLine
 
+			return rtnExtra + VT100.pos(self._pos, (centerOffset, 2)) + left + middle + right
 
-		preSeqs = ""
-		if redraw and self._drawtimes > 0: preSeqs = VT100.moveVert(-3)
 
 
 		# Draw the bar
 		print(
-			preSeqs + buildTop(),
+			VT100.cursorSave + buildTop(),
 			buildMid(),
 			buildBottom(),
 
@@ -634,7 +647,10 @@ class PBar():
 			end="\n"
 		)
 
+		print(VT100.cursorLoad, end="")
+
 		self._drawtimes += 1
+		self._requiresClear = False
 
 
 
@@ -665,9 +681,11 @@ if __name__ == "__main__":
 		range=(0, 25),
 		text="Loading...",
 		charset="full",
-		length=50
+		length=50,
+		position=("center", "center")
 	)
 
+	print("BEFORE")
 
 	while mybar.percentage < 100:
 		sleep(0.1)
@@ -682,3 +700,5 @@ if __name__ == "__main__":
 			"text": {"outside":		(0, 255, 0)}
 		}
 		mybar.step()
+
+	print("AFTER")

@@ -446,24 +446,41 @@ class PBar():
 
 	def _getCharset(self, charset: Any) -> CharSet:
 		"""Return a full valid character set"""
+
+		def stripCharset(charset: CharSet) -> CharSet:
+			"""Converts empty values to spaces, and makes sure there's only one character"""
+			newset = dict({})
+			for key in charset.keys():
+				value = charset[key]
+
+				if isinstance(value, dict):
+					value = stripCharset(value)
+				elif len(value) > 1:
+					value = value[0]
+				elif len(value) == 0:
+					value = " "
+
+				newset[key] = value
+			return newset
+
+
 		if charset:
 			if isinstance(charset, str):
 				# it is a string, so we just get the default character set with that name
 				charset = _DEFAULT_CHARSETS.get(charset, _DEFAULT_CHARSETS["normal"])
 			elif isinstance(charset, dict):
 				# it is a dict
+				charset = stripCharset(charset)
+
 				if "corner" in charset.keys():
 					if isinstance(charset["corner"], str):	# this is only a str, so we just make all corners the value of this str
 						charset["corner"] = {
-							"tleft":	charset["corner"][0],
-							"tright":	charset["corner"][0],
-							"bleft":	charset["corner"][0],
-							"bright":	charset["corner"][0]
+							"tleft":	charset["corner"],
+							"tright":	charset["corner"],
+							"bleft":	charset["corner"],
+							"bright":	charset["corner"]
 						}
 					elif isinstance(charset["corner"], dict):
-						# janky way of just getting the first character
-						for key in charset["corner"].keys():
-							charset["corner"][key] = charset["corner"][key][0]
 						charset["corner"] = _DEFAULT_CHARSETS["empty"]["corner"] | charset["corner"]	# Merge corners into default dict
 			else:
 				raise ValueError(f"Invalid type ({type(charset)}) for charset")
@@ -482,7 +499,7 @@ class PBar():
 	def _char(self, key: str) -> str:
 		assert(key != "corner")
 
-		return cast(str, self._charset[key][0])
+		return cast(str, self._charset[key])
 
 
 	def _getColorset(self, colorset: Any) -> ColorSet:

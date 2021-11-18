@@ -1,7 +1,7 @@
 # DarviLStuff
 This is the repository that contains some scripts that I do when I'm bored or when I have nothing else to do. Please remember that stuff here isn't exactly great quality, these are tests I did as a way to try to improve my skills.
 
-This is what I have at the moment:
+This is some of the things that I have at the moment:
 
 | Script | Description | Usage | Type |
 | ------ | ----------- | ----- | ---- |

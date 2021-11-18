@@ -11,9 +11,14 @@
 </body>
 </html>
 
-<!-- You need to import the js and the css -->
+
+
+
+
+
+<!-- You need to import the js and the css
 	<link rel="stylesheet" href="prompt.css">
-	<script src="prompt.js"></script>
+	<script src="prompt.js"></script> -->
 
 <script>
 	function changeText(text) {
@@ -21,19 +26,7 @@
 	}
 
 	document.getElementById("btn1").addEventListener("click", () => {
-		let input = new PromptInput("Type text")
-
-		let p = new Prompt("Change text", "Type some text for the H1 element",
-			[
-				input,
-				new PromptButton("Cancel", ["darkred", "red"]),
-				new PromptButton("OK", ["green", "lime"], () => {
-					changeText(input.value)
-				}),
-			]
-		)
-
-		p.show()
+		changeText(prompt())
 	})
 </script>
 

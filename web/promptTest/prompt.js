@@ -125,7 +125,7 @@ class PromptSpacer {
 	 */
 	constructor(width, shapeWidth, shapeColor) {
 		this.width = PromptSpacer.getWidth(width) || "0"
-		this.shapeWidth = PromptSpacer.getWidth(shapeWidth) || "0"
+		this.shapeWidth = shapeWidth || "0"
 		this.shapeColor = shapeColor || "#1f1f1f"
 	}
 

@@ -75,7 +75,7 @@
 
 
 /* Buttons */
-	.prompt-buttons {
+	.prompt-items {
 		display: flex;
 		flex-direction: row;
 		justify-content: right;
@@ -84,7 +84,7 @@
 		background-color: rgba(32, 32, 32, 0.452);
 	}
 
-	.prompt-buttons button {
+	.prompt-items button {
 		border: none;
 		background-image: linear-gradient(
 			90deg,
@@ -102,7 +102,7 @@
 		transition: background-position .5s, color .5s;
 	}
 
-	.prompt-buttons button:hover {
+	.prompt-items button:hover {
 		background-position: right;
 		color: black;
 		cursor: pointer;
@@ -111,7 +111,7 @@
 
 
 /* Input */
-	.prompt-buttons input {
+	.prompt-items input {
 		border: none;
 		padding: 0 1em;
 		border-radius: .25vh;
@@ -121,10 +121,10 @@
 		box-shadow: inset 0 0 10px 2px black;
 		transition: .5s;
 	}
-	.prompt-buttons input:focus {
+	.prompt-items input:focus {
 		box-shadow: none;
 		background-color: rgb(41, 41, 41);
 	}
-	.prompt-buttons input::placeholder {
+	.prompt-items input::placeholder {
 		color: rgb(170, 170, 170);
 	}

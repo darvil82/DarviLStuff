@@ -77,24 +77,26 @@ class PromptButton {
 
 // A prompt input that may be used inside a Prompt
 class PromptInput {
+	#id;
+
 	constructor(placeholder, defaultText, width) {
 		this.placeholder = placeholder || ""
 		this.defaultText = defaultText || ""
 		this.width = width || "100%"
 
-		this.id = "prompt-input" + parseInt(Math.random()*1000)
+		this.#id = "prompt-input" + parseInt(Math.random()*1000)
 	}
 
 	getElement() {
 		let i = document.createElement("input")
 		i.placeholder = this.placeholder
-		i.id = this.id
+		i.id = this.#id
 		i.value = this.defaultText
 		i.style.width = this.width
 		return i
 	}
 
 	get value() {
-		return document.getElementById(this.id).value
+		return document.getElementById(this.#id).value
 	}
 }

@@ -5,7 +5,7 @@
 function addPromptElements() {
 	let container = document.createElement("div")
 	container.className = "prompt-container"
-	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-buttons'></div></div>"
+	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
 	document.getElementsByTagName("body")[0].appendChild(container)
 }
 addPromptElements()
@@ -15,7 +15,7 @@ const CONTAINER = document.querySelector('.prompt-container');
 const PROMPT = {
 	header: document.querySelector('.prompt-header'),
 	text: document.querySelector('.prompt-text'),
-	items: document.querySelector(".prompt-buttons")
+	items: document.querySelector(".prompt-items")
 }
 
 

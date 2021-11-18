@@ -28,8 +28,8 @@ class Prompt {
 	 * @param {Array} ItemsArray - An array of items to be displayed in the prompt
 	 */
 	constructor(title, body, ItemsArray) {
-		this.title = title
-		this.text = body
+		this.title = title || ""
+		this.text = body || ""
 		this.items = ItemsArray || [ new PromptButton("Ok") ]
 	}
 
@@ -144,4 +144,12 @@ class PromptSpacer {
 		s.style.width = this.shapeWidth
 		return s
 	}
+}
+
+
+
+
+function showAlert(title, body) {
+	let a = new Prompt(title, body)
+	a.show()
 }

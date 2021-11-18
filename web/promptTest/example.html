@@ -8,6 +8,7 @@
 <body style="background-image: url(https://unsplash.it/id/50/1920/1080);">
 	<h1 id="h1">This is a test</h1>
 	<button id="btn1">Change text</button>
+	<button id="btn2">Show alert</button>
 </body>
 </html>
 
@@ -23,7 +24,9 @@
 	document.getElementById("btn1").addEventListener("click", () => {
 		let input = new PromptInput("Type text")
 
-		let p = new Prompt("Change text", "Type some text for the H1 element",
+		let p = new Prompt(
+			"Change text",
+			"Type some text for the H1 element",
 			[
 				input,
 				new PromptSpacer(null, ".5em"),
@@ -36,6 +39,9 @@
 
 		p.show()
 	})
-</script>
 
+	document.getElementById("btn2").addEventListener("click", () => {
+		showAlert("hola")
+	})
+</script>
 </html>

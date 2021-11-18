@@ -45,6 +45,12 @@
 			transform .25s;
 	}
 
+	@supports not (backdrop-filter: blur()) {
+		.prompt-window {
+			background-color: rgba(73, 73, 73, 0.9);
+		}
+	}
+
 	.prompt-container.shown .prompt-window {
 		transform: scale(1);
 	}
@@ -75,6 +81,14 @@
 
 
 
+.prompt-items {
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+	gap: .5em;
+	padding: .5em;
+	background-color: rgba(27, 27, 27, 0.452);
+}
 
 .prompt-items > * {
 	border: none;
@@ -84,15 +98,6 @@
 
 
 /* Buttons */
-	.prompt-items {
-		display: flex;
-		flex-direction: row;
-		justify-content: right;
-		gap: .5em;
-		padding: .5em;
-		background-color: rgba(32, 32, 32, 0.452);
-	}
-
 	.prompt-items button {
 		background-image: linear-gradient(
 			90deg,
@@ -109,7 +114,8 @@
 		transition: background-position .5s, color .5s;
 	}
 
-	.prompt-items button:hover {
+	.prompt-items button:hover,
+	.prompt-items button:focus-visible {
 		background-position: 99%;	/* to prevent the ugly white border */
 		color: black;
 		cursor: pointer;

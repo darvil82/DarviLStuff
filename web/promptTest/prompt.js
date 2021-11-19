@@ -124,7 +124,7 @@ class PromptButton {
 
 	getElement() {
 		let b = document.createElement("button")
-		b.style.backgroundImage = `linear-gradient(90deg, ${this.colors.toString()})`
+		b.style.backgroundImage = `linear-gradient(180deg, ${this.colors.toString()})`
 		b.innerHTML = this.text
 		b.style.width = this.width
 
@@ -204,16 +204,16 @@ class PromptSpacer {
 	}
 
 	getElement(isVertical) {
-		let s = document.createElement("div")
+		let div = document.createElement("div")
 		if (isVertical) {
-			s.style.marginBlock = this.width
-			s.style.height = this.shapeWidth
+			div.style.marginBlock = this.width
+			div.style.height = this.shapeWidth
 		} else {
-			s.style.marginInline = this.width
-			s.style.width = this.shapeWidth
+			div.style.marginInline = this.width
+			div.style.width = this.shapeWidth
 		}
-		s.style.backgroundColor = this.shapeColor
-		return s
+		div.style.backgroundColor = this.shapeColor
+		return div
 	}
 }
 
@@ -241,7 +241,7 @@ function showAlert(title, body) {
  */
 function showPrompt(title, body, callback, defaultValue=null) {
 	let inputText = new PromptInput(null, defaultValue, null, () => okButton.clickButton())
-	let okButton = new PromptButton("Ok", ["green", "lime"], () => callback(inputText.value))
+	let okButton = new PromptButton("Ok", ["lime", "green"], () => callback(inputText.value))
 
 	let p = new Prompt(
 		title, body,

@@ -35,8 +35,8 @@
 			[
 				input,
 				new PromptSpacer(null, "5px"),
-				new PromptButton("Cancel", ["darkred", "red"]),
-				new PromptButton("OK", ["green", "lime"], () => {
+				new PromptButton("Cancel", ["red", "darkred"]),
+				new PromptButton("OK", ["lime", "green"], () => {
 					changeText(input.value)
 				}),
 			],

@@ -114,23 +114,23 @@
 /* Buttons */
 	.prompt-items button {
 		background-image: linear-gradient(
-			90deg,
-			rgb(54, 54, 54),
-			rgb(182, 182, 182)
+			180deg,
+			rgb(168, 168, 168),
+			rgb(44, 44, 44)
 		);
-		background-size: 200%;
-		background-position: left;
+		background-size: 200% 200%;
+		background-position: bottom;
 		padding: .5em 2em;
 		font-size: 1rem;
 		color: white;
 		font-weight: bold;
 
-		transition: background-position .5s, color .5s;
+		transition: background-position .25s, color .25s;
 	}
 
 	.prompt-items button:hover,
 	.prompt-items button:focus-visible {
-		background-position: 99%;	/* to prevent the ugly white border */
+		background-position: top;	/* to prevent the ugly white border */
 		color: black;
 		cursor: pointer;
 	}

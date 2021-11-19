@@ -61,7 +61,7 @@
 
 	@supports not (backdrop-filter: blur()) {
 		.prompt-window {
-			background-color: rgba(73, 73, 73, 0.9);
+			background-color: rgba(73, 73, 73, 0.75);
 		}
 	}
 

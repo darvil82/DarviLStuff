@@ -30,10 +30,27 @@ const PROMPT = {
 }
 
 
+/**
+ * Gets keyboard-focusable elements in the body
+ * @param {HTMLElement} excludeParent - The element parent to exclude its children
+ * @returns {Array}
+ */
+function getKeyboardFocusableElements(excludeParent=null) {
+	return [...document.querySelector("body").querySelectorAll(
+		'a[href], button, input, textarea, select, details,[tabindex]:not([tabindex="-1"])'
+	)]
+	.filter(
+		el => !el.hasAttribute('disabled')
+		&& !el.getAttribute("aria-hidden")
+		&& !el.parentElement.isSameNode(PROMPT.items)
+	)
+}
+
+
 const TAB_INDEX = {}
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
 function setTabIndex(value=true) {
-	const elements = Array.from(document.querySelectorAll("body :not(.prompt-container *)"))
+	const elements = getKeyboardFocusableElements()
 
 	if (value) {
 		elements.forEach(e => e.tabIndex = TAB_INDEX[e])

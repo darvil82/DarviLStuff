@@ -223,8 +223,8 @@ function showAlert(title, body) {
  * @param {string} defaultValue - The default value of the input
  */
 function showPrompt(title, body, callback, defaultValue=null) {
-	let okButton = new PromptButton("Ok", ["green", "lime"], () => callback(inputText.value))
 	let inputText = new PromptInput(null, defaultValue, null, () => okButton.clickButton())
+	let okButton = new PromptButton("Ok", ["green", "lime"], () => callback(inputText.value))
 
 	let p = new Prompt(
 		title, body,

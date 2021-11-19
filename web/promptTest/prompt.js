@@ -6,7 +6,7 @@
 
 
 // Append the prompt elements to the body
-function addPromptElements() {
+(function() {
 	// add the prompt elements to the body
 	let container = document.createElement("div")
 	container.className = "prompt-container"
@@ -18,8 +18,8 @@ function addPromptElements() {
 	linkCSS.rel = "stylesheet"
 	linkCSS.href = "https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
 	document.getElementsByTagName("head")[0].appendChild(linkCSS)
-}
-addPromptElements()
+})()
+
 
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');

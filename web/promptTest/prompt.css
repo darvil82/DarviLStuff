@@ -91,7 +91,7 @@
 	background-color: rgba(27, 27, 27, .5);
 }
 
-.prompt-items > * {
+.prompt-items > :not(div) {
 	padding-block: .5em;
 	border: none;
 	border-radius: .5vh;

@@ -30,6 +30,21 @@ const PROMPT = {
 }
 
 
+const TAB_INDEX = {}
+/** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
+function setTabIndex(value=true) {
+	const elements = Array.from(document.querySelectorAll("body :not(.prompt-container *)"))
+
+	if (value) {
+		elements.forEach(e => e.tabIndex = TAB_INDEX[e])
+	} else {
+		elements.forEach(e => TAB_INDEX[e] = e.tabIndex )
+		elements.forEach(e => e.tabIndex = -1)
+	}
+}
+
+
+
 
 /** A prompt window that may have some properties like text and items */
 class Prompt {
@@ -37,30 +52,40 @@ class Prompt {
 	 * @param {string} title - The title of the prompt
 	 * @param {string} body - The body of the prompt
 	 * @param {Array} ItemsArray - An array of items to be displayed in the prompt
+	 * @param {boolean} vertical - Will the items be displayed vertically or horizontally?
 	 */
-	constructor(title, body, ItemsArray=null) {
+	constructor(title, body, ItemsArray=null, vertical=false) {
 		this.title = title || ""
 		this.text = body || ""
 		this.items = ItemsArray || [ new PromptButton("Ok") ]
+		this.isVertical = vertical || false
 	}
 
 	show() {
 		PROMPT.header.innerHTML = this.title;
 		PROMPT.text.innerHTML = this.text;
+		PROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
 
 		// remove all the buttons and set the new ones
-		Array.from(PROMPT.items.children).forEach(e => {PROMPT.items.removeChild(e)})
+		Array.from(PROMPT.items.children).forEach(e => PROMPT.items.removeChild(e))
 		this.items.forEach(e => {
-			PROMPT.items.appendChild(e.getElement())
+			PROMPT.items.appendChild(e.getElement(this.isVertical))
 		})
 
 		Prompt.display()
 	}
 
 	static isShown() { return (CONTAINER.classList.contains("shown")) }
-	static display() { CONTAINER.classList.add("shown") }
-	static hide() { CONTAINER.classList.remove("shown") }
+	static display() {
+		CONTAINER.classList.add("shown")
+		setTabIndex(false)
+	}
+	static hide() {
+		CONTAINER.classList.remove("shown")
+		setTabIndex(true)
+	}
 }
+
 
 
 
@@ -71,19 +96,22 @@ class PromptButton {
 	 * @param {string} text - The text to display on the button
 	 * @param {Array} colors - CSS colors to use for the gradient of the button background
 	 * @param {function} callback - The function to call when the button is pressed
+	 * @param {width} width - CSS width of the button
 	**/
-	constructor(text, colorsArray, callback=null) {
+	constructor(text, colorsArray, callback=null, width=null) {
 		this.text = text || "Button"
 		this.colors = colorsArray || []
 		this.callback = callback || (() => {})
+		this.width = width || ""
 	}
 
 	getElement() {
 		let b = document.createElement("button")
 		b.style.backgroundImage = `linear-gradient(90deg, ${this.colors.toString()})`
 		b.innerHTML = this.text
+		b.style.width = this.width
 
-		b.addEventListener("click", () => { this.clickButton() })
+		b.addEventListener("click", () => this.clickButton())
 		return b
 	}
 
@@ -92,6 +120,7 @@ class PromptButton {
 		this.callback()
 	}
 }
+
 
 
 
@@ -104,11 +133,13 @@ class PromptInput {
 	 * @param {string} placeholder - The placeholder text to display in the input
 	 * @param {string} defaultText - The default text value inside the input
 	 * @param {string} width - CSS width of the input box
+	 * @param {function} callback - The function to call with the value when the Enter key is pressed
 	 */
-	constructor(placeholder=null, defaultText=null, width=null) {
+	constructor(placeholder=null, defaultText=null, width=null, callback=null) {
 		this.placeholder = placeholder || ""
 		this.defaultText = defaultText || ""
 		this.width = width || "100%"
+		this.callback = callback || (() => {})
 
 		this.#id = "prompt-input" + parseInt(Math.random()*100)
 	}
@@ -119,6 +150,9 @@ class PromptInput {
 		i.id = this.#id
 		i.value = this.defaultText
 		i.style.width = this.width
+		i.addEventListener("keydown", e => {
+			if (e.key == "Enter") this.callback(this.value)
+		})
 		return i
 	}
 
@@ -126,6 +160,7 @@ class PromptInput {
 		return document.getElementById(this.#id).value
 	}
 }
+
 
 
 
@@ -151,11 +186,16 @@ class PromptSpacer {
 		return width
 	}
 
-	getElement() {
+	getElement(isVertical) {
 		let s = document.createElement("div")
-		s.style.marginInline = this.width
+		if (isVertical) {
+			s.style.marginBlock = this.width
+			s.style.height = this.shapeWidth
+		} else {
+			s.style.marginInline = this.width
+			s.style.width = this.shapeWidth
+		}
 		s.style.backgroundColor = this.shapeColor
-		s.style.width = this.shapeWidth
 		return s
 	}
 }
@@ -183,17 +223,18 @@ function showAlert(title, body) {
  * @param {string} defaultValue - The default value of the input
  */
 function showPrompt(title, body, callback, defaultValue=null) {
-	let inputText = new PromptInput(null, defaultValue)
+	let okButton = new PromptButton("Ok", ["green", "lime"], () => callback(inputText.value))
+	let inputText = new PromptInput(null, defaultValue, null, () => okButton.clickButton())
+
 	let p = new Prompt(
 		title, body,
 		[
 			inputText,
 			new PromptSpacer(),
 			new PromptButton("Cancel"),
-			new PromptButton("Ok", ["green", "lime"], () => {
-				callback(inputText.value)
-			}),
+			okButton
 		]
 	)
+
 	p.show()
 }

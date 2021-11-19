@@ -14,13 +14,13 @@
 </html>
 
 <!-- You *only* need to import the js file. It is recommended to download it to get the JSDocs on your editor -->
-<script src="https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.js"></script>
+<!-- <script src="https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.js"></script> -->
 
 
 
 <!-- testing stuff -->
-	<!-- <script src="prompt.js"></script>
-	<link rel="stylesheet" href="prompt.css"> -->
+	<script src="prompt.js"></script>
+	<link rel="stylesheet" href="prompt.css">
 
 
 <script>
@@ -29,19 +29,20 @@
 	}
 
 	document.getElementById("btn1").addEventListener("click", () => {
-		let input = new PromptInput("Type text")
+		let input = new PromptInput("Type text", null, null, (v) => console.log(v))
 
 		let p = new Prompt(
 			"Change text",
 			"Type some text for the H1 element",
 			[
 				input,
-				new PromptSpacer(null, ".5em"),
+				new PromptSpacer(null, "2px"),
 				new PromptButton("Cancel", ["darkred", "red"]),
 				new PromptButton("OK", ["green", "lime"], () => {
 					changeText(input.value)
 				}),
-			]
+			],
+			"column"
 		)
 
 		p.show()

@@ -24,6 +24,17 @@
 		padding: 0;
 	}
 
+	.prompt-container ::-webkit-scrollbar {
+		background-color: #252525;
+		border-radius: 0 1vh 1vh 0;
+		width: 10px;
+		height: 10px;
+	}
+	.prompt-container ::-webkit-scrollbar-thumb {
+		background-color: rgb(131, 131, 131);
+		border-radius: 1vh;
+	}
+
 
 
 
@@ -35,12 +46,13 @@
 		max-width: 600px;
 		min-width: 200px;
 		height: max-content;
+		max-height: 80vh;
 		background-color: rgba(73, 73, 73, 0.349);
 		color: white;
 		backdrop-filter: blur(20px);
 		border-radius: 1vh 1vh 1vh 1vh;
 		box-shadow: 0 0 50px 1px rgba(0, 0, 0, 0.548);
-		overflow: hidden;
+		overflow: hidden auto;
 		outline: 2px solid rgba(255, 255, 255, 0.212);
 		transform: scale(0.5);
 		transition:
@@ -74,9 +86,8 @@
 		line-height: 1em;
 	}
 
-	.prompt-text {
-		max-height: 250px;
-		overflow-y: auto;
+	.prompt-text::-webkit-scrollbar {
+		border-radius: 1vh 1vh 1vh 1vh;
 	}
 
 

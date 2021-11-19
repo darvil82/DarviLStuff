@@ -37,13 +37,13 @@
 			"Type some text for the H1 element",
 			[
 				input,
-				new PromptSpacer(null, "2px"),
+				new PromptSpacer(null, "5px"),
 				new PromptButton("Cancel", ["darkred", "red"]),
 				new PromptButton("OK", ["green", "lime"], () => {
 					changeText(input.value)
 				}),
 			],
-			"column"
+			true
 		)
 
 		p.show()

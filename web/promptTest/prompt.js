@@ -42,7 +42,7 @@ function getKeyboardFocusableElements(excludeParent=null) {
 	.filter(
 		el => !el.hasAttribute('disabled')
 		&& !el.getAttribute("aria-hidden")
-		&& !el.parentElement.isSameNode(PROMPT.items)
+		&& !el.parentElement.isSameNode(excludeParent)
 	)
 }
 
@@ -50,7 +50,7 @@ function getKeyboardFocusableElements(excludeParent=null) {
 const TAB_INDEX = {}
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
 function setTabIndex(value=true) {
-	const elements = getKeyboardFocusableElements()
+	const elements = getKeyboardFocusableElements(PROMPT.items)
 
 	if (value) {
 		elements.forEach(e => e.tabIndex = TAB_INDEX[e])

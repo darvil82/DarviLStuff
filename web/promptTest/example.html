@@ -5,16 +5,23 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="background-image: url(https://unsplash.it/id/50/1920/1080);">
+<body style="background-image: url(https://unsplash.it/id/52/1920/1080); background-color: rgb(63, 63, 63);">
 	<h1 id="h1">This is a test</h1>
-	<button id="btn1">Change text</button>
-	<button id="btn2">Show alert</button>
+	<button id="btn1">Change text (custom prompt)</button>
+	<button id="btn2">showAlert()</button>
+	<button id="btn3">showPrompt()</button>
 </body>
 </html>
 
-<!-- You need to import the js and the css -->
-	<link rel="stylesheet" href="prompt.css">
+<!-- You *only* need to import the js file. It is recommended to download it to get the JSDocs on your editor -->
+<script src="https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.js"></script>
+
+
+
+<!-- testing stuff
 	<script src="prompt.js"></script>
+	<link rel="stylesheet" href="prompt.css"> -->
+
 
 <script>
 	function changeText(text) {
@@ -41,7 +48,13 @@
 	})
 
 	document.getElementById("btn2").addEventListener("click", () => {
-		showAlert("hola")
+		showAlert("Hello World", "How are you doing?")
+	})
+
+	document.getElementById("btn3").addEventListener("click", () => {
+		showPrompt("ShowPrompt() test", "Testing how this function works!", value => {
+			changeText(value)
+		})
 	})
 </script>
 </html>

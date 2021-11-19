@@ -5,7 +5,7 @@
 "use strict";
 
 
-// Append the prompt elements to the body
+
 (function() {
 	// add the prompt elements to the body
 	let container = document.createElement("div")

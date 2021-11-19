@@ -124,14 +124,15 @@
 		font-size: 1rem;
 		color: white;
 		font-weight: bold;
+		text-shadow: 0 0 .25em black, 0 0 1em black;
 
 		transition: background-position .25s, color .25s;
 	}
 
 	.prompt-items button:hover,
 	.prompt-items button:focus-visible {
-		background-position: top;	/* to prevent the ugly white border */
-		color: black;
+		background-position: top;
+		color: white;
 		cursor: pointer;
 	}
 

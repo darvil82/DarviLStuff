@@ -11,6 +11,7 @@
 		transition: opacity .2s, visibility .2s;
 		user-select: none;
 		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		z-index: 9999;
 	}
 
 	.prompt-container.shown {

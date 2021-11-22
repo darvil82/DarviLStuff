@@ -75,16 +75,13 @@ class Prompt {
 		this.title = title || ""
 		this.text = body || ""
 		this.items = ItemsArray || [ new PromptButton("Ok") ]
-		this.isVertical = vertical || false
+		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 
 	show() {
 		PROMPT.header.innerHTML = this.title;
 		PROMPT.text.innerHTML = this.text;
-		PROMPT.items.style.flexDirection = (
-			this.isVertical
-			|| window.innerWidth < 600
-		) ? "column" : "row"	// If the window is small, display the items vertically
+		PROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
 
 		// remove all the buttons and set the new ones
 		Array.from(PROMPT.items.children).forEach(e => PROMPT.items.removeChild(e))

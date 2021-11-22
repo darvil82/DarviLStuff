@@ -81,7 +81,10 @@ class Prompt {
 	show() {
 		PROMPT.header.innerHTML = this.title;
 		PROMPT.text.innerHTML = this.text;
-		PROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
+		PROMPT.items.style.flexDirection = (
+			this.isVertical
+			|| window.innerWidth < 600
+		) ? "column" : "row"	// If the window is small, display the items vertically
 
 		// remove all the buttons and set the new ones
 		Array.from(PROMPT.items.children).forEach(e => PROMPT.items.removeChild(e))

@@ -7,17 +7,17 @@
 
 
 (function() {
-	// add the prompt elements to the body
-	let container = document.createElement("div")
-	container.className = "prompt-container"
-	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
-	document.getElementsByTagName("body")[0].appendChild(container)
-
 	// Get the stylesheet for the prompt and add it to the head
 	let linkCSS = document.createElement("link")
 	linkCSS.rel = "stylesheet"
 	linkCSS.href = "https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
 	document.getElementsByTagName("head")[0].appendChild(linkCSS)
+
+	// add the prompt elements to the body
+	let container = document.createElement("div")
+	container.className = "prompt-container"
+	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
+	document.getElementsByTagName("body")[0].appendChild(container)
 })()
 
 

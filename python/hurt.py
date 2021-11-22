@@ -21,10 +21,9 @@ def parseArgs():
 
 	args = argparser.parse_args()
 
-	if not path.isfile(args.file):
-		if not args.string:
-			print(f"The file '{args.file}' does not exist.")
-			quit()
+	if not path.isfile(args.file) and not args.string:
+		print(f"The file '{args.file}' does not exist.")
+		quit()
 
 
 
@@ -64,7 +63,7 @@ def main():
 
 	# Generate unique positions for all passes
 	maxPasses = capValue(args.passes, len(byteArr))
-	for nxt in range(0, maxPasses):
+	for _ in range(maxPasses):
 		rnd = randint(0, len(byteArr)) - 1
 
 		while rnd in positions:

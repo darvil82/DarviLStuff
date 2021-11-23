@@ -168,9 +168,11 @@ class PromptInput {
 		i.id = this.#id
 		i.value = this.defaultText
 		i.style.width = this.width
+
 		i.addEventListener("keydown", e => {
 			if (e.key == "Enter") this.callback(this.value)
 		})
+
 		return i
 	}
 
@@ -191,11 +193,13 @@ class PromptOptionList {
 	 * @param {Array} options - An array of options (strings) to display in the list
 	 * @param {string} selectedIndex - The index of the selected option by default. Default value is 0.
 	 * @param {string} width - CSS width of the input box
+	 * @param {function} callback - The function to call with the value and index when the value is changed
 	*/
-	constructor(optList, selectedIndex=null, width=null) {
+	constructor(optList, selectedIndex=null, width=null, callback=null) {
 		this.optList = optList
 		this.selectedIndex = selectedIndex || 0
 		this.width = width || ""
+		this.callback = callback || (() => {})
 
 		this.#id = "prompt-optionList" + parseInt(Math.random()*100)
 	}
@@ -204,11 +208,15 @@ class PromptOptionList {
 		let i = document.createElement("select")
 		i.id = this.#id
 		i.style.width = this.width
+
 		PromptOptionList.getOptionElements(this.optList).forEach(e => {
 			if (this.selectedIndex == this.optList.indexOf(e.innerHTML))
 				e.selected = true
 			i.appendChild(e)
 		})
+
+		i.addEventListener("change", () => this.callback(this.value, this.index))
+
 		return i
 	}
 

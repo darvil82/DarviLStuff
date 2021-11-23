@@ -10,6 +10,7 @@
 	<button id="btn1">Change text (custom prompt)</button>
 	<button id="btn2">showAlert()</button>
 	<button id="btn3">showPrompt()</button>
+	<button id="btn4">showConfirm()</button>
 </body>
 </html>
 
@@ -23,15 +24,13 @@
 
 
 <script>
-	function changeText(text) {
-		document.getElementById("h1").innerHTML = text
-	}
+	function changeText(text) { document.getElementById("h1").innerHTML = text }
 
 	document.getElementById("btn1").addEventListener("click", () => {
-		let input = new PromptInput("Type text")
+		let input = new PromptOptionList(["hello!", "goodbye!"])
 		let p = new Prompt(
 			"Change text",
-			"Type some text for the H1 element",
+			"Select text for the H1 element",
 			[
 				input,
 				new PromptSpacer(null, "5px"),
@@ -40,7 +39,7 @@
 					changeText(input.value)
 				}),
 			],
-			true
+			// true
 		)
 
 		p.show()
@@ -53,6 +52,12 @@
 	document.getElementById("btn3").addEventListener("click", () => {
 		showPrompt("showPrompt() test", "Testing how this function works!", value => {
 			changeText(value)
+		})
+	})
+
+	document.getElementById("btn4").addEventListener("click", () => {
+		showConfirm("Change text?", "Change the text to 'hello world'?", () => {
+			changeText("hello world")
 		})
 	})
 </script>

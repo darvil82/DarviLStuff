@@ -142,7 +142,6 @@ class PromptButton {
 
 
 
-
 /** A prompt input that lets the user enter text.
  *  The value entered can be obtained through the `value` property. */
 class PromptInput {
@@ -180,6 +179,44 @@ class PromptInput {
 	}
 }
 
+
+
+/** A prompt input that lets the user select an option from a list of options.
+ *  The value entered can be obtained through the `value` property. */
+class PromptOptionList {
+	#id;
+
+	/**
+	 * @param {Array} options - An array of options (strings) to display in the list
+	 * @param {string} width - CSS width of the input box
+	*/
+	constructor(optList, width=null) {
+		this.optList = optList
+		this.width = width || ""
+
+		this.#id = "prompt-optionList" + parseInt(Math.random()*100)
+	}
+
+	getElement() {
+		let i = document.createElement("select")
+		i.id = this.#id
+		i.style.width = this.width
+		PromptOptionList.getOptionElements(this.optList).forEach(e => {
+			i.appendChild(e)
+		})
+		return i
+	}
+
+	get value() { return document.getElementById(this.#id).value }
+
+	static getOptionElements(optList) {
+		return [...optList.map(opt => {
+			let e = document.createElement("option")
+			e.innerHTML = opt
+			return e
+		})]
+	}
+}
 
 
 
@@ -235,7 +272,7 @@ function showAlert(title, body) {
 }
 
 
-/** A prompt will window that will ask the user to input a value.
+/** A prompt window that will ask the user to input a value.
  * @param {string} title - The title of the prompt
  * @param {string} body - The body of the prompt
  * @param {function} callback - The function to call with the value of the input when the user presses the OK button
@@ -252,6 +289,25 @@ function showPrompt(title, body, callback, defaultValue=null) {
 			new PromptSpacer(),
 			new PromptButton("Cancel"),
 			okButton
+		]
+	)
+
+	p.show()
+}
+
+
+/** A prompt window that will ask the user to select Ok or Cancel.
+ * @param {string} title - The title of the prompt
+ * @param {string} body - The body of the prompt
+ * @param {function} callback - The function to call when the user presses the OK button
+ * @param {string} cancelCallback - The function to call when the user presses the Cancel button
+ */
+function showConfirm(title, body, okCallback, cancelCallback=null) {
+	let p = new Prompt(
+		title, body,
+		[
+			new PromptButton("Cancel", ["red", "darkred"], cancelCallback),
+			new PromptButton("Ok", ["lime", "green"], okCallback)
 		]
 	)
 

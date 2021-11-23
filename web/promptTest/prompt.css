@@ -141,7 +141,8 @@
 
 
 /* Input */
-	.prompt-items input {
+	.prompt-items input,
+	.prompt-items select {
 		padding-inline: .5em;
 		background-color: #3f3f3f;
 		border: 1px solid rgba(255, 255, 255, 0.075);
@@ -153,7 +154,8 @@
 			background-color .5s;
 	}
 
-	.prompt-items input:focus {
+	.prompt-items input:focus,
+	.prompt-items select:focus {
 		box-shadow: none;
 		background-color: #474747;
 	}

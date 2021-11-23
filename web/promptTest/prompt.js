@@ -11,13 +11,13 @@
 	let container = document.createElement("div")
 	container.className = "prompt-container"
 	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
-	document.getElementsByTagName("body")[0].appendChild(container)
+	document.querySelector("body").appendChild(container)
 
 	// Get the stylesheet for the prompt and add it to the head
 	let linkCSS = document.createElement("link")
 	linkCSS.rel = "stylesheet"
 	linkCSS.href = "https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
-	document.getElementsByTagName("head")[0].appendChild(linkCSS)
+	document.querySelector("head").appendChild(linkCSS)
 })()
 
 
@@ -95,10 +95,12 @@ class Prompt {
 	static isShown() { return (CONTAINER.classList.contains("shown")) }
 	static display() {
 		CONTAINER.classList.add("shown")
+		document.querySelector("body").style.overflowY = "hidden"
 		setTabIndex(false)
 	}
 	static hide() {
 		CONTAINER.classList.remove("shown")
+		document.querySelector("body").style.overflowY = ""
 		setTabIndex(true)
 	}
 }

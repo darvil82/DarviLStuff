@@ -15,19 +15,19 @@
 </html>
 
 <!-- You *only* need to import the js file. -->
-<script src="https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.js"></script>
+<!-- <script src="https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.js"></script> -->
 
 
 <!-- testing stuff -->
-	<!-- <script src="prompt.js"></script>
-	<link rel="stylesheet" href="prompt.css"> -->
+	<script src="prompt.js"></script>
+	<link rel="stylesheet" href="prompt.css">
 
 
 <script>
 	function changeText(text) { document.getElementById("h1").innerHTML = text }
 
 	document.getElementById("btn1").addEventListener("click", () => {
-		let input = new PromptOptionList(["hello!", "goodbye!"])
+		let input = new PromptOptionList(["hola", "adios", "beunas"])
 		let p = new Prompt(
 			"Change text",
 			"Select text for the H1 element",
@@ -39,7 +39,7 @@
 					changeText(input.value)
 				}),
 			],
-			// true
+			true
 		)
 
 		p.show()

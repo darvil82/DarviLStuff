@@ -182,16 +182,19 @@ class PromptInput {
 
 
 /** A prompt input that lets the user select an option from a list of options.
- *  The value entered can be obtained through the `value` property. */
+ *  The value entered can be obtained through the `value` property, and the index
+ *  of it in the options array with the `index` property. */
 class PromptOptionList {
 	#id;
 
 	/**
 	 * @param {Array} options - An array of options (strings) to display in the list
+	 * @param {string} selectedIndex - The index of the selected option by default. Default value is 0.
 	 * @param {string} width - CSS width of the input box
 	*/
-	constructor(optList, width=null) {
+	constructor(optList, selectedIndex=null, width=null) {
 		this.optList = optList
+		this.selectedIndex = selectedIndex || 0
 		this.width = width || ""
 
 		this.#id = "prompt-optionList" + parseInt(Math.random()*100)
@@ -202,12 +205,16 @@ class PromptOptionList {
 		i.id = this.#id
 		i.style.width = this.width
 		PromptOptionList.getOptionElements(this.optList).forEach(e => {
+			if (this.selectedIndex == this.optList.indexOf(e.innerHTML))
+				e.selected = true
 			i.appendChild(e)
 		})
 		return i
 	}
 
 	get value() { return document.getElementById(this.#id).value }
+
+	get index() { return document.getElementById(this.#id).selectedIndex }
 
 	static getOptionElements(optList) {
 		return [...optList.map(opt => {

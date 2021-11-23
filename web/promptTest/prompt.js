@@ -7,17 +7,17 @@
 
 
 (function() {
-	// add the prompt elements to the body
-	let container = document.createElement("div")
-	container.className = "prompt-container"
-	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
-	document.querySelector("body").appendChild(container)
-
 	// Get the stylesheet for the prompt and add it to the head
 	let linkCSS = document.createElement("link")
 	linkCSS.rel = "stylesheet"
 	linkCSS.href = "https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
 	document.querySelector("head").appendChild(linkCSS)
+
+	// add the prompt elements to the body
+	let container = document.createElement("div")
+	container.className = "prompt-container"
+	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
+	document.querySelector("body").appendChild(container)
 })()
 
 
@@ -75,7 +75,7 @@ class Prompt {
 		this.title = title || ""
 		this.text = body || ""
 		this.items = ItemsArray || [ new PromptButton("Ok") ]
-		this.isVertical = vertical || false
+		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 
 	show() {

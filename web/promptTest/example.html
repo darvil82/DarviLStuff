@@ -19,8 +19,8 @@
 
 
 <!-- testing stuff -->
-	<script src="prompt.js"></script>
 	<link rel="stylesheet" href="prompt.css">
+	<script src="prompt.js"></script>
 
 
 <script>
@@ -33,7 +33,7 @@
 			() => {changeText(input.value); Prompt.hide()}
 		)
 
-		let p = new Prompt(
+		new Prompt(
 			"Change text",
 			"Select text for the H1 element",
 			[
@@ -43,9 +43,7 @@
 
 			],
 			true
-		)
-
-		p.show()
+		).show()
 	})
 
 	document.getElementById("btn2").addEventListener("click", () => {

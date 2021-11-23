@@ -290,8 +290,7 @@ class PromptSpacer {
  * @param {string} body - The body of the prompt
  */
 function showAlert(title, body) {
-	let a = new Prompt(title, body, [ new PromptButton("Ok") ])
-	a.show()
+	new Prompt(title, body, [ new PromptButton("Ok") ]).show()
 }
 
 
@@ -305,7 +304,7 @@ function showPrompt(title, body, callback, defaultValue=null) {
 	let inputText = new PromptInput(null, defaultValue, null, () => okButton.press())
 	let okButton = new PromptButton("Ok", ["lime", "green"], () => { callback(inputText.value) })
 
-	let p = new Prompt(
+	new Prompt(
 		title, body,
 		[
 			inputText,
@@ -313,9 +312,7 @@ function showPrompt(title, body, callback, defaultValue=null) {
 			new PromptButton("Cancel"),
 			okButton
 		]
-	)
-
-	p.show()
+	).show()
 }
 
 
@@ -326,13 +323,11 @@ function showPrompt(title, body, callback, defaultValue=null) {
  * @param {string} cancelCallback - The function to call when the user presses the Cancel button
  */
 function showConfirm(title, body, okCallback, cancelCallback=null) {
-	let p = new Prompt(
+	new Prompt(
 		title, body,
 		[
 			new PromptButton("Cancel", ["red", "darkred"], cancelCallback),
 			new PromptButton("Ok", ["lime", "green"], okCallback)
 		]
-	)
-
-	p.show()
+	).show()
 }

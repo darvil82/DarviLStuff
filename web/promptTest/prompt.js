@@ -23,7 +23,7 @@
 
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');
-const PROMPT = {
+const WPROMPT = {
 	header: document.querySelector('.prompt-header'),
 	text: document.querySelector('.prompt-text'),
 	items: document.querySelector(".prompt-items")
@@ -33,7 +33,6 @@ const PROMPT = {
 /**
  * Gets keyboard-focusable elements in the body
  * @param {HTMLElement} excludeParent - The element parent to exclude its children
- * @returns {Array}
  */
 function getKeyboardFocusableElements(excludeParent=null) {
 	return [...document.querySelector("body").querySelectorAll(
@@ -47,15 +46,15 @@ function getKeyboardFocusableElements(excludeParent=null) {
 }
 
 
-const TAB_INDEX = {}
+const ELEMENTS_TAB_INDEX = {}
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
 function setTabIndex(value=true) {
-	const elements = getKeyboardFocusableElements(PROMPT.items)
+	const elements = getKeyboardFocusableElements(WPROMPT.items)
 
 	if (value) {
-		elements.forEach(e => e.tabIndex = TAB_INDEX[e])
+		elements.forEach(e => e.tabIndex = ELEMENTS_TAB_INDEX[e])
 	} else {
-		elements.forEach(e => TAB_INDEX[e] = e.tabIndex )
+		elements.forEach(e => ELEMENTS_TAB_INDEX[e] = e.tabIndex )
 		elements.forEach(e => e.tabIndex = -1)
 	}
 }
@@ -78,26 +77,32 @@ class Prompt {
 		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 
+	/** Generate a prompt window with all the elements, and show it */
 	show() {
-		PROMPT.header.innerHTML = this.title;
-		PROMPT.text.innerHTML = this.text;
-		PROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
+		WPROMPT.header.innerHTML = this.title;
+		WPROMPT.text.innerHTML = this.text;
+		WPROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
 
 		// remove all the buttons and set the new ones
-		Array.from(PROMPT.items.children).forEach(e => PROMPT.items.removeChild(e))
+		Array.from(WPROMPT.items.children).forEach(e => WPROMPT.items.removeChild(e))
 		this.items.forEach(e => {
-			PROMPT.items.appendChild(e.getElement(this.isVertical))
+			WPROMPT.items.appendChild(e.getElement(this.isVertical))
 		})
 
 		Prompt.display()
 	}
 
-	static isShown() { return (CONTAINER.classList.contains("shown")) }
+	/** Return the state of the window */
+	static get isShown() { return (CONTAINER.classList.contains("shown")) }
+
+	/** Shows the prompt window with the elements already added */
 	static display() {
 		CONTAINER.classList.add("shown")
 		document.querySelector("body").style.overflowY = "hidden"
 		setTabIndex(false)
 	}
+
+	/** Hides the prompt window */
 	static hide() {
 		CONTAINER.classList.remove("shown")
 		document.querySelector("body").style.overflowY = ""
@@ -116,12 +121,14 @@ class PromptButton {
 	 * @param {Array} colors - CSS colors to use for the gradient of the button background
 	 * @param {function} callback - The function to call when the button is pressed
 	 * @param {width} width - CSS width of the button
+	 * @param {boolean} closePromptOnPress - Will the prompt be closed when the button is pressed?
 	**/
-	constructor(text, colorsArray, callback=null, width=null) {
+	constructor(text, colorsArray, callback=null, width=null, closePromptOnPress=true) {
 		this.text = text || "Button"
 		this.colors = colorsArray || []
 		this.callback = callback || (() => {})
 		this.width = width || ""
+		this.closePromptOnPress = closePromptOnPress
 	}
 
 	getElement() {
@@ -130,12 +137,13 @@ class PromptButton {
 		b.innerHTML = this.text
 		b.style.width = this.width
 
-		b.addEventListener("click", () => this.clickButton())
+		b.addEventListener("click", () => this.press())
 		return b
 	}
 
-	clickButton() {
-		Prompt.hide()
+	press() {
+		if (this.closePromptOnPress)
+			Prompt.hide()
 		this.callback()
 	}
 }
@@ -294,8 +302,8 @@ function showAlert(title, body) {
  * @param {string} defaultValue - The default value of the input
  */
 function showPrompt(title, body, callback, defaultValue=null) {
-	let inputText = new PromptInput(null, defaultValue, null, () => okButton.clickButton())
-	let okButton = new PromptButton("Ok", ["lime", "green"], () => callback(inputText.value))
+	let inputText = new PromptInput(null, defaultValue, null, () => okButton.press())
+	let okButton = new PromptButton("Ok", ["lime", "green"], () => { callback(inputText.value) })
 
 	let p = new Prompt(
 		title, body,
@@ -314,7 +322,7 @@ function showPrompt(title, body, callback, defaultValue=null) {
 /** A prompt window that will ask the user to select Ok or Cancel.
  * @param {string} title - The title of the prompt
  * @param {string} body - The body of the prompt
- * @param {function} callback - The function to call when the user presses the OK button
+ * @param {function} okCallback - The function to call when the user presses the OK button
  * @param {string} cancelCallback - The function to call when the user presses the Cancel button
  */
 function showConfirm(title, body, okCallback, cancelCallback=null) {

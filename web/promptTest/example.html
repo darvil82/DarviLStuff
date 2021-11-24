@@ -27,18 +27,16 @@
 	function changeText(text) { document.getElementById("h1").innerHTML = text }
 
 	document.getElementById("btn1").addEventListener("click", () => {
-		let input = new PromptOptionList(
-			["stuff", "adios", "idk", "another option"],
-			null, null,
-			() => {changeText(input.value); Prompt.hide()}
-		)
-
 		new Prompt(
 			"Change text",
 			"Select text for the H1 element",
 			[
-				input,
-				new PromptSpacer(null, "5px"),
+				new PromptOptionList(
+					["stuff", "adios", "idk", "another option"],
+					null, null,
+					value => {changeText(value); Prompt.hide()}
+				),
+				new PromptSpacer(null, "4px"),
 				new PromptButton("Cancel", ["red", "darkred"]),
 
 			],

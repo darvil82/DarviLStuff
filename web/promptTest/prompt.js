@@ -36,7 +36,7 @@ const WPROMPT = {
  */
 function getKeyboardFocusableElements(excludeParent=null) {
 	return [...document.querySelector("body").querySelectorAll(
-		'a[href], button, input, textarea, select, details,[tabindex]:not([tabindex="-1"])'
+		'a[href], button, input, textarea, select, details, [tabindex]'
 	)]
 	.filter(
 		el => !el.hasAttribute("disabled")

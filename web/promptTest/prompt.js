@@ -1,5 +1,6 @@
 /**
  * Create custom prompt windows that may contain text, buttons, and inputs.
+ * Written by David Losantos.
  */
 
 "use strict";
@@ -16,7 +17,15 @@
 	// add the prompt elements to the body
 	let container = document.createElement("div")
 	container.className = "prompt-container"
-	container.innerHTML = "<div class='prompt-window'><div class='prompt-content'><span class='prompt-header'></span><p class='prompt-text'></p></div><div class='prompt-items'></div></div>"
+	container.innerHTML = `
+		<div class='prompt-window'>
+			<div class='prompt-content'>
+				<span class='prompt-header'></span>
+				<p class='prompt-text'></p>
+			</div>
+			<div class='prompt-items'></div>
+		</div>
+	`
 	document.querySelector("body").appendChild(container)
 })()
 

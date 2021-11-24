@@ -76,13 +76,13 @@ class Prompt {
 	/**
 	 * @param {string} title - The title of the prompt
 	 * @param {string} body - The body of the prompt
-	 * @param {Array} ItemsArray - An array of items to be displayed in the prompt
+	 * @param {Array} itemsArray - An array of items to be displayed in the prompt
 	 * @param {boolean} vertical - Will the items be displayed vertically or horizontally?
 	 */
-	constructor(title, body, ItemsArray=null, vertical=false) {
+	constructor(title, body, itemsArray=null, vertical=false) {
 		this.title = title || ""
 		this.text = body || ""
-		this.items = ItemsArray || [ new PromptButton("Ok") ]
+		this.items = itemsArray || [ new PromptButton("Ok") ]
 		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 

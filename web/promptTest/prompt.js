@@ -32,9 +32,6 @@
 })()
 
 
-var promptItemCounter = 0	// used to give each prompt item a unique ID
-function getNextItemID() { return "prompt-item-" + promptItemCounter++ }
-
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');
 const WPROMPT = {
@@ -79,6 +76,8 @@ function setTabIndex(value=true) {
 
 /** A prompt window that may have some properties like text and items */
 class Prompt {
+	static #itemCounter = 0; // used to give each prompt item a unique ID
+
 	/**
 	 * @param {string} title - The title of the prompt
 	 * @param {string} body - The body of the prompt
@@ -123,6 +122,8 @@ class Prompt {
 		document.querySelector("body").style.overflowY = ""
 		setTabIndex(true)
 	}
+
+	static getNextItemID() { return "prompt-item-" + Prompt.#itemCounter++ }
 }
 
 
@@ -184,7 +185,7 @@ class PromptInput {
 		this.width = width || "100%"
 		this.callback = callback || (() => {})
 
-		this.#id = getNextItemID()
+		this.#id = Prompt.getNextItemID()
 	}
 
 	getElement() {
@@ -225,7 +226,7 @@ class PromptOptionList {
 		this.width = width || ""
 		this.callback = callback || (() => {})
 
-		this.#id = getNextItemID()
+		this.#id = Prompt.getNextItemID()
 	}
 
 	getElement() {

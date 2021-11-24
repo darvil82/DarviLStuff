@@ -58,16 +58,18 @@ function getKeyboardFocusableElements(excludeParent=null) {
 }
 
 
-const ELEMENTS_TAB_INDEX = {}
+const ELEMENTS_TAB_INDEX = { globalState: true }
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
 function setTabIndex(value=true) {
 	const elements = getKeyboardFocusableElements(WPROMPT.items)
 
 	if (value) {
 		elements.forEach(e => e.tabIndex = ELEMENTS_TAB_INDEX[e])
-	} else {
+		ELEMENTS_TAB_INDEX.globalState = true
+	} else if (ELEMENTS_TAB_INDEX.globalState) {
 		elements.forEach(e => ELEMENTS_TAB_INDEX[e] = e.tabIndex )
 		elements.forEach(e => e.tabIndex = -1)
+		ELEMENTS_TAB_INDEX.globalState = false
 	}
 }
 

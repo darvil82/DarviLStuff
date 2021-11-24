@@ -1,6 +1,8 @@
 /**
  * Create custom prompt windows that may contain text, buttons, and inputs.
  * Written by David Losantos.
+ *
+ * Wiki available at https://github.com/DarviL82/DarviLStuff/wiki/prompt.js
  */
 
 "use strict";

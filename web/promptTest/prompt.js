@@ -32,6 +32,9 @@
 })()
 
 
+var promptItemCounter = 0	// used to give each prompt item a unique ID
+function getNextItemID() { return "prompt-item-" + promptItemCounter++ }
+
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');
 const WPROMPT = {
@@ -44,6 +47,7 @@ const WPROMPT = {
 /**
  * Gets keyboard-focusable elements in the body
  * @param {HTMLElement} excludeParent - The element parent to exclude its children
+ * @returns {HTMLElement[]} The array of elements
  */
 function getKeyboardFocusableElements(excludeParent=null) {
 	return [...document.querySelector("body").querySelectorAll(
@@ -180,7 +184,7 @@ class PromptInput {
 		this.width = width || "100%"
 		this.callback = callback || (() => {})
 
-		this.#id = "prompt-input" + parseInt(Math.random()*100)
+		this.#id = getNextItemID()
 	}
 
 	getElement() {
@@ -221,7 +225,7 @@ class PromptOptionList {
 		this.width = width || ""
 		this.callback = callback || (() => {})
 
-		this.#id = "prompt-optionList" + parseInt(Math.random()*100)
+		this.#id = getNextItemID()
 	}
 
 	getElement() {

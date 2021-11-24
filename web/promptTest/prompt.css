@@ -58,6 +58,7 @@
 		overflow: hidden auto;
 		outline: 2px solid rgba(255, 255, 255, 0.212);
 		transform: scale(0.5) rotateX(45deg);
+		transform-origin: bottom;
 		transition:
 			transform 250ms;
 	}
@@ -69,7 +70,7 @@
 	}
 
 	.prompt-container.shown .prompt-window {
-		transform: scale(1);
+		transform: none;
 	}
 
 

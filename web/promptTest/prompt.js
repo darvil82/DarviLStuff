@@ -86,7 +86,7 @@ class Prompt {
 		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 
-	/** Generate a prompt window with all the elements, and show it */
+	/** Generate the prompt window with all the elements, and show it */
 	show() {
 		WPROMPT.header.innerHTML = this.title;
 		WPROMPT.text.innerHTML = this.text;
@@ -123,7 +123,7 @@ class Prompt {
 
 
 /** A prompt button that can be pressed by the user.
- *  When the user clicks it, the callback supplied will be called and the prompt will hide. */
+ *  When the user presses it, the callback supplied will be called. */
 class PromptButton {
 	/**
 	 * @param {string} text - The text to display on the button
@@ -140,6 +140,7 @@ class PromptButton {
 		this.closePromptOnPress = closePromptOnPress
 	}
 
+	/** Return the HTML element with the properties specified */
 	getElement() {
 		let b = document.createElement("button")
 		b.style.backgroundImage = `linear-gradient(180deg, ${this.colors.toString()})`
@@ -150,6 +151,7 @@ class PromptButton {
 		return b
 	}
 
+	/** Call the callback function and hide the prompt if the closePromptOnPress property is true */
 	press() {
 		if (this.closePromptOnPress)
 			Prompt.hide()
@@ -193,9 +195,8 @@ class PromptInput {
 		return i
 	}
 
-	get value() {
-		return document.getElementById(this.#id).value
-	}
+	/** Return the value entered by the user */
+	get value() { return document.getElementById(this.#id).value }
 }
 
 
@@ -237,10 +238,7 @@ class PromptOptionList {
 		return i
 	}
 
-	get value() { return document.getElementById(this.#id).value }
-
-	get index() { return document.getElementById(this.#id).selectedIndex }
-
+	/** Return the option elements from the options array */
 	static getOptionElements(optList) {
 		return [...optList.map(opt => {
 			let e = document.createElement("option")
@@ -248,12 +246,18 @@ class PromptOptionList {
 			return e
 		})]
 	}
+
+	/** Return the value entered by the user */
+	get value() { return document.getElementById(this.#id).value }
+
+	/** Return the index of the selected option on the options */
+	get index() { return document.getElementById(this.#id).selectedIndex }
 }
 
 
 
 /** A prompt spacer that basically just adds a little
- *  space between the prompt items */
+ *  space between the prompt items. */
 class PromptSpacer {
 	/**
 	 * @param {string} width - The CSS width of the spacer
@@ -325,7 +329,7 @@ function showPrompt(title, body, callback, defaultValue=null) {
 }
 
 
-/** A prompt window that will ask the user to select Ok or Cancel.
+/** A prompt window that will ask the user to select the Ok or Cancel button.
  * @param {string} title - The title of the prompt
  * @param {string} body - The body of the prompt
  * @param {function} okCallback - The function to call when the user presses the OK button

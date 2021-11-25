@@ -136,12 +136,12 @@ class Prompt {
 class PromptButton {
 	/**
 	 * @param {string} text - The text to display on the button
-	 * @param {Array} colors - CSS colors to use for the gradient of the button background
+	 * @param {Array} colorsArray - CSS colors to use for the gradient of the button background
 	 * @param {function} callback - The function to call when the button is pressed
-	 * @param {width} width - CSS width of the button
+	 * @param {string} width - CSS width of the button
 	 * @param {boolean} closePromptOnPress - Will the prompt be closed when the button is pressed?
 	**/
-	constructor(text, colorsArray, callback=null, width=null, closePromptOnPress=true) {
+	constructor(text, colorsArray=null, callback=null, width=null, closePromptOnPress=true) {
 		this.text = text || "Button"
 		this.colors = colorsArray || []
 		this.callback = callback || (() => {})
@@ -217,7 +217,7 @@ class PromptOptionList {
 	#id;
 
 	/**
-	 * @param {Array} options - An array of options (strings) to display in the list
+	 * @param {Array} optList - An array of options (strings) to display in the list
 	 * @param {string} selectedIndex - The index of the selected option by default. Default value is 0.
 	 * @param {string} width - CSS width of the input box
 	 * @param {function} callback - The function to call with the value and index when the value is changed
@@ -342,7 +342,7 @@ function showPrompt(title, body, callback, defaultValue=null) {
  * @param {string} title - The title of the prompt
  * @param {string} body - The body of the prompt
  * @param {function} okCallback - The function to call when the user presses the OK button
- * @param {string} cancelCallback - The function to call when the user presses the Cancel button
+ * @param {function} cancelCallback - The function to call when the user presses the Cancel button
  */
 function showConfirm(title, body, okCallback, cancelCallback=null) {
 	new Prompt(

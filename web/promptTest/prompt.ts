@@ -69,9 +69,11 @@ function setTabIndex(value=true) {
 	const elements = <Array<HTMLElement>>getKeyboardFocusableElements(WPROMPT.items)
 
 	if (value) {
+		// @ts-ignore
 		elements.forEach(e => e.tabIndex = ELEMENTS_TAB_INDEX[e])
 		ELEMENTS_TAB_INDEX.globalState = true
 	} else if (ELEMENTS_TAB_INDEX.globalState) {
+		// @ts-ignore
 		elements.forEach(e => ELEMENTS_TAB_INDEX[e] = e.tabIndex)
 		elements.forEach(e => e.tabIndex = -1)
 		ELEMENTS_TAB_INDEX.globalState = false
@@ -83,34 +85,35 @@ function setTabIndex(value=true) {
 
 /** A prompt window that may have some properties like text and items */
 class Prompt {
-	title: string
-	text: string
-	items: PromptItem[]
-	isVertical: boolean
 	private static itemCounter = 0; // used to give each prompt item a unique ID
 
 	/**
-	 * @param {string} title - The title of the prompt
-	 * @param {string} body - The body of the prompt
-	 * @param {Array} itemsArray - An array of items to be displayed in the prompt
-	 * @param {boolean} vertical - Will the items be displayed vertically or horizontally?
+	 * @param title - The title of the prompt window
+	 * @param body - The body of the prompt window
+	 * @param itemsArray - The array of items to add to the prompt window
+	 * @param isVertical - Whether the items should be displayed vertically or horizontally
 	 */
-	constructor(title: string, body: string, itemsArray?: PromptItem[], vertical?: boolean) {
+	constructor(
+		public title: string,
+		public body: string,
+		public itemsArray?: PromptItem[],
+		public isVertical?: boolean
+	) {
 		this.title = title || ""
-		this.text = body || ""
-		this.items = itemsArray || [ new PromptButton("Ok") ]
-		this.isVertical = vertical || window.innerWidth < 600 	// If the window is small, display the items vertically
+		this.body = body || ""
+		this.itemsArray = itemsArray || [ new PromptButton("Ok") ]
+		this.isVertical = isVertical || window.innerWidth < 600 	// If the window is small, display the items vertically
 	}
 
 	/** Generate the prompt window with all the elements, and show it */
 	show() {
 		WPROMPT.header.innerHTML = this.title;
-		WPROMPT.text.innerHTML = this.text;
+		WPROMPT.text.innerHTML = this.body;
 		WPROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
 
 		// remove all the buttons and set the new ones
 		Array.from(WPROMPT.items.children).forEach(e => WPROMPT.items.removeChild(e))
-		this.items.forEach(e => {
+		this.itemsArray.forEach(e => {
 			WPROMPT.items.appendChild(e.genElement(this.isVertical))
 		})
 
@@ -150,12 +153,6 @@ interface PromptItem {
 /** A prompt button that can be pressed by the user.
  *  When the user presses it, the callback supplied will be called. */
 class PromptButton implements PromptItem {
-	text: string
-	colors: string[]
-	callback: Function
-	width: string
-	closePromptOnPress: boolean
-
 	/**
 	 * @param {string} text - The text to display on the button
 	 * @param {Array} colorsArray - CSS colors to use for the gradient of the button background
@@ -163,9 +160,15 @@ class PromptButton implements PromptItem {
 	 * @param {string} width - CSS width of the button
 	 * @param {boolean} closePromptOnPress - Will the prompt be closed when the button is pressed?
 	**/
-	constructor(text, colorsArray=null, callback=null, width=null, closePromptOnPress=true) {
+	constructor(
+		public text: string,
+		public colorsArray?: string[],
+		public callback?: Function,
+		public width?: string,
+		public closePromptOnPress?: boolean
+	) {
 		this.text = text || "Button"
-		this.colors = colorsArray || []
+		this.colorsArray = colorsArray || []
 		this.callback = callback || (() => {})
 		this.width = width || ""
 		this.closePromptOnPress = closePromptOnPress
@@ -174,7 +177,7 @@ class PromptButton implements PromptItem {
 	/** Return the HTML element with the properties specified */
 	genElement() {
 		let b = document.createElement("button")
-		b.style.backgroundImage = `linear-gradient(180deg, ${this.colors.toString()})`
+		b.style.backgroundImage = `linear-gradient(180deg, ${this.colorsArray.toString()})`
 		b.innerHTML = this.text
 		b.style.width = this.width
 
@@ -196,10 +199,6 @@ class PromptButton implements PromptItem {
  *  The value entered can be obtained through the `value` property. */
 class PromptInput implements PromptItem {
 	private id: string;
-	placeholder: string;
-	defaultText: string;
-	width: string;
-	callback: Function;
 
 	/**
 	 * @param {string} placeholder - The placeholder text to display in the input
@@ -207,7 +206,12 @@ class PromptInput implements PromptItem {
 	 * @param {string} width - CSS width of the input box
 	 * @param {function} callback - The function to call with the value when the Enter key is pressed
 	 */
-	constructor(placeholder?: string, defaultText?: string, width?: string, callback?: Function) {
+	constructor(
+		public placeholder?: string,
+		public defaultText?: string,
+		public width?: string,
+		public callback?: Function
+	) {
 		this.placeholder = placeholder || ""
 		this.defaultText = defaultText || ""
 		this.width = width || "100%"
@@ -243,10 +247,6 @@ class PromptInput implements PromptItem {
  *  of it in the options array with the `index` property. */
 class PromptOptionList implements PromptItem {
 	private id: string;
-	optList: string[];
-	selectedIndex: number;
-	width: string;
-	callback: Function;
 
 	/**
 	 * @param {Array} optList - An array of options (strings) to display in the list
@@ -254,7 +254,12 @@ class PromptOptionList implements PromptItem {
 	 * @param {string} width - CSS width of the input box
 	 * @param {function} callback - The function to call with the value and index when the value is changed
 	*/
-	constructor(optList: string[], selectedIndex?: number, width?: string, callback?: Function) {
+	constructor(
+		public optList: string[],
+		public selectedIndex?: number,
+		public width?: string,
+		public callback?: Function
+	) {
 		this.optList = optList
 		this.selectedIndex = selectedIndex || 0
 		this.width = width || ""
@@ -302,25 +307,24 @@ class PromptOptionList implements PromptItem {
 /** A prompt spacer that basically just adds a little
  *  space between the prompt items. */
 class PromptSpacer implements PromptItem {
-	width: string
-	shapeWidth: string
-	shapeColor: string
-
 	/**
 	 * @param {string} width - The CSS width of the spacer
 	 * @param {string} shapeWidth - The CSS width of the spacer shape
 	 * @param {string} shapeColor - The CSS color of the spacer shape
 	 */
-	constructor(width?: string, shapeWidth?: string, shapeColor?: string) {
+	constructor(
+		public width?: string,
+		public shapeWidth?: string,
+		public shapeColor?: string
+	) {
 		this.width = PromptSpacer.getWidth(width) || "0"
 		this.shapeWidth = shapeWidth || "0"
 		this.shapeColor = shapeColor || "#1f1f1f"
 	}
 
 	static getWidth(width: string) {
-		if (!width) return 0
-		if (width.startsWith("-")) {
-			return 0
+		if (!width || width.startsWith("-")) {
+			return "0"
 		}
 		return width
 	}

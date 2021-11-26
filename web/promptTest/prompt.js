@@ -4,7 +4,6 @@
  *
  * Wiki available at https://github.com/DarviL82/DarviLStuff/wiki/prompt.js
  */
-"use strict";
 (function () {
     // Get the stylesheet for the prompt and add it to the head
     let linkCSS = document.createElement("link");

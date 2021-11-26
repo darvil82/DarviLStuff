@@ -115,7 +115,7 @@ class PromptButton {
      * @param {string} width - CSS width of the button
      * @param {boolean} closePromptOnPress - Will the prompt be closed when the button is pressed?
     **/
-    constructor(text, colorsArray, callback, width, closePromptOnPress) {
+    constructor(text, colorsArray, callback, width, closePromptOnPress = true) {
         this.text = text;
         this.colorsArray = colorsArray;
         this.callback = callback;
@@ -125,7 +125,7 @@ class PromptButton {
         this.colorsArray = colorsArray || [];
         this.callback = callback || (() => { });
         this.width = width || "";
-        this.closePromptOnPress = closePromptOnPress || true;
+        this.closePromptOnPress = closePromptOnPress;
     }
     /** Return the HTML element with the properties specified */
     genElement() {

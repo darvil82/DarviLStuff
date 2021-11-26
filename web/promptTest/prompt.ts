@@ -161,13 +161,13 @@ class PromptButton implements PromptItem {
 		public colorsArray?: string[],
 		public callback?: Function,
 		public width?: string,
-		public closePromptOnPress?: boolean
+		public closePromptOnPress: boolean = true
 	) {
 		this.text = text || "Button"
 		this.colorsArray = colorsArray || []
 		this.callback = callback || (() => {})
 		this.width = width || ""
-		this.closePromptOnPress = closePromptOnPress || true
+		this.closePromptOnPress = closePromptOnPress
 	}
 
 	/** Return the HTML element with the properties specified */

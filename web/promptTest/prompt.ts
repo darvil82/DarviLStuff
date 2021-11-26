@@ -283,7 +283,7 @@ class PromptOptionList implements PromptItem {
 	private get element() { return <HTMLSelectElement>document.getElementById(this.id) }
 
 	/** Return the option elements from the options array */
-	static getOptionElements(optList) {
+	static getOptionElements(optList: string[]): HTMLOptionElement[] {
 		return [...optList.map(opt => {
 			let e = document.createElement("option")
 			e.innerHTML = opt
@@ -382,7 +382,7 @@ function showPrompt(title: string, body: string, callback: Function, defaultValu
  * @param {function} okCallback - The function to call when the user presses the OK button
  * @param {function} cancelCallback - The function to call when the user presses the Cancel button
  */
-function showConfirm(title: string, body: string, okCallback: Function, cancelCallback: Function=null) {
+function showConfirm(title: string, body: string, okCallback: Function, cancelCallback?: Function) {
 	new Prompt(
 		title, body,
 		[

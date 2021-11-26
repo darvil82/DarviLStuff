@@ -33,8 +33,8 @@ const WPROMPT = {
 };
 /**
  * Gets keyboard-focusable elements in the body
- * @param {HTMLElement} excludeParent - The element parent to exclude its children
- * @returns {HTMLElement[]} The array of elements
+ * @param {Element} excludeParent - The element parent to exclude its children
+ * @returns {Element[]} The array of elements
  */
 function getKeyboardFocusableElements(excludeParent) {
     return [...document.querySelector("body").querySelectorAll('a[href], button, input, textarea, select, details, [tabindex]')]
@@ -125,7 +125,7 @@ class PromptButton {
         this.colorsArray = colorsArray || [];
         this.callback = callback || (() => { });
         this.width = width || "";
-        this.closePromptOnPress = closePromptOnPress;
+        this.closePromptOnPress = closePromptOnPress || true;
     }
     /** Return the HTML element with the properties specified */
     genElement() {

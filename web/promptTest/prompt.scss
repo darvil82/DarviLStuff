@@ -1,0 +1,163 @@
+/* Container */
+	.prompt-container {
+		visibility: hidden;
+		inset: 0;
+		position: fixed;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.459);
+		opacity: 0;
+		transition: opacity .2s, visibility .2s;
+		user-select: none;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		z-index: 9999;
+		perspective: 500px;
+
+		&.shown {
+			visibility: visible;
+			opacity: 1;
+
+			.prompt-window {
+				transform: none;
+			}
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		::-webkit-scrollbar {
+			background-color: #252525;
+			border-radius: 0 1vh 1vh 0;
+			width: 10px;
+			height: 10px;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: rgb(131, 131, 131);
+			border-radius: 1vh;
+		}
+	}
+
+
+
+
+
+/* Prompt Window */
+	.prompt-window {
+		position: relative;
+		inset: auto;
+		width: max-content;
+		margin: 20px;
+		max-width: 600px;
+		min-width: 200px;
+		height: max-content;
+		max-height: 80vh;
+		background-color: rgba(73, 73, 73, 0.349);
+		color: white;
+		backdrop-filter: blur(20px);
+		border-radius: 1vh 1vh 1vh 1vh;
+		box-shadow: 0 0 50px 1px rgba(0, 0, 0, 0.548);
+		overflow: hidden auto;
+		outline: 2px solid rgba(255, 255, 255, 0.212);
+		transform: scale(0.5) rotateX(45deg);
+		transform-origin: bottom;
+		transition:
+			transform 250ms;
+
+
+		@supports not (backdrop-filter: blur()) {
+			& {
+				background-color: rgba(73, 73, 73, 0.75);
+			}
+		}
+	}
+
+
+
+
+/* Prompt content */
+	.prompt-content {
+		display: flex;
+		gap: 10px;
+		flex-direction: column;
+		padding: 1em;
+	}
+
+	.prompt-header {
+		font-size: 3rem;
+		font-weight: bold;
+		line-height: 1em;
+	}
+
+	.prompt-text::-webkit-scrollbar {
+		border-radius: 1vh 1vh 1vh 1vh;
+	}
+
+
+
+
+
+/* Prompt Items */
+	.prompt-items {
+		display: flex;
+		flex-direction: row;
+		justify-content: right;
+		gap: .5em;
+		padding: .5em;
+		background-color: rgba(27, 27, 27, .5);
+
+		> :not(div) {	// spacers
+			padding-block: .5em;
+			border: none;
+			border-radius: .5vh;
+		}
+
+		button {
+			background-image: linear-gradient(
+				180deg,
+				rgb(168, 168, 168),
+				rgb(44, 44, 44)
+			);
+			background-size: 200% 200%;
+			background-position: bottom;
+			padding: .5em 2em;
+			font-size: 1rem;
+			color: white;
+			font-weight: bold;
+			text-shadow: 0 0 .25em black, 0 0 1em black;
+
+			transition: background-position .25s, color .25s;
+
+			&:hover,
+			&:focus-visible {
+				background-position: top;
+				color: white;
+				cursor: pointer;
+			}
+		}
+
+		select, input {
+			padding-inline: .5em;
+			background-color: #3f3f3f;
+			border: 1px solid rgba(255, 255, 255, 0.075);
+			color: white;
+			font-size: 1em;
+			box-shadow: inset 0 0 7px 1px rgba(0, 0, 0, 0.473);
+			transition:
+				box-shadow .5s,
+				background-color .5s;
+
+			&:focus {
+				box-shadow: none;
+				background-color: #474747;
+			}
+		}
+
+		input::placeholder {
+			color: rgb(129, 129, 129);
+		}
+	}

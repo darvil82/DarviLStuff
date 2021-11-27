@@ -102,7 +102,7 @@ class Prompt {
         document.querySelector("body").style.overflowY = "";
         setTabIndex(true);
     }
-    static getNextItemID() { return "prompt-item-" + Prompt.itemCounter++; }
+    static getNextItemID() { return `prompt-item-${Prompt.itemCounter++}`; }
 }
 Prompt.itemCounter = 0; // used to give each prompt item a unique ID
 /** A prompt button that can be pressed by the user.
@@ -292,7 +292,7 @@ function showPrompt(title, body, callback, defaultValue = null) {
  * @param {function} okCallback - The function to call when the user presses the OK button
  * @param {function} cancelCallback - The function to call when the user presses the Cancel button
  */
-function showConfirm(title, body, okCallback, cancelCallback = null) {
+function showConfirm(title, body, okCallback, cancelCallback) {
     new Prompt(title, body, [
         new PromptButton("Cancel", ["red", "darkred"], cancelCallback),
         new PromptButton("Ok", ["lime", "green"], okCallback)

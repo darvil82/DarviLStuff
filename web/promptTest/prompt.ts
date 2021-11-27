@@ -133,7 +133,7 @@ class Prompt {
 		setTabIndex(true)
 	}
 
-	static getNextItemID() { return "prompt-item-" + Prompt.itemCounter++ }
+	static getNextItemID() { return `prompt-item-${Prompt.itemCounter++}` }
 }
 
 
@@ -159,7 +159,7 @@ class PromptButton implements PromptItem {
 	constructor(
 		public text: string,
 		public colorsArray?: string[],
-		public callback?: Function,
+		public callback?: () => void,
 		public width?: string,
 		public closePromptOnPress: boolean = true
 	) {
@@ -206,7 +206,7 @@ class PromptInput implements PromptItem {
 		public placeholder?: string,
 		public defaultText?: string,
 		public width?: string,
-		public callback?: Function
+		public callback?: (value: string) => void
 	) {
 		this.placeholder = placeholder || ""
 		this.defaultText = defaultText || ""
@@ -254,7 +254,7 @@ class PromptOptionList implements PromptItem {
 		public optList: string[],
 		public selectedIndex?: number,
 		public width?: string,
-		public callback?: Function
+		public callback?: (value: string, index: number) => void
 	) {
 		this.optList = optList
 		this.selectedIndex = selectedIndex || 0
@@ -360,7 +360,7 @@ function showAlert(title: string, body: string) {
  * @param {function} callback - The function to call with the value of the input when the user presses the OK button
  * @param {string} defaultValue - The default value of the input
  */
-function showPrompt(title: string, body: string, callback: Function, defaultValue: string=null) {
+function showPrompt(title: string, body: string, callback: (value: string) => void, defaultValue: string=null) {
 	let inputText = new PromptInput(null, defaultValue, null, () => okButton.press())
 	let okButton = new PromptButton("Ok", ["lime", "green"], () => { callback(inputText.value) })
 
@@ -382,7 +382,7 @@ function showPrompt(title: string, body: string, callback: Function, defaultValu
  * @param {function} okCallback - The function to call when the user presses the OK button
  * @param {function} cancelCallback - The function to call when the user presses the Cancel button
  */
-function showConfirm(title: string, body: string, okCallback: Function, cancelCallback?: Function) {
+function showConfirm(title: string, body: string, okCallback: () => void, cancelCallback?: () => void) {
 	new Prompt(
 		title, body,
 		[

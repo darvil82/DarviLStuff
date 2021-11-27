@@ -360,7 +360,7 @@ function showAlert(title: string, body: string) {
  * @param {function} callback - The function to call with the value of the input when the user presses the OK button
  * @param {string} defaultValue - The default value of the input
  */
-function showPrompt(title: string, body: string, callback: (value: string) => void, defaultValue: string=null) {
+function showPrompt(title: string, body: string, callback: (value: string) => void, defaultValue?: string) {
 	let inputText = new PromptInput(null, defaultValue, null, () => okButton.press())
 	let okButton = new PromptButton("Ok", ["lime", "green"], () => { callback(inputText.value) })
 

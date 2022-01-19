@@ -61,15 +61,15 @@ function getKeyboardFocusableElements(excludeParent?: Element): Element[] {
  * @returns {number[]} The array of the color values
  */
 function getColorArray(color: string): number[] {
-    const dummy = document.createElement("dummy")
+	const dummy = document.createElement("dummy")
 	document.body.appendChild(dummy)	// this is needed to get the computed style
 
-    dummy.style.backgroundColor = color
+	dummy.style.backgroundColor = color
 	const value = getComputedStyle(dummy).backgroundColor
 
 	dummy.remove()
 
-    return value.match(/\d+/g).map(v => parseInt(v))
+	return value.match(/\d+/g).map(v => parseInt(v))
 }
 
 

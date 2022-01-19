@@ -64,6 +64,7 @@
 		overflow: hidden auto;
 		transform: scale(0.5) rotateX(45deg);
 		transform-origin: bottom;
+		outline: 2px solid rgba(255, 255, 255, 0.212);
 		transition:
 			transform 250ms;
 

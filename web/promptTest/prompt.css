@@ -81,6 +81,7 @@
           transform: scale(0.5) rotateX(45deg);
   -webkit-transform-origin: bottom;
           transform-origin: bottom;
+  outline: 2px solid rgba(255, 255, 255, 0.212);
   -webkit-transition: -webkit-transform 250ms;
   transition: -webkit-transform 250ms;
   transition: transform 250ms;

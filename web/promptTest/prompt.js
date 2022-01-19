@@ -27,6 +27,7 @@
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');
 const WPROMPT = {
+    window: document.querySelector(".prompt-window"),
     header: document.querySelector('.prompt-header'),
     text: document.querySelector('.prompt-text'),
     items: document.querySelector(".prompt-items")
@@ -41,6 +42,19 @@ function getKeyboardFocusableElements(excludeParent) {
         .filter(el => !el.hasAttribute("disabled")
         && !el.getAttribute("aria-hidden")
         && !el.parentElement.isSameNode(excludeParent));
+}
+/**
+ * Returns a computed color array from the given CSS color string.
+ * @param {string} color - The CSS color string
+ * @returns {number[]} The array of the color values
+ */
+function getColorArray(color) {
+    const dummy = document.createElement("dummy");
+    document.body.appendChild(dummy); // this is needed to get the computed style
+    dummy.style.backgroundColor = color;
+    const value = getComputedStyle(dummy).backgroundColor;
+    dummy.remove();
+    return value.match(/\d+/g).map(v => parseInt(v));
 }
 const ELEMENTS_TAB_INDEX = { globalState: true };
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
@@ -65,22 +79,26 @@ class Prompt {
      * @param body - The body of the prompt window
      * @param itemsArray - The array of items to add to the prompt window
      * @param isVertical - Whether the items should be displayed vertically or horizontally
+     * @param accent - The accent color of the prompt window
      */
-    constructor(title, body, itemsArray, isVertical) {
+    constructor(title, body, itemsArray, isVertical, accent) {
         this.title = title;
         this.body = body;
         this.itemsArray = itemsArray;
         this.isVertical = isVertical;
+        this.accent = accent;
         this.title = title || "";
         this.body = body || "";
         this.itemsArray = itemsArray || [new PromptButton("Ok")];
         this.isVertical = isVertical || window.innerWidth < 600; // If the window is small, display the items vertically
+        this.accent = accent || "white";
     }
     /** Generate the prompt window with all the elements, and show it */
     show() {
         WPROMPT.header.innerHTML = this.title;
         WPROMPT.text.innerHTML = this.body;
         WPROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row";
+        WPROMPT.window.style.outlineColor = `rgba(${getColorArray(this.accent).join(", ")}, 0.21)`;
         // remove all the buttons and set the new ones
         Array.from(WPROMPT.items.children).forEach(e => WPROMPT.items.removeChild(e));
         this.itemsArray.forEach(e => {

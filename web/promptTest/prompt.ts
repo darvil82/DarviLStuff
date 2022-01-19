@@ -31,6 +31,7 @@
 // Constants pointing to the elements that we'll use.
 const CONTAINER = document.querySelector('.prompt-container');
 const WPROMPT = {
+	window: <HTMLDivElement>document.querySelector(".prompt-window"),
 	header: <HTMLHeadingElement>document.querySelector('.prompt-header'),
 	text: <HTMLParagraphElement>document.querySelector('.prompt-text'),
 	items: <HTMLDivElement>document.querySelector(".prompt-items")
@@ -53,6 +54,23 @@ function getKeyboardFocusableElements(excludeParent?: Element): Element[] {
 	)
 }
 
+
+/**
+ * Returns a computed color array from the given CSS color string.
+ * @param {string} color - The CSS color string
+ * @returns {number[]} The array of the color values
+ */
+function getColorArray(color: string): number[] {
+    const dummy = document.createElement("dummy")
+	document.body.appendChild(dummy)	// this is needed to get the computed style
+
+    dummy.style.backgroundColor = color
+	const value = getComputedStyle(dummy).backgroundColor
+
+	dummy.remove()
+
+    return value.match(/\d+/g).map(v => parseInt(v))
+}
 
 
 
@@ -88,17 +106,20 @@ class Prompt {
 	 * @param body - The body of the prompt window
 	 * @param itemsArray - The array of items to add to the prompt window
 	 * @param isVertical - Whether the items should be displayed vertically or horizontally
+	 * @param accent - The accent color of the prompt window
 	 */
 	constructor(
 		public title: string,
 		public body: string,
 		public itemsArray?: PromptItem[],
-		public isVertical?: boolean
+		public isVertical?: boolean,
+		public accent?: string
 	) {
 		this.title = title || ""
 		this.body = body || ""
 		this.itemsArray = itemsArray || [ new PromptButton("Ok") ]
 		this.isVertical = isVertical || window.innerWidth < 600 	// If the window is small, display the items vertically
+		this.accent = accent || "white"
 	}
 
 	/** Generate the prompt window with all the elements, and show it */
@@ -106,6 +127,7 @@ class Prompt {
 		WPROMPT.header.innerHTML = this.title;
 		WPROMPT.text.innerHTML = this.body;
 		WPROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
+		WPROMPT.window.style.outlineColor = `rgba(${getColorArray(this.accent).join(", ")}, 0.21)`
 
 		// remove all the buttons and set the new ones
 		Array.from(WPROMPT.items.children).forEach(e => WPROMPT.items.removeChild(e))

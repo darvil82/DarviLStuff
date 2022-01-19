@@ -77,7 +77,6 @@
   -webkit-box-shadow: 0 0 50px 1px rgba(0, 0, 0, 0.548);
           box-shadow: 0 0 50px 1px rgba(0, 0, 0, 0.548);
   overflow: hidden auto;
-  outline: 2px solid rgba(255, 255, 255, 0.212);
   -webkit-transform: scale(0.5) rotateX(45deg);
           transform: scale(0.5) rotateX(45deg);
   -webkit-transform-origin: bottom;

@@ -16,15 +16,19 @@
 	let container = document.createElement("div")
 	container.className = "prompt-container"
 	container.innerHTML = `
-		<div class='prompt-window'>
-			<div class='prompt-content'>
-				<span class='prompt-header'></span>
-				<p class='prompt-text'></p>
-			</div>
-			<div class='prompt-items'></div>
-		</div>
+	<div class='prompt-window'>
+	<div class='prompt-content'>
+	<span class='prompt-header'></span>
+	<p class='prompt-text'></p>
+	</div>
+	<div class='prompt-items'></div>
+	</div>
 	`
 	document.querySelector("body").appendChild(container)
+
+	// hack to prevent the prompt from appearing for a small amount of time on load
+	container.style.transition = "all 0s"
+	setTimeout(() => {container.style.transition = ""}, 200);
 })()
 
 

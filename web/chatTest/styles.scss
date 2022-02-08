@@ -107,6 +107,11 @@ h1 {
 				color: inherit;
 				font-size: inherit;
 				padding-inline: .25em;
+				font-size: .75em;
+
+				&::placeholder {
+					color: #888;
+				}
 			}
 
 			.messages-container {

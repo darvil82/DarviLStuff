@@ -156,6 +156,23 @@ h1 {
   color: inherit;
   font-size: inherit;
   padding-inline: .25em;
+  font-size: .75em;
+}
+
+.chat-wrapper > .content > .chat > input.header::-webkit-input-placeholder {
+  color: #888;
+}
+
+.chat-wrapper > .content > .chat > input.header:-ms-input-placeholder {
+  color: #888;
+}
+
+.chat-wrapper > .content > .chat > input.header::-ms-input-placeholder {
+  color: #888;
+}
+
+.chat-wrapper > .content > .chat > input.header::placeholder {
+  color: #888;
 }
 
 .chat-wrapper > .content > .chat .messages-container {

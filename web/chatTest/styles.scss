@@ -1,0 +1,153 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	background-color: rgb(107, 107, 107);
+	font-family: lato;
+}
+
+h1 {
+	font-size: 6em;
+	color: white;
+}
+
+.banner {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
+	height: 100%;
+	margin-inline: 2em;
+	perspective: 1250px;
+
+	& .title {
+		max-width: 5em;
+	}
+}
+
+.chat-wrapper {
+	color: white;
+	background-color: rgb(12, 12, 12);
+	display: flex;
+	flex-direction: column;
+	border-radius: 5px;
+	width: 350px;
+	height: 500px;
+	overflow: hidden;
+	box-shadow: 0 0 30px 0 black;
+	transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
+
+
+	> .header {
+		display: flex;
+		flex-direction: column;
+
+		> span {
+			font-size: 1.5em;
+			margin: .5em;
+		}
+
+		> .tabs {
+			display: flex;
+			flex-direction: row;
+
+			> div {
+				background-color: rgb(48, 48, 48);
+				padding: .2em;
+				width: 5em;
+				text-align: left;
+				margin-right: .25em;
+				border-top: 3px solid rgb(144, 207, 228);
+
+				&:last-child {
+					margin-right: initial;
+				}
+
+				&.selected {
+					background-color: rgb(82, 82, 82);
+				}
+			}
+		}
+	}
+
+	> .content {
+		display: flex;
+		flex-basis: 100%;
+		flex-direction: row;
+		justify-content: center;
+		gap: .1em;
+		min-height: 0;
+
+		> .chat {
+			background-color: hsl(0, 0%, 10%);
+			padding: .1em;
+			flex-basis: 100%;
+			display: flex;
+			flex-direction: column;
+
+			> .header {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background-color: #444;
+				border: 1px solid gray;
+				width: 100%;
+				min-height: 20px;
+				max-height: 20px;
+			}
+
+			> input.header {
+				color: inherit;
+				font-size: inherit;
+				padding-inline: .25em;
+			}
+
+			.messages-container {
+				display: flex;
+				gap: .1em;
+				flex-direction: column;
+				justify-content: flex-end;
+				flex-grow: 1;
+				overflow: hidden;
+			}
+
+			.message {
+				font-family: Arial, Helvetica, sans-serif;
+				background-color: #111;
+				font-size: .8em;
+				padding: .25em .5em;
+				overflow-wrap: anywhere;
+
+				> .user {
+					font-weight: bold;
+					margin-right: .2em;
+
+					&::after {
+						content: ":"
+					}
+				}
+
+				> .timestamp {
+					opacity: .5;
+				}
+
+				&.mention {
+					background-color: rgb(43, 21, 21);
+				}
+			}
+		}
+	}
+}
+
+
+.fakelink {
+	color: rgb(0, 119, 255);
+	text-decoration: underline;
+}

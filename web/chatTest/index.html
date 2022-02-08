@@ -1,0 +1,49 @@
+<!-- My try at making a chatterino.com chat clone -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Chat Test</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="main.js" defer></script>
+</head>
+<body>
+	<template data-message-template>
+		<div class="message">
+			<span class="timestamp"></span>
+			<span class="user"></span>
+			<span class="body"></span>
+		</div>
+	</template>
+
+	<div class="banner">
+		<h1 class="title">The best Chat ever</h1>
+
+		<div class="chat-wrapper">
+			<div class="header">
+				<span>Test Chat</span>
+				<div class="tabs">
+					<div class="selected">Tab1</div>
+					<div>Tab2</div>
+					<div>Tab3</div>
+				</div>
+			</div>
+			<div class="content">
+				<div class="chat">
+					<div class="header">Chat</div>
+					<div class="messages-container" data-chat-main></div>
+					<input class="header" data-chat-input></input>
+				</div>
+				<div class="chat">
+					<div class="header">Mentions</div>
+					<div class="messages-container" data-chat-mentions></div>
+					<div class="header"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: #6b6b6b;
+  font-family: lato;
+}
+
+h1 {
+  font-size: 6em;
+  color: white;
+}
+
+.banner {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  height: 100%;
+  margin-inline: 2em;
+  -webkit-perspective: 1250px;
+          perspective: 1250px;
+}
+
+.banner .title {
+  max-width: 5em;
+}
+
+.chat-wrapper {
+  color: white;
+  background-color: #0c0c0c;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  border-radius: 5px;
+  width: 350px;
+  height: 500px;
+  overflow: hidden;
+  -webkit-box-shadow: 0 0 30px 0 black;
+          box-shadow: 0 0 30px 0 black;
+  -webkit-transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
+          transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
+}
+
+.chat-wrapper > .header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.chat-wrapper > .header > span {
+  font-size: 1.5em;
+  margin: .5em;
+}
+
+.chat-wrapper > .header > .tabs {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.chat-wrapper > .header > .tabs > div {
+  background-color: #303030;
+  padding: .2em;
+  width: 5em;
+  text-align: left;
+  margin-right: .25em;
+  border-top: 3px solid #90cfe4;
+}
+
+.chat-wrapper > .header > .tabs > div:last-child {
+  margin-right: initial;
+}
+
+.chat-wrapper > .header > .tabs > div.selected {
+  background-color: #525252;
+}
+
+.chat-wrapper > .content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-preferred-size: 100%;
+      flex-basis: 100%;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: .1em;
+  min-height: 0;
+}
+
+.chat-wrapper > .content > .chat {
+  background-color: #1a1a1a;
+  padding: .1em;
+  -ms-flex-preferred-size: 100%;
+      flex-basis: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.chat-wrapper > .content > .chat > .header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background-color: #444;
+  border: 1px solid gray;
+  width: 100%;
+  min-height: 20px;
+  max-height: 20px;
+}
+
+.chat-wrapper > .content > .chat > input.header {
+  color: inherit;
+  font-size: inherit;
+  padding-inline: .25em;
+}
+
+.chat-wrapper > .content > .chat .messages-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: .1em;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  overflow: hidden;
+}
+
+.chat-wrapper > .content > .chat .message {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #111;
+  font-size: .8em;
+  padding: .25em .5em;
+  overflow-wrap: anywhere;
+}
+
+.chat-wrapper > .content > .chat .message > .user {
+  font-weight: bold;
+  margin-right: .2em;
+}
+
+.chat-wrapper > .content > .chat .message > .user::after {
+  content: ":";
+}
+
+.chat-wrapper > .content > .chat .message > .timestamp {
+  opacity: .5;
+}
+
+.chat-wrapper > .content > .chat .message.mention {
+  background-color: #2b1515;
+}
+
+.fakelink {
+  color: #0077ff;
+  text-decoration: underline;
+}
+/*# sourceMappingURL=styles.css.map */

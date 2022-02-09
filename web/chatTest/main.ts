@@ -1,6 +1,57 @@
+class Chat {
+	constructor(public element: HTMLDivElement) {}
+
+	addMessage(message: Message) {
+		const msgElement = message.element
+		this.element.appendChild(msgElement)
+
+		new IntersectionObserver((entries, obs) => {
+			if (!entries[0].isIntersecting) {
+				msgElement.remove()
+				obs.disconnect()
+			}
+		}, { root: this.element }).observe(msgElement)
+	}
+}
+
+class Message {
+	constructor(
+		public user: string,
+		public text: string,
+		public userColor?: string,
+		public isMentioned: boolean = false
+	) {
+		this.userColor = userColor || "white"
+	}
+
+	get element() {
+		const element = document.importNode(messageTemplate, true).content.firstElementChild as HTMLElement;
+
+		const usrEl = element.querySelector(".user") as HTMLSpanElement
+		const textEl = element.querySelector(".body") as HTMLSpanElement
+		const dateEl = element.querySelector(".timestamp") as HTMLSpanElement
+
+		usrEl.textContent = this.user
+		usrEl.style.color = this.userColor
+		dateEl.textContent = getFormatHour(new Date())
+
+		textEl.appendChild(Message.getParsedContent(this.text))
+		if (this.isMentioned) element.classList.add("mention")
+
+		return element
+	}
+
+	static getParsedContent(content: string): HTMLSpanElement {
+		const span = document.createElement("span")
+		span.appendChild(parseEmotes(content))
+
+		return span
+	}
+}
+
 const messageTemplate = document.querySelector("[data-message-template]") as HTMLTemplateElement
-const mainChat = document.querySelector("[data-chat-main]") as HTMLDivElement
-const mentionsChat = document.querySelector("[data-chat-mentions]") as HTMLDivElement
+const mainChat = new Chat(document.querySelector("[data-chat-main]"))
+const mentionsChat =  new Chat(document.querySelector("[data-chat-mentions]"))
 const chatInput = document.querySelector("[data-chat-input]") as HTMLInputElement
 
 const USER_NAME = "darvil82"
@@ -99,19 +150,27 @@ const EMOTES = {
 }
 
 
+function parseEmotes(text: string): HTMLSpanElement {
+	const pattern = /:([a-zA-Z_]+):/g
+	const match = text.match(pattern)
+	const endEl = document.createElement("span")
 
+	if (!match) {
+		endEl.textContent = text
+		return endEl
+	}
 
+	match.forEach(emote => {
+		const emoteName = emote.slice(1, -1)
+		const emoteEl = document.createElement("img")
+		emoteEl.src = `./images/emotes/${EMOTES[emoteName]}`
+		emoteEl.classList.add("emote")
+		endEl.appendChild(emoteEl)
+	})
 
-function appendMsgElement(message: Element, container: HTMLDivElement) {
-	container.appendChild(message)
-
-	new IntersectionObserver((entries, obv) => {
-		if (!entries[0].isIntersecting) {
-			message.remove()
-			obv.disconnect()
-		}
-	}, { root: container }).observe(message)
+	return endEl
 }
+
 
 function insertMsg(
 	user: string,
@@ -119,69 +178,35 @@ function insertMsg(
 	userColor?: string,
 	checkAt: boolean = true
 ) {
-	const msg = document.importNode(messageTemplate, true).content.firstElementChild as HTMLElement;
+	let msg = new Message(user, content, userColor || getRandomColor())
+	if (checkAt && content.includes("@")) {
+		msg.isMentioned = true
 
-	const usrEl = msg.querySelector(".user") as HTMLSpanElement
-	const textEl = msg.querySelector(".body") as HTMLSpanElement
-	const dateEl = msg.querySelector(".timestamp") as HTMLSpanElement
-
-	usrEl.textContent = user
-	usrEl.style.color = userColor ? userColor : getRandomColor()
-	dateEl.textContent = getFormatHour(new Date())
-
-	let newContent = content
-
-	if (content.includes("@") && checkAt) {
-		newContent = content.replaceAll("@", `@${USER_NAME}`)
-		msg.classList.add("mention")
-
-		const clone = document.importNode(msg, true)
-		clone.classList.remove("mention")
-		appendMsgElement(clone, mentionsChat)
+		mentionsChat.addMessage(msg)
 	}
-
-	textEl.appendChild(parseEmojis(newContent))
-
-	appendMsgElement(msg, mainChat)
+	mainChat.addMessage(msg)
 }
 
-function parseEmojis(content: string): HTMLSpanElement {
-	const span = document.createElement("span")
-	span.textContent = content
-	const emoteMatches = span.textContent.match(/(:([a-zA-Z0-9_]+):)/g)
 
-	if (emoteMatches) {
-		for (const match of emoteMatches) {
-			const emote = match.replaceAll(":", "")
-			if (EMOTES[emote]) {
-				const img = document.createElement("img")
-				img.src = `./images/emotes/${EMOTES[emote]}`
-				img.classList.add("emote")
-				span.innerHTML = span.innerHTML.replace(match, img.outerHTML)
-			}
-		}
-	}
 
-	return span
-}
 
 function addRandomMsg() {
-	const text = MESSAGES[randomBetween(0, MESSAGES.length)]
+	const text = MESSAGES[randint(0, MESSAGES.length)]
 	insertMsg(
-		USERS[randomBetween(0, USERS.length)],
+		USERS[randint(0, USERS.length)],
 		text
 		+ (
-			(randomBetween(0, 20) == 0 && !text.includes("@")) ? " @" : ""
+			(randint(0, 20) == 0 && !text.includes("@")) ? " @" : ""
 		) // add an extra @ at the end sometimes
 	)
 }
 
 
 function getRandomColor() {
-	return `hsl(${Math.random() * 360}, 100%, 50%)`
+	return `hsl(${randint(0, 367)}, 100%, 50%)`
 }
 
-function randomBetween(min: number, max: number) {
+function randint(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min)) + min
 }
 
@@ -199,8 +224,8 @@ function getFormatHour(date: Date): string {
 setInterval(() => {
 	setTimeout(() => {
 		addRandomMsg()
-	}, Math.random() * 1000)
-}, 2500)
+	}, Math.random() * 3000)
+}, 1000)
 
 chatInput.addEventListener("keydown", e => {
 	if (e.key != "Enter" || chatInput.value == "") return;

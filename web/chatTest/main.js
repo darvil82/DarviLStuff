@@ -1,6 +1,48 @@
+class Chat {
+    constructor(element) {
+        this.element = element;
+    }
+    addMessage(message) {
+        const msgElement = message.element;
+        this.element.appendChild(msgElement);
+        new IntersectionObserver((entries, obs) => {
+            if (!entries[0].isIntersecting) {
+                msgElement.remove();
+                obs.disconnect();
+            }
+        }, { root: this.element }).observe(msgElement);
+    }
+}
+class Message {
+    constructor(user, text, userColor, isMentioned = false) {
+        this.user = user;
+        this.text = text;
+        this.userColor = userColor;
+        this.isMentioned = isMentioned;
+        this.userColor = userColor || "white";
+    }
+    get element() {
+        const element = document.importNode(messageTemplate, true).content.firstElementChild;
+        const usrEl = element.querySelector(".user");
+        const textEl = element.querySelector(".body");
+        const dateEl = element.querySelector(".timestamp");
+        usrEl.textContent = this.user;
+        usrEl.style.color = this.userColor;
+        dateEl.textContent = getFormatHour(new Date());
+        textEl.appendChild(Message.getParsedContent(this.text));
+        if (this.isMentioned)
+            element.classList.add("mention");
+        return element;
+    }
+    static getParsedContent(content) {
+        const span = document.createElement("span");
+        span.appendChild(parseEmotes(content));
+        return span;
+    }
+}
 const messageTemplate = document.querySelector("[data-message-template]");
-const mainChat = document.querySelector("[data-chat-main]");
-const mentionsChat = document.querySelector("[data-chat-mentions]");
+const mainChat = new Chat(document.querySelector("[data-chat-main]"));
+const mentionsChat = new Chat(document.querySelector("[data-chat-mentions]"));
 const chatInput = document.querySelector("[data-chat-input]");
 const USER_NAME = "darvil82";
 const USER_COLOR = "rgb(0,255,100)";
@@ -96,61 +138,41 @@ const EMOTES = {
     incredible: "incredible.webp",
     flushed: "flushed.webp",
 };
-function appendMsgElement(message, container) {
-    container.appendChild(message);
-    new IntersectionObserver((entries, obv) => {
-        if (!entries[0].isIntersecting) {
-            message.remove();
-            obv.disconnect();
-        }
-    }, { root: container }).observe(message);
+function parseEmotes(text) {
+    const pattern = /:([a-zA-Z_]+):/g;
+    const match = text.match(pattern);
+    const endEl = document.createElement("span");
+    if (!match) {
+        endEl.textContent = text;
+        return endEl;
+    }
+    match.forEach(emote => {
+        const emoteName = emote.slice(1, -1);
+        const emoteEl = document.createElement("img");
+        emoteEl.src = `./images/emotes/${EMOTES[emoteName]}`;
+        emoteEl.classList.add("emote");
+        endEl.appendChild(emoteEl);
+    });
+    return endEl;
 }
 function insertMsg(user, content, userColor, checkAt = true) {
-    const msg = document.importNode(messageTemplate, true).content.firstElementChild;
-    const usrEl = msg.querySelector(".user");
-    const textEl = msg.querySelector(".body");
-    const dateEl = msg.querySelector(".timestamp");
-    usrEl.textContent = user;
-    usrEl.style.color = userColor ? userColor : getRandomColor();
-    dateEl.textContent = getFormatHour(new Date());
-    let newContent = content;
-    if (content.includes("@") && checkAt) {
-        newContent = content.replaceAll("@", `@${USER_NAME}`);
-        msg.classList.add("mention");
-        const clone = document.importNode(msg, true);
-        clone.classList.remove("mention");
-        appendMsgElement(clone, mentionsChat);
+    let msg = new Message(user, content, userColor || getRandomColor());
+    if (checkAt && content.includes("@")) {
+        msg.isMentioned = true;
+        mentionsChat.addMessage(msg);
     }
-    textEl.appendChild(parseEmojis(newContent));
-    appendMsgElement(msg, mainChat);
-}
-function parseEmojis(content) {
-    const span = document.createElement("span");
-    span.textContent = content;
-    const emoteMatches = span.textContent.match(/(:([a-zA-Z0-9_]+):)/g);
-    if (emoteMatches) {
-        for (const match of emoteMatches) {
-            const emote = match.replaceAll(":", "");
-            if (EMOTES[emote]) {
-                const img = document.createElement("img");
-                img.src = `./images/emotes/${EMOTES[emote]}`;
-                img.classList.add("emote");
-                span.innerHTML = span.innerHTML.replace(match, img.outerHTML);
-            }
-        }
-    }
-    return span;
+    mainChat.addMessage(msg);
 }
 function addRandomMsg() {
-    const text = MESSAGES[randomBetween(0, MESSAGES.length)];
-    insertMsg(USERS[randomBetween(0, USERS.length)], text
-        + ((randomBetween(0, 20) == 0 && !text.includes("@")) ? " @" : "") // add an extra @ at the end sometimes
+    const text = MESSAGES[randint(0, MESSAGES.length)];
+    insertMsg(USERS[randint(0, USERS.length)], text
+        + ((randint(0, 20) == 0 && !text.includes("@")) ? " @" : "") // add an extra @ at the end sometimes
     );
 }
 function getRandomColor() {
-    return `hsl(${Math.random() * 360}, 100%, 50%)`;
+    return `hsl(${randint(0, 367)}, 100%, 50%)`;
 }
-function randomBetween(min, max) {
+function randint(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 function getFormatHour(date) {
@@ -163,8 +185,8 @@ function getFormatHour(date) {
 setInterval(() => {
     setTimeout(() => {
         addRandomMsg();
-    }, Math.random() * 1000);
-}, 2500);
+    }, Math.random() * 3000);
+}, 1000);
 chatInput.addEventListener("keydown", e => {
     if (e.key != "Enter" || chatInput.value == "")
         return;

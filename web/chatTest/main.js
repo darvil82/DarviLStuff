@@ -63,7 +63,7 @@ const MESSAGES = [
     "okay so when are we playing something good",
     "LMAO",
     "hahahahha",
-    "trolled",
+    "trolled :incredible:",
     "lol",
     "hey guys get free nitro here! https://dickord.com/gift",
     "how is that even possible LOL",
@@ -77,7 +77,7 @@ const MESSAGES = [
     "okay so today I was trying to get a nap but you just started the fucking stream so I can't sleep",
     "gta8 map confirmed!",
     "jesus",
-    "massive hole right there!",
+    "massive hole right there! :flushed:",
     "cringe",
     "goodbye!",
     "hello!",
@@ -94,6 +94,7 @@ const MESSAGES = [
 ];
 const EMOTES = {
     incredible: "incredible.webp",
+    flushed: "flushed.webp",
 };
 function appendMsgElement(message, container) {
     container.appendChild(message);
@@ -112,16 +113,33 @@ function insertMsg(user, content, userColor, checkAt = true) {
     usrEl.textContent = user;
     usrEl.style.color = userColor ? userColor : getRandomColor();
     dateEl.textContent = getFormatHour(new Date());
+    let newContent = content;
     if (content.includes("@") && checkAt) {
-        textEl.textContent = content.replaceAll("@", `@${USER_NAME}`);
+        newContent = content.replaceAll("@", `@${USER_NAME}`);
         msg.classList.add("mention");
         const clone = document.importNode(msg, true);
         clone.classList.remove("mention");
         appendMsgElement(clone, mentionsChat);
     }
-    else
-        textEl.textContent = content;
+    textEl.appendChild(parseEmojis(newContent));
     appendMsgElement(msg, mainChat);
+}
+function parseEmojis(content) {
+    const span = document.createElement("span");
+    span.textContent = content;
+    const emoteMatches = span.textContent.match(/(:([a-zA-Z0-9_]+):)/g);
+    if (emoteMatches) {
+        for (const match of emoteMatches) {
+            const emote = match.replaceAll(":", "");
+            if (EMOTES[emote]) {
+                const img = document.createElement("img");
+                img.src = `./images/emotes/${EMOTES[emote]}`;
+                img.classList.add("emote");
+                span.innerHTML = span.innerHTML.replace(match, img.outerHTML);
+            }
+        }
+    }
+    return span;
 }
 function addRandomMsg() {
     const text = MESSAGES[randomBetween(0, MESSAGES.length)];

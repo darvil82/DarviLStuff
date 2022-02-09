@@ -151,7 +151,9 @@ h1 {
   border: 1px solid gray;
   width: 100%;
   min-height: 20px;
-  max-height: 20px;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  padding-inline: .5em;
 }
 
 .chat-wrapper > .content > .chat > input.header {

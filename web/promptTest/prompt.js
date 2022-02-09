@@ -319,3 +319,4 @@ function showConfirm(title, body, okCallback, cancelCallback) {
         new PromptButton("Ok", ["lime", "green"], okCallback)
     ]).show();
 }
+//# sourceMappingURL=prompt.js.map

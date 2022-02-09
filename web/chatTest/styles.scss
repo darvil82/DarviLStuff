@@ -10,16 +10,17 @@ html, body {
 
 body {
 	background-color: rgb(107, 107, 107);
-	font-family: lato;
+	font-family: Lato, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h1 {
-	font-size: 6em;
+	font-size: 7vw;
 	color: white;
 }
 
 .banner {
 	display: flex;
+	flex-wrap: wrap;
 	flex-direction: row;
 	justify-content: space-around;
 	align-items: center;
@@ -38,8 +39,8 @@ h1 {
 	display: flex;
 	flex-direction: column;
 	border-radius: 5px;
-	width: 350px;
-	height: 500px;
+	width: 25rem;
+	height: 75vh;
 	overflow: hidden;
 	box-shadow: 0 0 30px 0 black;
 	transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
@@ -143,8 +144,13 @@ h1 {
 					opacity: .5;
 				}
 
+				.emote {
+					width: 20px;
+					aspect-ratio: 1;
+				}
+
 				&.mention {
-					background-color: rgb(43, 21, 21);
+					background-color: rgb(71, 36, 36);
 				}
 			}
 		}

@@ -11,11 +11,11 @@ html, body {
 
 body {
   background-color: #6b6b6b;
-  font-family: lato;
+  font-family: Lato, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h1 {
-  font-size: 6em;
+  font-size: 7vw;
   color: white;
 }
 
@@ -23,6 +23,8 @@ h1 {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
       -ms-flex-direction: row;
@@ -53,8 +55,8 @@ h1 {
       -ms-flex-direction: column;
           flex-direction: column;
   border-radius: 5px;
-  width: 350px;
-  height: 500px;
+  width: 25rem;
+  height: 75vh;
   overflow: hidden;
   -webkit-box-shadow: 0 0 30px 0 black;
           box-shadow: 0 0 30px 0 black;
@@ -214,8 +216,13 @@ h1 {
   opacity: .5;
 }
 
+.chat-wrapper > .content > .chat .message .emote {
+  width: 20px;
+  aspect-ratio: 1;
+}
+
 .chat-wrapper > .content > .chat .message.mention {
-  background-color: #2b1515;
+  background-color: #472424;
 }
 
 .fakelink {

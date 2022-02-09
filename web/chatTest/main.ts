@@ -66,14 +66,14 @@ const MESSAGES = [
 	"hahahahha",
 	"trolled",
 	"lol",
-	"hey guys get free nitro here! <span class='fakelink'>dickord.com/gift</span>",
+	"hey guys get free nitro here! https://dickord.com/gift",
 	"how is that even possible LOL",
 	"okay what",
 	"what the hell",
 	"this is really cursed",
 	"did you hydrate yourself?",
 	"give me attention @",
-	"<span class='fakelink'>dikcok.com</span>",
+	"https://dikcok.com",
 	"did you know that a whale is way bigger than me?",
 	"okay so today I was trying to get a nap but you just started the fucking stream so I can't sleep",
 	"gta8 map confirmed!",
@@ -91,14 +91,26 @@ const MESSAGES = [
 	"god some please give @ the deserved shit",
 	"@ @ @",
 	"this chat fucking sucks",
-	"check this nice link: <span class='fakelink'>yousuck.net</span>"
+	"check this nice link: http://yousuck.net"
 ]
+const EMOTES = {
+	incredible: "incredible.webp",
+
+}
 
 
-function appendMsgElement(message: DocumentFragment, container: HTMLDivElement) {
+
+
+
+function appendMsgElement(message: Element, container: HTMLDivElement) {
 	container.appendChild(message)
-	if (container.childElementCount > 20)
-		container.firstElementChild.remove()
+
+	new IntersectionObserver((entries, obv) => {
+		if (!entries[0].isIntersecting) {
+			message.remove()
+			obv.disconnect()
+		}
+	}, { root: container }).observe(message)
 }
 
 function insertMsg(
@@ -107,9 +119,7 @@ function insertMsg(
 	userColor?: string,
 	checkAt: boolean = true
 ) {
-	const msg = document.importNode(messageTemplate.content, true);
-
-	const date = new Date()
+	const msg = document.importNode(messageTemplate, true).content.firstElementChild as HTMLElement;
 
 	const usrEl = msg.querySelector(".user") as HTMLSpanElement
 	const textEl = msg.querySelector(".body") as HTMLSpanElement
@@ -117,21 +127,19 @@ function insertMsg(
 
 	usrEl.textContent = user
 	usrEl.style.color = userColor ? userColor : getRandomColor()
-	dateEl.textContent = getFormatHour(date)
+	dateEl.textContent = getFormatHour(new Date())
 
 
 	if (content.includes("@") && checkAt) {
-		textEl.innerHTML = content.replaceAll("@", `@${USER_NAME}`)
+		textEl.textContent= content.replaceAll("@", `@${USER_NAME}`)
+		msg.classList.add("mention")
 
-		/** Create a clone of the node because otherwise we would use the same
-		 *  reference to the node both times */
-		const mentionChatNode = document.importNode(msg, true)
-
-		msg.firstElementChild.classList.add("mention")
-
-		appendMsgElement(mentionChatNode, mentionsChat)
+		const clone = document.importNode(msg, true)
+		clone.classList.remove("mention")
+		appendMsgElement(clone, mentionsChat)
 	} else
-		textEl.innerHTML = content
+		textEl.textContent= content
+
 
 	appendMsgElement(msg, mainChat)
 }
@@ -160,9 +168,9 @@ function getFormatHour(date: Date): string {
 	const hours = date.getHours()
 	const minutes = date.getMinutes()
 	return (
-		((hours < 10) ? `${hours}0` : hours)
+		((hours < 10) ? `0${hours}` : hours)
 		+ ":"
-		+ ( (minutes < 10) ? `${minutes}0` : minutes)
+		+ ( (minutes < 10) ? `0${minutes}` : minutes)
 	)
 }
 
@@ -171,7 +179,7 @@ setInterval(() => {
 	setTimeout(() => {
 		addRandomMsg()
 	}, Math.random() * 1000)
-}, 2000)
+}, 2500)
 
 chatInput.addEventListener("keydown", e => {
 	if (e.key != "Enter" || chatInput.value == "") return;

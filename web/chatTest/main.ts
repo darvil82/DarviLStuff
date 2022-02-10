@@ -56,9 +56,12 @@ class Interval {
 	constructor(public callback: (delay: number) => any) {}
 
 	set(delay: number) {
-		clearInterval(this.currentIntervalId)
-
+		this.clear()
 		this.currentIntervalId = setInterval(() => this.callback(delay), delay)
+	}
+
+	clear() {
+		clearInterval(this.currentIntervalId)
 	}
 }
 
@@ -312,13 +315,18 @@ chatInput.addEventListener("keydown", e => {
 		case "!color":
 			userColor = prompt("change color to (CSS):", userColor) || userColor
 			break
-		case "!delay":
-			randomMessagesInterval.set(parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString())) || CHAT_DELAY)
+		case "!delay": {
+			const input = parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString()))
+			if (input == 0)
+				randomMessagesInterval.clear()
+			else
+				randomMessagesInterval.set(input || CHAT_DELAY)
 			break
+		}
 	}
 })
 
-// adds 25 random messages to the chat for populating it
+// adds random messages to the chat for populating it
 {
 	for (let i = 0; i<25; i++)
 		addRandomMsg()

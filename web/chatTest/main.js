@@ -45,8 +45,8 @@ const mainChat = new Chat(document.querySelector("[data-chat-main]"));
 const mentionsChat = new Chat(document.querySelector("[data-chat-mentions]"));
 const chatInput = document.querySelector("[data-chat-input]");
 // the user that will be mentioned in the messages
-const USER_NAME = "darvil82";
-const USER_COLOR = "rgb(0,255,100)";
+var userName = "darvil82";
+var userColor = "rgb(0,255,100)";
 const USERS = [
     "soulfulcomb",
     "quartrule",
@@ -138,7 +138,7 @@ const MESSAGES = [
     "you looking good today :sunglasses:",
     "he is just very good :stuff:",
     ":sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus:",
-    "wtf try to type !emotes",
+    "wtf try to type !help",
     "testing if this works: <h1>hello</h1>",
 ];
 const EMOTES = {
@@ -187,7 +187,7 @@ function parseEmotes(text) {
  */
 function insertMsg(user, content, userColor, checkAt = true) {
     const color = userColor ?? getRandomColor();
-    const replacedText = content.replaceAll("@", `@${USER_NAME}`);
+    const replacedText = content.replaceAll("@", `@${userName}`);
     let msg = new Message(user, content, color);
     if (checkAt && content.includes("@")) {
         msg.isMentioned = true;
@@ -240,9 +240,21 @@ chatInput.addEventListener("keydown", e => {
     if (e.key != "Enter" || inValue == "")
         return;
     chatInput.value = "";
-    insertMsg(USER_NAME, inValue, USER_COLOR, false);
-    if (inValue == "!emotes") {
-        insertMsg("klyde", `@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}`, "lime");
+    insertMsg(userName, inValue, userColor, false);
+    const klydeMsg = (msg) => insertMsg("klyde", msg, "lime");
+    switch (inValue.toLowerCase()) {
+        case "!help":
+            klydeMsg("@ available commands: !help, !emotes, !name, !color");
+            break;
+        case "!emotes":
+            klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}`);
+            break;
+        case "!name":
+            userName = prompt("change name to:").replaceAll(" ", "_") || userName;
+            break;
+        case "!color":
+            userColor = prompt("change color to (CSS):", userColor) || userColor;
+            break;
     }
 });
 // adds 25 random messages to the chat for populating it

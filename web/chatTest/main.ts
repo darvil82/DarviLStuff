@@ -50,6 +50,19 @@ class Message {
 	}
 }
 
+class Interval {
+	private currentIntervalId: number
+
+	constructor(public callback: (delay: number) => any) {}
+
+	set(delay: number) {
+		clearInterval(this.currentIntervalId)
+		console.log(delay, this.currentIntervalId)
+
+		this.currentIntervalId = setInterval(() => this.callback(delay), delay)
+	}
+}
+
 const messageTemplate = document.querySelector("[data-message-template]") as HTMLTemplateElement
 const mainChat = new Chat(document.querySelector("[data-chat-main]"))
 const mentionsChat =  new Chat(document.querySelector("[data-chat-mentions]"))
@@ -163,6 +176,7 @@ const EMOTES = {
 	sus: "sus.gif",
 	peter_fall: "peter_fall.gif",
 }
+const CHAT_DELAY = 2000
 
 
 /**
@@ -268,12 +282,14 @@ function getFormatHour(date: Date): string {
 	)
 }
 
-// sets interval for adding random messages over time
-setInterval(() => {
+var randomMessagesInterval = new Interval(d => {
 	setTimeout(() => {
-		addRandomMsg()
-	}, Math.random() * 3000)
-}, 1500)
+			addRandomMsg()
+		}, Math.random() * d
+	)
+})
+randomMessagesInterval.set(CHAT_DELAY)
+
 
 // sets up the input field for handling user input
 chatInput.addEventListener("keydown", e => {
@@ -286,7 +302,7 @@ chatInput.addEventListener("keydown", e => {
 
 	switch (inValue.toLowerCase()) {
 		case "!help":
-			klydeMsg("@ available commands: !help, !emotes, !name, !color")
+			klydeMsg("@ available commands: !help, !emotes, !name, !color, !delay")
 			break
 		case "!emotes":
 			klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`)
@@ -296,6 +312,9 @@ chatInput.addEventListener("keydown", e => {
 			break
 		case "!color":
 			userColor = prompt("change color to (CSS):", userColor) || userColor
+			break
+		case "!delay":
+			randomMessagesInterval.set(parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString())) || CHAT_DELAY)
 			break
 	}
 })

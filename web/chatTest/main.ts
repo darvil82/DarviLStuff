@@ -57,7 +57,6 @@ class Interval {
 
 	set(delay: number) {
 		clearInterval(this.currentIntervalId)
-		console.log(delay, this.currentIntervalId)
 
 		this.currentIntervalId = setInterval(() => this.callback(delay), delay)
 	}

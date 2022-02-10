@@ -1,7 +1,9 @@
 # DarviLStuff
-This is the repository that contains some scripts that I do when I'm bored or when I have nothing else to do. Please remember that stuff here isn't exactly great quality, these are tests I did as a way to try to improve my skills.
+This is the repository that contains some stuff that I do when I'm bored or when I have nothing else to do. Please remember that stuff here isn't exactly great quality, these are tests I did as a way to try to improve my skills.
 
 This is some of the things that I have at the moment:
+
+## Scripts
 
 | Script | Description | Usage | Type |
 | ------ | ----------- | ----- | ---- |
@@ -13,19 +15,23 @@ This is some of the things that I have at the moment:
 
 **There's a wiki explaining the instalation and usage of this scripts here: https://github.com/L89David/DarviLStuff/wiki**
 
-***
 
-## VIRINT
+### VIRINT
 ![image](https://user-images.githubusercontent.com/48654552/108505311-75733c00-72b7-11eb-89ae-0a059ea99ea2.png)
 
-## PBAR
+### PBAR
 ![preview](https://user-images.githubusercontent.com/48654552/104537150-af4a8600-5619-11eb-9479-b43bd3ecb924.gif)
 
-## ECHOC
+### ECHOC
 ![image](https://user-images.githubusercontent.com/48654552/106464772-6445c500-6499-11eb-86bb-9303bd273070.png)
 
-## prompt.js
+### prompt.js
 ![image](https://user-images.githubusercontent.com/48654552/143162759-8b379c6b-e004-4e9a-9966-97f173616cc7.png)
 
-## pongtest2
+### pongtest2
 ![image](https://user-images.githubusercontent.com/48654552/120077549-2e14fc80-c0ab-11eb-98c4-dbb6681ec1e9.png)
+
+
+## Other
+
+There's some other stuff available that isn't listed here. Go check it out! (if you want)

@@ -149,7 +149,7 @@ const MESSAGES = [
 	"you looking good today :sunglasses:",
 	"he is just very good :stuff:",
 	":sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus: :sus:",
-	"wtf guys try to type !emotes",
+	"wtf try to type !emotes",
 	"testing if this works: <h1>hello</h1>",
 ]
 const EMOTES = {

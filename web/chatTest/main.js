@@ -13,6 +13,9 @@ class Chat {
             }
         }, { root: this.element }).observe(msgElement);
     }
+    clear() {
+        this.element.innerHTML = '';
+    }
 }
 class Message {
     constructor(user, text, userColor, isMentioned = false) {
@@ -276,6 +279,9 @@ chatInput.addEventListener("keydown", e => {
                 randomMessagesInterval.set(input || CHAT_DELAY);
             break;
         }
+        case "!clear":
+            mainChat.clear();
+            mentionsChat.clear();
     }
 });
 // adds random messages to the chat for populating it

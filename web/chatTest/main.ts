@@ -13,6 +13,10 @@ class Chat {
 			}
 		}, { root: this.element }).observe(msgElement)
 	}
+
+	clear() {
+		this.element.innerHTML = ''
+	}
 }
 
 class Message {
@@ -323,6 +327,9 @@ chatInput.addEventListener("keydown", e => {
 				randomMessagesInterval.set(input || CHAT_DELAY)
 			break
 		}
+		case "!clear":
+			mainChat.clear()
+			mentionsChat.clear()
 	}
 })
 

@@ -289,7 +289,7 @@ chatInput.addEventListener("keydown", e => {
 			klydeMsg("@ available commands: !help, !emotes, !name, !color")
 			break
 		case "!emotes":
-			klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}`)
+			klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`)
 			break
 		case "!name":
 			userName = prompt("change name to:").replaceAll(" ", "_") || userName

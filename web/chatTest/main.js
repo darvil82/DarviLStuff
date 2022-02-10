@@ -5,6 +5,7 @@ class Chat {
     addMessage(message) {
         const msgElement = message.element;
         this.element.appendChild(msgElement);
+        // inmediately remove the node when it gets out of the chat
         new IntersectionObserver((entries, obs) => {
             if (!entries[0].isIntersecting) {
                 msgElement.remove();
@@ -43,6 +44,7 @@ const messageTemplate = document.querySelector("[data-message-template]");
 const mainChat = new Chat(document.querySelector("[data-chat-main]"));
 const mentionsChat = new Chat(document.querySelector("[data-chat-mentions]"));
 const chatInput = document.querySelector("[data-chat-input]");
+// the user that will be mentioned in the messages
 const USER_NAME = "darvil82";
 const USER_COLOR = "rgb(0,255,100)";
 const USERS = [
@@ -151,7 +153,8 @@ const EMOTES = {
     peter_fall: "peter_fall.gif",
 };
 /**
- * Return a span element with all the emotes replaced with their images while keeping the text
+ * Return a span element with all the emotes replaced with their respective
+ * images while keeping the text
  */
 function parseEmotes(text) {
     const match = text.match(/:([a-zA-Z_]+):/g);
@@ -178,6 +181,10 @@ function parseEmotes(text) {
     endEl.appendChild(lastText);
     return endEl;
 }
+/**
+ * Insert a message to the chat. If this has a mention in it, it may also be
+ * inserted to the mentions chat.
+ */
 function insertMsg(user, content, userColor, checkAt = true) {
     const color = userColor ?? getRandomColor();
     const replacedText = content.replaceAll("@", `@${USER_NAME}`);
@@ -190,18 +197,30 @@ function insertMsg(user, content, userColor, checkAt = true) {
     }
     mainChat.addMessage(msg);
 }
+/**
+ * Insert a message to the chat using random content.
+ */
 function addRandomMsg() {
     const text = MESSAGES[randint(0, MESSAGES.length)];
     insertMsg(USERS[randint(0, USERS.length)], text
         + ((randint(0, 20) == 0 && !text.includes("@")) ? " @" : "") // add an extra @ at the end sometimes
     );
 }
+/**
+ * Returns a random HSL color with maximum saturation and lightness.
+ */
 function getRandomColor() {
     return `hsl(${randint(0, 367)}, 100%, 50%)`;
 }
+/**
+ * Returns a random integer between min (inclusive) and max (exclusive).
+ */
 function randint(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
+/**
+ * Returns the current hour in 24-hour format with proper prefix.
+ */
 function getFormatHour(date) {
     const hours = date.getHours();
     const minutes = date.getMinutes();
@@ -209,22 +228,24 @@ function getFormatHour(date) {
         + ":"
         + ((minutes < 10) ? `0${minutes}` : minutes));
 }
+// sets interval for adding random messages over time
 setInterval(() => {
     setTimeout(() => {
         addRandomMsg();
     }, Math.random() * 3000);
 }, 1500);
+// sets up the input field for handling user input
 chatInput.addEventListener("keydown", e => {
     const inValue = chatInput.value;
     if (e.key != "Enter" || inValue == "")
         return;
     chatInput.value = "";
+    insertMsg(USER_NAME, inValue, USER_COLOR, false);
     if (inValue == "!emotes") {
         insertMsg("klyde", `@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}`, "lime");
-        return;
     }
-    insertMsg(USER_NAME, inValue, USER_COLOR, false);
 });
+// adds 25 random messages to the chat for populating it
 {
     for (let i = 0; i < 25; i++)
         addRandomMsg();

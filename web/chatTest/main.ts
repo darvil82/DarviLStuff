@@ -5,6 +5,7 @@ class Chat {
 		const msgElement = message.element
 		this.element.appendChild(msgElement)
 
+		// inmediately remove the node when it gets out of the chat
 		new IntersectionObserver((entries, obs) => {
 			if (!entries[0].isIntersecting) {
 				msgElement.remove()
@@ -54,6 +55,7 @@ const mainChat = new Chat(document.querySelector("[data-chat-main]"))
 const mentionsChat =  new Chat(document.querySelector("[data-chat-mentions]"))
 const chatInput = document.querySelector("[data-chat-input]") as HTMLInputElement
 
+// the user that will be mentioned in the messages
 const USER_NAME = "darvil82"
 const USER_COLOR = "rgb(0,255,100)"
 const USERS = [
@@ -164,7 +166,8 @@ const EMOTES = {
 
 
 /**
- * Return a span element with all the emotes replaced with their images while keeping the text
+ * Return a span element with all the emotes replaced with their respective
+ * images while keeping the text
  */
 function parseEmotes(text: string): HTMLSpanElement {
 	const match = text.match(/:([a-zA-Z_]+):/g)
@@ -198,6 +201,10 @@ function parseEmotes(text: string): HTMLSpanElement {
 }
 
 
+/**
+ * Insert a message to the chat. If this has a mention in it, it may also be
+ * inserted to the mentions chat.
+ */
 function insertMsg(
 	user: string,
 	content: string,
@@ -219,8 +226,9 @@ function insertMsg(
 }
 
 
-
-
+/**
+ * Insert a message to the chat using random content.
+ */
 function addRandomMsg() {
 	const text = MESSAGES[randint(0, MESSAGES.length)]
 	insertMsg(
@@ -233,14 +241,23 @@ function addRandomMsg() {
 }
 
 
+/**
+ * Returns a random HSL color with maximum saturation and lightness.
+ */
 function getRandomColor() {
 	return `hsl(${randint(0, 367)}, 100%, 50%)`
 }
 
+/**
+ * Returns a random integer between min (inclusive) and max (exclusive).
+ */
 function randint(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min)) + min
 }
 
+/**
+ * Returns the current hour in 24-hour format with proper prefix.
+ */
 function getFormatHour(date: Date): string {
 	const hours = date.getHours()
 	const minutes = date.getMinutes()
@@ -251,24 +268,25 @@ function getFormatHour(date: Date): string {
 	)
 }
 
-
+// sets interval for adding random messages over time
 setInterval(() => {
 	setTimeout(() => {
 		addRandomMsg()
 	}, Math.random() * 3000)
 }, 1500)
 
+// sets up the input field for handling user input
 chatInput.addEventListener("keydown", e => {
 	const inValue = chatInput.value
 	if (e.key != "Enter" || inValue == "") return;
 	chatInput.value = ""
+	insertMsg(USER_NAME, inValue, USER_COLOR, false)
 	if (inValue == "!emotes") {
 		insertMsg("klyde", `@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}`, "lime")
-		return
 	}
-	insertMsg(USER_NAME, inValue, USER_COLOR, false)
 })
 
+// adds 25 random messages to the chat for populating it
 {
 	for (let i = 0; i<25; i++)
 		addRandomMsg()

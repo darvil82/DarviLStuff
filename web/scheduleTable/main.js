@@ -1,5 +1,8 @@
+"use strict";
+
 const CAMOUNT = 10;
 const CAMOUNT_HOVER = 5;
+const ANIM_DELAY = 750;
 
 
 /**
@@ -53,26 +56,44 @@ function countHours(classname) {
 }
 
 /**
+ * Capitalizes the first letter of a string
+ * @param {string} string The string to be parsed
+ * @returns {string} The string with the first letter capitalized
+ */
+function capitalizeString(string) {
+	return string[0].toUpperCase() + string.slice(1)
+}
+
+/**
  * Populate the schedule with the subjects from the give object
  * @param {Object} dataObject - Object with the subject definitions:
  *
- * class-name: [name: string, color: array, teacher: string]
+ * class-name: [name: string, color: array, options: object]
+ *
+ * Each key-value pair of the options object will be shown when clicking the
+ * subject.
  * */
  function loadEntries(dataObject) {
 	Object.entries(dataObject).forEach(item => {
-		const entry = item[1];
-		const clsName = item[0];
-		const parsedColor = getColor(entry[1]);
+		const [clsName, [name, color, extra]] = item;
+		const parsedColor = getColor(color);
 
 		// Define the popup that will appear when clicking a subject
 		const popup = () => {
 			new Prompt(
-				entry[0],
-				`<b>Teacher:</b> ${entry[2]}.<br>
-				<b>${countHours(clsName)}</b> hours per week.`,
+				name,
+				(() => {
+					let text = `<b>${countHours(clsName)}</b> hours per week.`;
+					if (!extra)
+						return text;
+					for (let [key, value] of Object.entries(extra)) {
+						text += `<br><b>${capitalizeString(key)}:</b> ${value}.`
+					}
+					return text
+				})(),
 				[
-					new PromptButton("Volver", [
-						parsedColor, getColor(darkenColor(entry[1], 10))
+					new PromptButton("Ok", [
+						parsedColor, getColor(darkenColor(color, 10))
 					])
 				],
 				false,
@@ -83,13 +104,13 @@ function countHours(classname) {
 		document.querySelectorAll("."+clsName).forEach(element => {
 			["mouseover", "focus"].forEach(listener => {
 				element.addEventListener(listener, () => {
-					hoverSubjects(clsName, entry[1])
+					hoverSubjects(clsName, color)
 				});
 			});
 
 			["mouseout", "blur"].forEach(listener => {
 				element.addEventListener(listener, () => {
-					hoverSubjects(clsName, entry[1], false)
+					hoverSubjects(clsName, color, false)
 				});
 			});
 
@@ -98,10 +119,10 @@ function countHours(classname) {
 				if (event.key == "Enter") popup()
 			});
 
-			element.innerText = entry[0];
+			element.textContent = name;
 			element.style.color = parsedColor;
 			element.tabIndex = 0;
-			hoverSubjects(clsName, entry[1], false)
+			hoverSubjects(clsName, color, false)
 		})
 	})
 }
@@ -109,14 +130,14 @@ function countHours(classname) {
 
 
 
-/* Simplemente cambiar el fondo de forma aleatoria */
+/* Just change the background to a random one when clicking the change bg button */
 document.querySelector(".optbtn").addEventListener("click", () => {
 	document.querySelector("body").style.backgroundImage =
 	`url(https://picsum.photos/id/${parseInt(Math.random()*1000)}/1920/1080)`
 });
 
 
-/** Iliminar los subjects al pasar el cursor por encima de los días */
+/* Highlight the subjects when hovering over the days */
 document.querySelectorAll(".top-header > .col-header").forEach((th, i) => {
 	const subjects = document.querySelectorAll(
 		`tr > [day="${i+1}"],
@@ -124,23 +145,23 @@ document.querySelectorAll(".top-header > .col-header").forEach((th, i) => {
 	);
 
 	th.addEventListener("mouseover", () => {
-		// aplicar clase a todos los elementos que pertenecen al día actual
+		// apply class to all elements that belong to the current day
 		subjects.forEach(td => td.classList.add("lighten"))
 	});
 
 	th.addEventListener("mouseout", () => {
-		// simplemente remover la clase a todos
+		// simply remove the class from all elements
 		subjects.forEach(td => td.classList.remove("lighten"))
 	});
 
 	th.addEventListener("click", () => {
 		showAlert(
-			th.innerText,
+			th.textContent,
 			"<ul style='list-style-position: inside'><li>"
 			+ Array.from(subjects)
-				.map(e => e.innerText)	// obtener el nombre de los subjects
-				.filter((v, i, a) => a.indexOf(v) == i)	// filtrar los repetidos
-				.join("<li>")	// unir los nombres de los subjects
+				.map(e => e.textContent)	// get the name of each subject
+				.filter((v, i, a) => a.indexOf(v) == i)	// filter repeated
+				.join("<li>")	// join all the subjects
 			+ "</ul>",
 		)
 	})
@@ -149,10 +170,7 @@ document.querySelectorAll(".top-header > .col-header").forEach((th, i) => {
 
 
 
-const ANIM_DELAY = 750;
-
-
-/** Mostrar todos los subjects */
+/** Show all subjects */
 setTimeout(() => {
 	const tds = document.querySelectorAll(".table-wrapper td");
 
@@ -163,7 +181,7 @@ setTimeout(() => {
 	}
 }, ANIM_DELAY);
 
-/** Mostrar los ths */
+/** Show all ths */
 setTimeout(() => {
 	const ths = document.querySelectorAll(".row-header, .col-header");
 

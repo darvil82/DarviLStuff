@@ -1,69 +1,69 @@
-<!-- Creado por David Losantos -->
+<!-- Created by David Losantos -->
 
 <!doctype html>
 <html>
 	<head>
-        <title> Horario semanal </title>
+        <title> Week Schedule </title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="style.css">
 	</head>
 
 	<body>
-		<button class="optbtn">Cambiar fondo</button>
+		<button class="optbtn">Change background</button>
 
 		<div class="table-wrapper">
 			<table style="width: 100%;">
-				<caption> Horario de la semana </caption>
+				<caption> Week Schedule </caption>
 				<tr class="top-header">
 					<th>
-					<th class="col-header"> Lunes
-					<th class="col-header"> Martes
-					<th class="col-header"> Miércoles
-					<th class="col-header"> Jueves
-					<th class="col-header"> Viernes
+					<th class="col-header"> Monday
+					<th class="col-header"> Tuesday
+					<th class="col-header"> Wednesday
+					<th class="col-header"> Thursday
+					<th class="col-header"> Friday
 				</tr>
 				<tr>
-					<th class="row-header">16:00<br>16:50</th>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
-					<td class="">
-					<td class="" rowspan=2>
+					<th class="row-header">8:00<br>9:50</th>
+					<td class="maths" rowspan=2>
+					<td class="maths" rowspan=2>
+					<td class="biology" rowspan=2>
+					<td class="biology">
+					<td class="science" rowspan=2>
 				</tr>
 				<tr>
-					<th class="row-header">16:55<br>17:45</th>
-					<td class="" day=4>
+					<th class="row-header">9:55<br>10:45</th>
+					<td class="history" day=4>
 				</tr>
 				<tr>
-					<th class="row-header">17:50<br>18:40</th>
-					<td class="">
-					<td class="">
-					<td class="">
-					<td class="">
-					<td class="">
+					<th class="row-header">10:50<br>11:40</th>
+					<td class="history">
+					<td class="science">
+					<td class="history">
+					<td class="maths">
+					<td class="maths">
 				</tr>
 				<tr>
-					<th><th class="col-header" colspan=5>Recreo
+					<th><th class="col-header" colspan=5>Break
 				</tr>
 				<tr>
-					<th class="row-header">19:00<br>19:50</th>
-					<td class="">
-					<td class="">
-					<td class="">
-					<td class="">
-					<td class="">
+					<th class="row-header">12:00<br>12:50</th>
+					<td class="history">
+					<td class="science">
+					<td class="history">
+					<td class="maths">
+					<td class="maths">
 				</tr>
 				<tr>
-					<th class="row-header">19:55<br>20:45</th>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
-					<td class="" rowspan=2>
+					<th class="row-header">12:55<br>13:45</th>
+					<td class="english" rowspan=2>
+					<td class="english" rowspan=2>
+					<td class="science" rowspan=2>
+					<td class="science" rowspan=2>
+					<td class="english" rowspan=2>
 				</tr>
 
 				<tr>
-					<th class="row-header">20:50<br>21:40</th>
+					<th class="row-header">13:50<br>14:40</th>
 				</tr>
 			</table>
 		</div>
@@ -72,6 +72,11 @@
 	<script src="main.js"></script>
 	<script>
 		loadEntries({
+			maths: ["Maths", [255, 255, 0], { teacher: "name", room: "2A" }],
+			history: ["History", [255, 120, 120], { teacher: "name", room: "5A" }],
+			biology: ["Biology", [255, 20, 255], { teacher: "name", room: "4T" }],
+			english: ["English", [100, 255, 0], { teacher: "name", room: "0B" }],
+			science: ["Science", [75, 255, 255], { teacher: "name", room: "12B "}]
 		})
 	</script>
 </html>

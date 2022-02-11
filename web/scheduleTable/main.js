@@ -73,7 +73,7 @@ function capitalizeString(string) {
  * Each key-value pair of the options object will be shown when clicking the
  * subject.
  * */
- function loadEntries(dataObject) {
+function loadEntries(dataObject) {
 	Object.entries(dataObject).forEach(item => {
 		const [clsName, [name, color, extra]] = item;
 		const parsedColor = getColor(color);

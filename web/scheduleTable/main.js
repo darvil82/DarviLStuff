@@ -16,10 +16,7 @@ function hoverSubjects(classname, colorArray, state=true) {
 		e.style.background = getColor(
 			darkenColor(colorArray, (state ? CAMOUNT_HOVER : CAMOUNT)),
 		);
-		if (state)
-			e.classList.add("highlighted")
-		else
-			e.classList.remove("highlighted")
+		e.classList.toggle("highlighted", state)
 	})
 }
 

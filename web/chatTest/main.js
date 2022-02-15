@@ -170,10 +170,10 @@ const EMOTES = {
 const CHAT_DELAY = 2000;
 const COMMANDS = {
     help: function () {
-        klydeMsg(`@ available commands: !${Object.keys(this).join(", !")}`);
+        sendKlydeMsg(`@ available commands: !${Object.keys(this).join(", !")}`);
     },
     emotes: () => {
-        klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`);
+        sendKlydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`);
     },
     name: () => {
         userName = prompt("change name to:").replaceAll(" ", "_") || userName;
@@ -193,7 +193,6 @@ const COMMANDS = {
         mentionsChat.clear();
     }
 };
-const klydeMsg = (msg) => insertMsg("klyde", msg, "lime");
 /**
  * Return a span element with all the emotes replaced with their respective
  * images while keeping the text
@@ -269,6 +268,9 @@ function getFormatHour(date) {
     return (((hours < 10) ? `0${hours}` : hours)
         + ":"
         + ((minutes < 10) ? `0${minutes}` : minutes));
+}
+function sendKlydeMsg(msg) {
+    insertMsg("klyde", msg, "lime");
 }
 var randomMessagesInterval = new Interval(d => {
     setTimeout(() => {

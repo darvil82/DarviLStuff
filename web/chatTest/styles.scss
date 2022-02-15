@@ -44,6 +44,9 @@ h1 {
 	overflow: hidden;
 	box-shadow: 0 0 30px 0 black;
 	transform: rotateX(15deg) rotateY(-20deg) rotateZ(5deg);
+	resize: both;
+	min-width: 200px;
+	min-height: 200px;
 
 
 	> .header {

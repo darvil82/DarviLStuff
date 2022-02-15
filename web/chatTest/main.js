@@ -168,6 +168,32 @@ const EMOTES = {
     peter_fall: "peter_fall.gif",
 };
 const CHAT_DELAY = 2000;
+const COMMANDS = {
+    help: function () {
+        klydeMsg(`@ available commands: !${Object.keys(this).join(", !")}`);
+    },
+    emotes: () => {
+        klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`);
+    },
+    name: () => {
+        userName = prompt("change name to:").replaceAll(" ", "_") || userName;
+    },
+    color: () => {
+        userColor = prompt("change color to (CSS):", userColor) || userColor;
+    },
+    delay: () => {
+        const input = parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString()));
+        if (input == 0)
+            randomMessagesInterval.clear();
+        else
+            randomMessagesInterval.set(input || CHAT_DELAY);
+    },
+    clear: () => {
+        mainChat.clear();
+        mentionsChat.clear();
+    }
+};
+const klydeMsg = (msg) => insertMsg("klyde", msg, "lime");
 /**
  * Return a span element with all the emotes replaced with their respective
  * images while keeping the text
@@ -257,31 +283,9 @@ chatInput.addEventListener("keydown", e => {
         return;
     chatInput.value = "";
     insertMsg(userName, inValue, userColor, false);
-    const klydeMsg = (msg) => insertMsg("klyde", msg, "lime");
-    switch (inValue.toLowerCase()) {
-        case "!help":
-            klydeMsg("@ available commands: !help, !emotes, !name, !color, !delay");
-            break;
-        case "!emotes":
-            klydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`);
-            break;
-        case "!name":
-            userName = prompt("change name to:").replaceAll(" ", "_") || userName;
-            break;
-        case "!color":
-            userColor = prompt("change color to (CSS):", userColor) || userColor;
-            break;
-        case "!delay": {
-            const input = parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString()));
-            if (input == 0)
-                randomMessagesInterval.clear();
-            else
-                randomMessagesInterval.set(input || CHAT_DELAY);
-            break;
-        }
-        case "!clear":
-            mainChat.clear();
-            mentionsChat.clear();
+    // check if the message is a command
+    if (inValue.startsWith("!")) {
+        COMMANDS[inValue.slice(1)]?.();
     }
 });
 // adds random messages to the chat for populating it

@@ -331,7 +331,7 @@ randomMessagesInterval.set(CHAT_DELAY)
 
 // sets up the input field for handling user input
 chatInput.addEventListener("keydown", e => {
-	const inValue = chatInput.value
+	const inValue = chatInput.value.trim()
 	if (e.key != "Enter" || inValue == "") return;
 	chatInput.value = ""
 	insertMsg(userName, inValue, userColor, false)

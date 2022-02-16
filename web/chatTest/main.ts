@@ -1,5 +1,5 @@
 class Chat {
-	constructor(public element: HTMLDivElement) {}
+	constructor(public element: HTMLDivElement) { }
 
 	addMessage(message: Message) {
 		const msgElement = message.element
@@ -57,7 +57,7 @@ class Message {
 class Interval {
 	private currentIntervalId: number
 
-	constructor(public callback: (delay: number) => any) {}
+	constructor(public callback: (delay: number) => any) { }
 
 	set(delay: number) {
 		this.clear()
@@ -71,7 +71,7 @@ class Interval {
 
 const messageTemplate = document.querySelector("[data-message-template]") as HTMLTemplateElement
 const mainChat = new Chat(document.querySelector("[data-chat-main]"))
-const mentionsChat =  new Chat(document.querySelector("[data-chat-mentions]"))
+const mentionsChat = new Chat(document.querySelector("[data-chat-mentions]"))
 const chatInput = document.querySelector("[data-chat-input]") as HTMLInputElement
 
 // the user that will be mentioned in the messages
@@ -232,8 +232,11 @@ function parseEmotes(text: string): HTMLSpanElement {
 		emoteImg.classList.add("emote")
 
 		const textEl = document.createElement("span")
-		textEl.textContent = text.slice(0, text.indexOf(emote))
-		endEl.appendChild(textEl)
+		const newContent = text.slice(0, text.indexOf(emote))
+		if (newContent) {
+			textEl.textContent = newContent
+			endEl.appendChild(textEl)
+		}
 		endEl.appendChild(emoteImg)
 		text = text.slice(text.indexOf(emote) + emote.length)
 	}
@@ -309,7 +312,7 @@ function getFormatHour(date: Date): string {
 	return (
 		((hours < 10) ? `0${hours}` : hours)
 		+ ":"
-		+ ( (minutes < 10) ? `0${minutes}` : minutes)
+		+ ((minutes < 10) ? `0${minutes}` : minutes)
 	)
 }
 
@@ -319,8 +322,8 @@ function sendKlydeMsg(msg: string) {
 
 var randomMessagesInterval = new Interval(d => {
 	setTimeout(() => {
-			addRandomMsg()
-		}, Math.random() * d
+		addRandomMsg()
+	}, Math.random() * d
 	)
 })
 randomMessagesInterval.set(CHAT_DELAY)
@@ -341,6 +344,6 @@ chatInput.addEventListener("keydown", e => {
 
 // adds random messages to the chat for populating it
 {
-	for (let i = 0; i<25; i++)
+	for (let i = 0; i < 25; i++)
 		addRandomMsg()
 }

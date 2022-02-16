@@ -212,8 +212,11 @@ function parseEmotes(text) {
         emoteImg.src = `./images/emotes/${EMOTES[emoteName]}`;
         emoteImg.classList.add("emote");
         const textEl = document.createElement("span");
-        textEl.textContent = text.slice(0, text.indexOf(emote));
-        endEl.appendChild(textEl);
+        const newContent = text.slice(0, text.indexOf(emote));
+        if (newContent) {
+            textEl.textContent = newContent;
+            endEl.appendChild(textEl);
+        }
         endEl.appendChild(emoteImg);
         text = text.slice(text.indexOf(emote) + emote.length);
     }

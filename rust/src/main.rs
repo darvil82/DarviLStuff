@@ -16,9 +16,9 @@ trait Details {
 
 
 struct Pizza {
-    name: String,
+	name: String,
 	size: PizzaSizes,
-    price: f32,
+	price: f32,
 	quantity: u8
 }
 
@@ -64,19 +64,19 @@ impl Details for Pizza {
 
 
 struct Order<'a> {
-    items: &'a Vec<Pizza>,
-    customer: String,
+	items: &'a Vec<Pizza>,
+	customer: String,
 }
 
 impl<'a> Order<'a> {
 	/** Get the total price of all the ordered items */
-    fn get_price(&self) -> f32 {
-        let mut final_price: f32 = 0.0;
-        for pizza in self.items {
-            final_price += pizza.get_unit_price() as f32;
-        }
-        final_price
-    }
+	fn get_price(&self) -> f32 {
+		let mut final_price: f32 = 0.0;
+		for pizza in self.items {
+			final_price += pizza.get_unit_price() as f32;
+		}
+		final_price
+	}
 }
 
 impl Details for Order<'_> {

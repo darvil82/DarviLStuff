@@ -103,10 +103,10 @@ fn main() {
 		Pizza::new("Hot Dog", PizzaSizes::Galactic, price, 5),
 	];
 
-	let pedido = Order {
+	let order = Order {
 		items: &pizzas,
 		customer: "Joshua".into(),
 	};
 
-	println!("{}", pedido.display())
+	println!("{}", order.display())
 }

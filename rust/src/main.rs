@@ -79,7 +79,7 @@ impl<'a> Order<'a> {
 	}
 }
 
-impl Details for Order {
+impl Details for Order<'_> {
 	fn display(&self) -> String {
 		let mut end_str = format!("Customer: {}\nPizzas:\n", self.customer);
 		for item in self.items {

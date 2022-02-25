@@ -8,8 +8,8 @@ enum PizzaSizes {
 
 
 trait Details {
-	/** Returns a String that represents the details
-	of the object. */
+	/// Returns a String that represents the details
+	/// of the object.
 	fn display(&self) -> String;
 }
 
@@ -32,7 +32,7 @@ impl Pizza {
 		}
 	}
 
-	/** Get the price of the pizza depending on it's size */
+	/// Get the price of the pizza depending on it's size
 	fn get_unit_price(&self) -> f32 {
 		let plus: f32 = match self.size {
 			PizzaSizes::Galactic => 8.0,
@@ -43,7 +43,7 @@ impl Pizza {
 		(self.price + (plus/10.0)*self.price) as f32
 	}
 
-	/** Get the total price of all the pizzas */
+	/// Get the total price of all the pizzas
 	fn get_total_price(&self) -> f32 {
 		self.get_unit_price() * self.quantity as f32
 	}
@@ -64,16 +64,16 @@ impl Details for Pizza {
 
 
 struct Order<'a> {
-	items: &'a Vec<Pizza>,
+	items: &'a [Pizza],
 	customer: String,
 }
 
 impl<'a> Order<'a> {
-	/** Get the total price of all the ordered items */
+	/// Get the total price of all the ordered items
 	fn get_price(&self) -> f32 {
 		let mut final_price: f32 = 0.0;
 		for pizza in self.items {
-			final_price += pizza.get_unit_price() as f32;
+			final_price += pizza.get_total_price() as f32;
 		}
 		final_price
 	}
@@ -104,7 +104,7 @@ fn main() {
 	];
 
 	let pedido = Order {
-		items: &Vec::from(pizzas),
+		items: &pizzas,
 		customer: "Joshua".into(),
 	};
 

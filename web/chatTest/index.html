@@ -13,9 +13,14 @@
 <body>
 	<template data-message-template>
 		<div class="message">
-			<span class="timestamp"></span>
-			<span class="user"></span>
-			<span class="body"></span>
+			<div data-message-remove class="options">
+				<span>✕</span>
+			</div>
+			<div class="content">
+				<span class="timestamp"></span>
+				<span class="user"></span>
+				<span class="body"></span>
+			</div>
 		</div>
 	</template>
 

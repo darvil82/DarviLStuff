@@ -1,17 +1,25 @@
+/**
+ * The main chat class.
+ */
 class Chat {
-	constructor(public element: HTMLDivElement) { }
+	private observer: IntersectionObserver;
+
+	constructor(public element: HTMLDivElement) {
+		// this observer will remove the message from the DOM when it's out of view
+		this.observer = new IntersectionObserver(entries => {
+			entries.forEach(entry => {
+				if (!entry.isIntersecting)
+					// inmediately remove the msg when it gets out of the chat
+					entry.target.remove()
+			})
+		}, { root: this.element })
+	}
 
 	addMessage(message: Message) {
 		const msgElement = message.element
 		this.element.appendChild(msgElement)
 
-		// inmediately remove the node when it gets out of the chat
-		new IntersectionObserver((entries, obs) => {
-			if (!entries[0].isIntersecting) {
-				msgElement.remove()
-				obs.disconnect()
-			}
-		}, { root: this.element }).observe(msgElement)
+		this.observer.observe(msgElement)
 	}
 
 	clear() {
@@ -19,6 +27,10 @@ class Chat {
 	}
 }
 
+
+/**
+ * A message in the chat.
+ */
 class Message {
 	private date: Date
 
@@ -38,13 +50,30 @@ class Message {
 		const usrEl = element.querySelector(".user") as HTMLSpanElement
 		const textEl = element.querySelector(".body") as HTMLSpanElement
 		const dateEl = element.querySelector(".timestamp") as HTMLSpanElement
+		const crossEl = element.querySelector("[data-message-remove]") as HTMLSpanElement
 
 		usrEl.textContent = this.user
 		usrEl.style.color = this.userColor
 		dateEl.textContent = getFormatHour(this.date)
 
-		textEl.appendChild(Message.getParsedText(this.text))
-		if (this.isMentioned) element.classList.add("mention")
+		textEl.replaceWith(Message.getParsedText(this.text))
+
+		if (this.isMentioned)
+			/* we can't add the mention animation without waiting for the
+			slide animation to finish. Otherwise it would just appear inmediately */
+			element.addEventListener("animationend", function addMentionClass() {
+				element.classList.add("mention")
+				element.removeEventListener("animationend", addMentionClass)
+			})
+
+		// slide out the message and remove it when the user clicks the cross
+		crossEl.addEventListener("click", () => {
+			element.classList.add("slide-out")
+			element.addEventListener("animationend", () => element.remove())
+		})
+
+		// if the user clicks the nickname, append this username to the input with an @
+		usrEl.addEventListener("click", () => appendTextToInput(`@${this.user} `))
 
 		return element
 	}
@@ -54,6 +83,10 @@ class Message {
 	}
 }
 
+
+/**
+ * Helper for setting intervals.
+ */
 class Interval {
 	private currentIntervalId: number
 
@@ -76,7 +109,12 @@ const chatInput = document.querySelector("[data-chat-input]") as HTMLInputElemen
 
 // the user that will be mentioned in the messages
 var userName = "darvil82"
-var userColor = "rgb(0,255,100)"
+var userColor = "rgb(0,255,200)"
+
+// The main delay between messages
+const CHAT_DELAY = 2000
+
+// NOTE: All nicknames were generated randomly
 const USERS = [
 	"soulfulcomb",
 	"quartrule",
@@ -129,6 +167,7 @@ const USERS = [
 	"sidelightopu",
 	"porcupineout"
 ]
+
 const MESSAGES = [
 	"hey, how you doing",
 	"lmao haha trolled :trollface:",
@@ -171,6 +210,7 @@ const MESSAGES = [
 	"wtf try to type !help",
 	"testing if this works: <h1>hello</h1>",
 ]
+
 const EMOTES = {
 	peter: "peter.webp",
 	sunglasses: "sunglasses.webp",
@@ -182,9 +222,9 @@ const EMOTES = {
 	sus: "sus.gif",
 	peter_fall: "peter_fall.gif",
 }
-const CHAT_DELAY = 2000
+
 const COMMANDS = {
-	help: function() {
+	help: function () {
 		sendKlydeMsg(`@ available commands: !${Object.keys(this).join(", !")}`)
 	},
 	emotes: () => {
@@ -208,6 +248,8 @@ const COMMANDS = {
 		mentionsChat.clear()
 	}
 }
+
+
 
 
 /**
@@ -298,6 +340,8 @@ function getRandomColor() {
 
 /**
  * Returns a random integer between min (inclusive) and max (exclusive).
+ * @param min Minimum number
+ * @param max Maximum number
  */
 function randint(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min)) + min
@@ -305,6 +349,7 @@ function randint(min: number, max: number) {
 
 /**
  * Returns the current hour in 24-hour format with proper prefix.
+ * @param date Date to use.
  */
 function getFormatHour(date: Date): string {
 	const hours = date.getHours()
@@ -316,10 +361,23 @@ function getFormatHour(date: Date): string {
 	)
 }
 
+/**
+ * Send a message as the "Klyde" user.
+ * @param msg - The text of the message
+ */
 function sendKlydeMsg(msg: string) {
-	insertMsg("klyde", msg, "lime")
+	insertMsg("klyde", msg, "turquoise")
 }
 
+/**
+ * Append some text to the input field and focus it.
+ */
+function appendTextToInput(text: string) {
+	chatInput.value += text
+	chatInput.focus()
+}
+
+// set up the random delay between random messages
 var randomMessagesInterval = new Interval(d => {
 	setTimeout(() => {
 		addRandomMsg()
@@ -327,6 +385,8 @@ var randomMessagesInterval = new Interval(d => {
 	)
 })
 randomMessagesInterval.set(CHAT_DELAY)
+
+
 
 
 // sets up the input field for handling user input
@@ -347,3 +407,11 @@ chatInput.addEventListener("keydown", e => {
 	for (let i = 0; i < 25; i++)
 		addRandomMsg()
 }
+
+// add initial help message
+sendKlydeMsg(
+	`Hey @! Welcome! Just wanted to remind you that this chat is not real.
+	No people is really typing here, it's all random messages with some delay
+	(you probably already noticed though).
+	Thank you for visiting this project, and have fun!`
+)

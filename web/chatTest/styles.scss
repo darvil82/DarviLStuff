@@ -113,6 +113,7 @@ h1 {
 				font-size: inherit;
 				padding-inline: .25em;
 				font-size: .75em;
+				z-index: 1;
 
 				&::placeholder {
 					color: #888;
@@ -132,19 +133,62 @@ h1 {
 				font-family: Arial, Helvetica, sans-serif;
 				background-color: #111;
 				font-size: .8em;
-				padding: .25em .5em;
 				overflow-wrap: anywhere;
+				transition: .25s;
+				animation: slide-in 250ms ease-out;
+				position: relative;
+				display: flex;
 
-				> .user {
+				&:hover {
+					transform: translate(1em);
+				}
+
+				@keyframes slide-in {
+					0% {
+						transform: translateX(-100%);
+					}
+				}
+
+				@keyframes slide-out {
+					100% {
+						transform: translateX(110%);
+					}
+				}
+
+				.options {
+					position: absolute;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					flex-direction: column;
+					left: -1em;
+					height: 100%;
+					cursor: pointer;
+					transition: 100ms;
+					width: .9em;
+					user-select: none;
+
+					&:hover {
+						font-weight: bold;
+						filter: drop-shadow(0 0 5px white);
+					}
+				}
+
+				.content {
+					padding: .25em .5em;
+				}
+
+				.user {
 					font-weight: bold;
 					margin-right: .2em;
+					cursor: pointer;
 
 					&::after {
 						content: ":"
 					}
 				}
 
-				> .timestamp {
+				.timestamp {
 					opacity: .5;
 				}
 
@@ -154,7 +198,20 @@ h1 {
 				}
 
 				&.mention {
-					background-color: rgb(71, 36, 36);
+					animation: mention-pulse 3s infinite ease-in-out alternate;
+				}
+
+				&.slide-out {
+					animation: slide-out 250ms ease-in-out;
+				}
+
+				@keyframes mention-pulse {
+					0% {
+						background-color: rgb(54, 29, 29);
+					}
+					100% {
+						background-color: rgb(85, 45, 45);
+					}
 				}
 			}
 		}

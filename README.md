@@ -1,7 +1,7 @@
 # DarviLStuff
 This is the repository that contains some stuff that I do when I'm bored or when I have nothing else to do. Please remember that stuff here isn't exactly great quality, these are tests I did as a way to try to improve my skills.
 
-This is some of the things that I have at the moment:
+This are some of the things that I have at the moment:
 
 ## Scripts
 
@@ -13,7 +13,7 @@ This is some of the things that I have at the moment:
 | [prompt.js](https://github.com/L89David/DarviLStuff/blob/master/web/promptTest) | Create custom prompt windows that may contain text, buttons, and inputs. | [Wiki available.](https://github.com/DarviL82/DarviLStuff/wiki/prompt.js) | Javascript |
 | [pongtest2](https://github.com/L89David/DarviLStuff/blob/master/python/pongtest2.py) | Like pongtest.sh, but much more complex. Multiple lines, length, and much more. |  | Python 3 |
 
-**There's a wiki explaining the instalation and usage of this scripts here: https://github.com/L89David/DarviLStuff/wiki**
+**There's a wiki explaining the instalation and usage of some of this scripts here: https://github.com/L89David/DarviLStuff/wiki**
 
 
 ### VIRINT

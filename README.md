@@ -35,3 +35,6 @@ This are some of the things that I have at the moment:
 ## Other
 
 There's some other stuff available that isn't listed here. Go check it out! (if you want)
+
+Stuff like web tests are available on the github pages. To check them out, just go to https://darvil82.github.io/DarviLStuff/.
+For example, if you want to check out *chatTest*, open https://darvil82.github.io/DarviLStuff/chatTest

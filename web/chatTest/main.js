@@ -222,15 +222,11 @@ const COMMANDS = {
     help: function () {
         sendKlydeMsg(`@ available commands: !${Object.keys(this).join(", !")}`);
     },
-    emotes: () => {
-        sendKlydeMsg(`@ heyy huhh this are the emotes :peter:: ${Object.keys(EMOTES).join(", ")}. Oh yeah for using them just type :emote:`);
-    },
-    name: () => {
-        userName = prompt("change name to:").replaceAll(" ", "_") || userName;
-    },
-    color: () => {
-        userColor = prompt("change color to (CSS):", userColor) || userColor;
-    },
+    emotes: () => sendKlydeMsg(`@ heyy huhh this are the emotes :peter::
+		${Object.keys(EMOTES).join(", ")}.
+		Oh yeah for using them just type :emote:`),
+    name: () => userName = prompt("change name to:").replaceAll(" ", "_") || userName,
+    color: () => userColor = prompt("change color to (CSS):", userColor) || userColor,
     delay: () => {
         const input = parseInt(prompt("change delay to (ms):", CHAT_DELAY.toString()));
         if (input == 0)

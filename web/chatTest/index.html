@@ -26,26 +26,32 @@
 
 
 	<div class="banner">
-		<h1 class="title">The best Chat ever</h1>
+		<h1 class="title" title="(no)">The best Chat ever</h1>
 
 		<div class="chat-wrapper">
 			<div class="header">
-				<span>Test Chat</span>
+				<span class="header-title">Test Chat</span>
 				<div class="tabs">
-					<div class="selected">Tab1</div>
-					<div>Tab2</div>
-					<div>Tab3</div>
+					<div class="tab selected">Tab1</div>
+					<div class="tab">Tab2</div>
+					<div class="tab">Tab3</div>
 				</div>
 			</div>
 			<div class="content">
-				<div class="chat">
-					<div class="header">Chat</div>
-					<div class="messages-container" data-chat-main></div>
+				<div class="chat" data-chat-main>
+					<div class="header">
+						Chat
+						<sup data-msg-counter></sup>
+					</div>
+					<div class="messages-container"></div>
 					<input class="header" data-chat-input placeholder="Type stuff"></input>
 				</div>
-				<div class="chat">
-					<div class="header">Mentions</div>
-					<div class="messages-container" data-chat-mentions></div>
+				<div class="chat" data-chat-mentions>
+					<div class="header">
+						Mentions
+						<sup data-msg-counter></sup>
+					</div>
+					<div class="messages-container"></div>
 					<div class="header"></div>
 				</div>
 			</div>

@@ -10,7 +10,7 @@ html, body {
 }
 
 body {
-  background-color: #6b6b6b;
+  background-color: #646464;
   font-family: Lato, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -42,6 +42,7 @@ h1 {
 
 .banner .title {
   max-width: 5em;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .chat-wrapper {
@@ -77,12 +78,12 @@ h1 {
           flex-direction: column;
 }
 
-.chat-wrapper > .header > span {
+.chat-wrapper > .header .header-title {
   font-size: 1.5em;
   margin: .5em;
 }
 
-.chat-wrapper > .header > .tabs {
+.chat-wrapper > .header .tabs {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -92,7 +93,7 @@ h1 {
           flex-direction: row;
 }
 
-.chat-wrapper > .header > .tabs > div {
+.chat-wrapper > .header .tabs .tab {
   background-color: #303030;
   padding: .2em;
   width: 5em;
@@ -101,11 +102,11 @@ h1 {
   border-top: 3px solid #90cfe4;
 }
 
-.chat-wrapper > .header > .tabs > div:last-child {
+.chat-wrapper > .header .tabs .tab:last-child {
   margin-right: initial;
 }
 
-.chat-wrapper > .header > .tabs > div.selected {
+.chat-wrapper > .header .tabs .tab.selected {
   background-color: #525252;
 }
 
@@ -159,6 +160,42 @@ h1 {
   padding-inline: .5em;
 }
 
+.chat-wrapper > .content > .chat > .header [data-msg-counter] {
+  padding-left: .20em;
+  font-size: .75em;
+  opacity: .5;
+  font-weight: bold;
+}
+
+.chat-wrapper > .content > .chat > .header [data-msg-counter].pulse {
+  -webkit-animation: pulse 250ms forwards;
+          animation: pulse 250ms forwards;
+}
+
+@-webkit-keyframes pulse {
+  from {
+    opacity: 1;
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25);
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+    -webkit-transform: scale(1.25);
+            transform: scale(1.25);
+  }
+}
+
+.chat-wrapper > .content > .chat > .header [data-msg-counter]::before {
+  content: "(";
+}
+
+.chat-wrapper > .content > .chat > .header [data-msg-counter]::after {
+  content: ")";
+}
+
 .chat-wrapper > .content > .chat > input.header {
   color: inherit;
   font-size: inherit;
@@ -201,7 +238,7 @@ h1 {
   overflow: hidden;
 }
 
-.chat-wrapper > .content > .chat .message {
+.message {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #111;
   font-size: .8em;
@@ -216,7 +253,7 @@ h1 {
   display: flex;
 }
 
-.chat-wrapper > .content > .chat .message:hover {
+.message:hover {
   -webkit-transform: translate(1em);
           transform: translate(1em);
 }
@@ -249,7 +286,7 @@ h1 {
   }
 }
 
-.chat-wrapper > .content > .chat .message .options {
+.message .options {
   position: absolute;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -276,41 +313,41 @@ h1 {
           user-select: none;
 }
 
-.chat-wrapper > .content > .chat .message .options:hover {
+.message .options:hover {
   font-weight: bold;
   -webkit-filter: drop-shadow(0 0 5px white);
           filter: drop-shadow(0 0 5px white);
 }
 
-.chat-wrapper > .content > .chat .message .content {
+.message .content {
   padding: .25em .5em;
 }
 
-.chat-wrapper > .content > .chat .message .user {
+.message .user {
   font-weight: bold;
   margin-right: .2em;
   cursor: pointer;
 }
 
-.chat-wrapper > .content > .chat .message .user::after {
+.message .user::after {
   content: ":";
 }
 
-.chat-wrapper > .content > .chat .message .timestamp {
+.message .timestamp {
   opacity: .5;
 }
 
-.chat-wrapper > .content > .chat .message .emote {
+.message .emote {
   width: 20px;
   aspect-ratio: 1;
 }
 
-.chat-wrapper > .content > .chat .message.mention {
+.message.mention {
   -webkit-animation: mention-pulse 3s infinite ease-in-out alternate;
           animation: mention-pulse 3s infinite ease-in-out alternate;
 }
 
-.chat-wrapper > .content > .chat .message.slide-out {
+.message.slide-out {
   -webkit-animation: slide-out 250ms ease-in-out;
           animation: slide-out 250ms ease-in-out;
 }

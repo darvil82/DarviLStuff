@@ -2,7 +2,10 @@
  * The main chat class.
  */
 class Chat {
-	private observer: IntersectionObserver;
+	private observer: IntersectionObserver
+	private msgCounterEl: HTMLElement
+	private msgsContainer: HTMLDivElement
+	private msgsCounter: number = 0
 
 	constructor(public element: HTMLDivElement) {
 		// this observer will remove the message from the DOM when it's out of view
@@ -13,17 +16,28 @@ class Chat {
 					entry.target.remove()
 			})
 		}, { root: this.element })
+		this.msgCounterEl = element.querySelector("[data-msg-counter]")
+		this.msgsContainer = element.querySelector(".messages-container")
 	}
 
 	addMessage(message: Message) {
 		const msgElement = message.element
-		this.element.appendChild(msgElement)
+		this.msgsContainer.appendChild(msgElement)
 
 		this.observer.observe(msgElement)
+		this.updateMsgCounter()
 	}
 
 	clear() {
-		this.element.innerHTML = ''
+		this.msgsContainer.innerHTML = ''
+		this.msgsCounter = 0
+		this.updateMsgCounter(0)
+	}
+
+	updateMsgCounter(increment: number = 1) {
+		this.msgCounterEl.textContent = `${this.msgsCounter += increment}`
+		this.msgCounterEl.classList.add("pulse")
+		setTimeout(() => this.msgCounterEl.classList.remove("pulse"), 250)
 	}
 }
 
@@ -45,37 +59,39 @@ class Message {
 	}
 
 	get element() {
-		const element = document.importNode(messageTemplate, true).content.firstElementChild as HTMLElement;
+		const msg = document.importNode(messageTemplate, true).content.firstElementChild as HTMLElement;
 
-		const usrEl = element.querySelector(".user") as HTMLSpanElement
-		const textEl = element.querySelector(".body") as HTMLSpanElement
-		const dateEl = element.querySelector(".timestamp") as HTMLSpanElement
-		const crossEl = element.querySelector("[data-message-remove]") as HTMLSpanElement
+		const msgElms = {
+			user: msg.querySelector(".user") as HTMLSpanElement,
+			body: msg.querySelector(".body") as HTMLSpanElement,
+			time: msg.querySelector(".timestamp") as HTMLSpanElement,
+			cross: msg.querySelector("[data-message-remove]") as HTMLSpanElement
+		}
 
-		usrEl.textContent = this.user
-		usrEl.style.color = this.userColor
-		dateEl.textContent = getFormatHour(this.date)
+		msgElms.user.textContent = this.user
+		msgElms.user.style.color = this.userColor
+		msgElms.time.textContent = getFormatHour(this.date)
 
-		textEl.replaceWith(Message.getParsedText(this.text))
+		msgElms.body.replaceWith(Message.getParsedText(this.text))
 
 		if (this.isMentioned)
 			/* we can't add the mention animation without waiting for the
 			slide animation to finish. Otherwise it would just appear inmediately */
-			element.addEventListener("animationend", function addMentionClass() {
-				element.classList.add("mention")
-				element.removeEventListener("animationend", addMentionClass)
+			msg.addEventListener("animationend", function addMentionClass() {
+				msg.classList.add("mention")
+				msg.removeEventListener("animationend", addMentionClass)
 			})
 
 		// slide out the message and remove it when the user clicks the cross
-		crossEl.addEventListener("click", () => {
-			element.classList.add("slide-out")
-			element.addEventListener("animationend", () => element.remove())
+		msgElms.cross.addEventListener("click", () => {
+			msg.classList.add("slide-out")
+			msg.addEventListener("animationend", () => msg.remove())
 		})
 
 		// if the user clicks the nickname, append this username to the input with an @
-		usrEl.addEventListener("click", () => appendTextToInput(`@${this.user} `))
+		msgElms.user.addEventListener("click", () => appendTextToInput(`@${this.user} `))
 
-		return element
+		return msg
 	}
 
 	static getParsedText(content: string): HTMLSpanElement {
@@ -404,7 +420,7 @@ chatInput.addEventListener("keydown", e => {
 
 // adds random messages to the chat for populating it
 {
-	for (let i = 0; i < 25; i++)
+	for (let i = 0; i < window.innerHeight / 50; i++)
 		addRandomMsg()
 }
 

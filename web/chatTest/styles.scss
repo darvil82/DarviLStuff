@@ -9,7 +9,7 @@ html, body {
 }
 
 body {
-	background-color: rgb(107, 107, 107);
+	background-color: rgb(100, 100, 100);
 	font-family: Lato, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -30,6 +30,7 @@ h1 {
 
 	& .title {
 		max-width: 5em;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	}
 }
 
@@ -48,21 +49,21 @@ h1 {
 	min-width: 200px;
 	min-height: 200px;
 
-
+	// Contains the title of the chat and the tabs
 	> .header {
 		display: flex;
 		flex-direction: column;
 
-		> span {
+		.header-title {
 			font-size: 1.5em;
 			margin: .5em;
 		}
 
-		> .tabs {
+		.tabs {
 			display: flex;
 			flex-direction: row;
 
-			> div {
+			.tab {
 				background-color: rgb(48, 48, 48);
 				padding: .2em;
 				width: 5em;
@@ -106,6 +107,31 @@ h1 {
 				min-height: 20px;
 				flex-shrink: 0;
 				padding-inline: .5em;
+
+				[data-msg-counter] {
+					padding-left: .20em;
+					font-size: .75em;
+					opacity: .5;
+					font-weight: bold;
+
+					&.pulse {
+						animation: pulse 250ms forwards;
+					}
+
+					@keyframes pulse {
+						from {
+							opacity: 1;
+							transform: scale(1.25);
+						}
+					}
+
+					&::before {
+						content: "(";
+					}
+					&::after {
+						content: ")";
+					}
+				}
 			}
 
 			> input.header {
@@ -128,92 +154,92 @@ h1 {
 				flex-grow: 1;
 				overflow: hidden;
 			}
+		}
+	}
+}
 
-			.message {
-				font-family: Arial, Helvetica, sans-serif;
-				background-color: #111;
-				font-size: .8em;
-				overflow-wrap: anywhere;
-				transition: .25s;
-				animation: slide-in 250ms ease-out;
-				position: relative;
-				display: flex;
+.message {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #111;
+	font-size: .8em;
+	overflow-wrap: anywhere;
+	transition: .25s;
+	animation: slide-in 250ms ease-out;
+	position: relative;
+	display: flex;
 
-				&:hover {
-					transform: translate(1em);
-				}
+	&:hover {
+		transform: translate(1em);
+	}
 
-				@keyframes slide-in {
-					0% {
-						transform: translateX(-100%);
-					}
-				}
+	@keyframes slide-in {
+		0% {
+			transform: translateX(-100%);
+		}
+	}
 
-				@keyframes slide-out {
-					100% {
-						transform: translateX(110%);
-					}
-				}
+	@keyframes slide-out {
+		100% {
+			transform: translateX(110%);
+		}
+	}
 
-				.options {
-					position: absolute;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					flex-direction: column;
-					left: -1em;
-					height: 100%;
-					cursor: pointer;
-					transition: 100ms;
-					width: .9em;
-					user-select: none;
+	.options {
+		position: absolute;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		left: -1em;
+		height: 100%;
+		cursor: pointer;
+		transition: 100ms;
+		width: .9em;
+		user-select: none;
 
-					&:hover {
-						font-weight: bold;
-						filter: drop-shadow(0 0 5px white);
-					}
-				}
+		&:hover {
+			font-weight: bold;
+			filter: drop-shadow(0 0 5px white);
+		}
+	}
 
-				.content {
-					padding: .25em .5em;
-				}
+	.content {
+		padding: .25em .5em;
+	}
 
-				.user {
-					font-weight: bold;
-					margin-right: .2em;
-					cursor: pointer;
+	.user {
+		font-weight: bold;
+		margin-right: .2em;
+		cursor: pointer;
 
-					&::after {
-						content: ":"
-					}
-				}
+		&::after {
+			content: ":"
+		}
+	}
 
-				.timestamp {
-					opacity: .5;
-				}
+	.timestamp {
+		opacity: .5;
+	}
 
-				.emote {
-					width: 20px;
-					aspect-ratio: 1;
-				}
+	.emote {
+		width: 20px;
+		aspect-ratio: 1;
+	}
 
-				&.mention {
-					animation: mention-pulse 3s infinite ease-in-out alternate;
-				}
+	&.mention {
+		animation: mention-pulse 3s infinite ease-in-out alternate;
+	}
 
-				&.slide-out {
-					animation: slide-out 250ms ease-in-out;
-				}
+	&.slide-out {
+		animation: slide-out 250ms ease-in-out;
+	}
 
-				@keyframes mention-pulse {
-					0% {
-						background-color: rgb(54, 29, 29);
-					}
-					100% {
-						background-color: rgb(85, 45, 45);
-					}
-				}
-			}
+	@keyframes mention-pulse {
+		0% {
+			background-color: rgb(54, 29, 29);
+		}
+		100% {
+			background-color: rgb(85, 45, 45);
 		}
 	}
 }

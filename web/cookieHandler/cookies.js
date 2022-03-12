@@ -102,7 +102,7 @@ class Cookies {
             if (endObj[name])
                 return endObj[name];
             else {
-                console.warn(`Cookie '${name}' does not exist`);
+                console.error(`Cookie '${name}' does not exist`);
                 return;
             }
         }

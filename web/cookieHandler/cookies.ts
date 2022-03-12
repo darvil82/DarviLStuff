@@ -69,7 +69,7 @@ class Cookies {
 	 * @param options Options for the cookie
 	 */
 	private _setCookie(key: string, value: CookieValue, options?: CookieOptions) {
-		let endString = [`${key}=${encodeValue(value)}`]
+		let endString = [`${key.replaceAll("=", "")}=${encodeValue(value)}`]
 
 		if (options)
 			Object.entries(options).forEach(([key, value]) => {
@@ -136,6 +136,13 @@ class Cookies {
 		names.forEach(name => {
 			this._setCookie(name, "", { maxAge: 0 })
 		})
+	}
+
+	/**
+	 * Remove all cookies from the document.
+	 */
+	removeAll() {
+		this.remove(...Object.keys(this.get()))
 	}
 }
 

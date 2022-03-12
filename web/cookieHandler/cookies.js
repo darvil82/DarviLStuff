@@ -112,5 +112,5 @@ class Cookies {
         });
     }
 }
-var cookies = new Cookies();
+const cookies = new Cookies();
 //# sourceMappingURL=cookies.js.map

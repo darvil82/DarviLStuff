@@ -15,20 +15,35 @@
 		}
 
 		code {
+			font-weight: bold;
 			display: block;
 			width: max-content;
 			padding: 1.25em;
+			padding-inline: 3em;
 			padding-top: 0;
-			padding-right: 10em;
 			border-radius: 5px;
-			background-color: rgb(56, 57, 65);
+			background-color: rgb(41, 42, 48);
 			border-bottom: 2px solid rgb(88, 89, 102);
 			white-space: pre-line;
 		}
 	</style>
 </head>
 <body>
-	<h1>Some Examples</h1>
+	<h1>Cookies Handling</h1>
+	<p>
+		If you ever worked with Cookies, you may know that it is pretty ugly.
+		At that time when they added Cookies, they thought that using a "string" as a
+		way to add cookies was not confusing at all.
+	</p>
+	<p>
+		It's understandable that Cookies are very old now, but the system for handling these
+		could be improved without breaking backwards compatibility, like implementing a simple
+		Cookie object that can be used to handle them easier.
+	</p>
+	<p>
+		So that's what I did (and what many, many millions of people probably already done).
+	</p>
+	<h2>Usage</h2>
 	<code>
 		const cookies = new Cookies()
 		cookies.set({ user: { name: "Aster", age: 21 } })
@@ -64,5 +79,12 @@
 		The script has been included in this html, so feel free to try this
 		by just opening the console.
 	</p>
+	<h1>Using it</h1>
+	<p>
+		Wanna use it on your site? If that's the case (thank you) you can just include it like this:
+	</p>
+	<code>
+		&lt;script src="https://darvil82.github.io/DarviLStuff/web/cookieHandler/cookies.js"&gt;&lt;/script&gt;
+	</code>
 </body>
 </html>

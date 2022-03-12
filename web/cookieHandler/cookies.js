@@ -98,8 +98,14 @@ class Cookies {
                 return;
             endObj[key] = decodeValue(value);
         });
-        if (name)
-            return endObj[name];
+        if (name) {
+            if (endObj[name])
+                return endObj[name];
+            else {
+                console.warn(`Cookie '${name}' does not exist`);
+                return;
+            }
+        }
         return endObj;
     }
     /**
@@ -108,6 +114,8 @@ class Cookies {
      */
     remove(...names) {
         names.forEach(name => {
+            if (!this.get(name))
+                return;
             this._setCookie(name, "", { maxAge: 0 });
         });
     }

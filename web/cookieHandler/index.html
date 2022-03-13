@@ -260,8 +260,7 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 		// wrap this element with a div
 		const wrapper = document.createElement("div")
 		wrapper.className = "code-wrapper"
-		e.parentNode.insertBefore(wrapper, e)
-		wrapper.appendChild(e)
+		e.parentNode.insertBefore(wrapper, e).appendChild(e)
 	})
 </script>
 </html>

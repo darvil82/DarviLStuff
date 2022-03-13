@@ -48,7 +48,7 @@ function decodeValue(value: string): CookieValue {
 		return JSON.parse(value)
 	} catch (error) {
 		if (/^[+-]?([0-9]*[.])?[0-9]+$/g.test(value))
-			return parseInt(value)
+			return parseFloat(value)
 		else if (value === "true" || value === "undefined")
 			return true
 		else if (value === "false")

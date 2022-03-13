@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark-dimmed.min.css">
 	<style>
 		body {
+			overflow-x: hidden;
 			margin: 0;
 			background-color: rgb(33, 34, 37);
 			color: white;
@@ -66,10 +67,16 @@
 			width: max-content;
 			padding: 1.25em !important;
 			padding-inline: 3em !important;
-			border-radius: 5px;
-			border-bottom: 2px solid rgb(64, 65, 83);
 			white-space: pre;
 			word-break: break-all;
+		}
+
+		.code-wrapper {
+			width: min-content;
+			max-width: 100%;
+			border-radius: 5px;
+			border-bottom: 3px solid rgb(64, 65, 83);
+			overflow: auto;
 		}
 
 		.example {
@@ -247,6 +254,11 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 	document.querySelectorAll("code").forEach(e => {
 		e.textContent = e.textContent.replaceAll("\t", "    ").trim()
 		hljs.highlightElement(e)
+		// wrap this element with a div
+		const wrappper = document.createElement("div")
+		wrappper.classList.add("code-wrapper")
+		e.parentNode.insertBefore(wrappper, e)
+		wrappper.appendChild(e)
 	})
 </script>
 </html>

@@ -251,8 +251,8 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
 <script>
-	// limit detection to typescript code
-	hljs.configure({ languages: ["typescript"]})
+	// limit detection of code
+	hljs.configure({ languages: ["typescript", "html"] })
 	document.querySelectorAll("code").forEach(e => {
 		e.textContent = e.textContent.replaceAll("\t", "    ").trim()
 		hljs.highlightElement(e)

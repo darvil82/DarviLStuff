@@ -15,12 +15,9 @@ function camelToKebab(string) {
  * @returns
  */
 function encodeValue(value) {
-    let endValue;
-    if (typeof value == "object")
-        endValue = JSON.stringify(value);
-    else
-        endValue = `${value}`;
-    return encodeURIComponent(endValue);
+    return encodeURIComponent(typeof value === "object"
+        ? JSON.stringify(value)
+        : value);
 }
 /**
  * Decode a string to a CookieValue
@@ -51,25 +48,25 @@ class Cookies {
      * @param options Options for the cookie
      */
     _setCookie(key, value, options) {
-        let endString = [`${key.replaceAll("=", "")}=${encodeValue(value)}`];
+        let cookies = [`${key.replaceAll("=", "")}=${encodeValue(value)}`];
         if (options)
             Object.entries(options).forEach(([key, value]) => {
-                const push_value = (value) => {
-                    endString.push(camelToKebab(key) +
+                const pushValue = (value) => {
+                    cookies.push(camelToKebab(key) +
                         (value !== true
                             ? `=${value}`
                             : ""));
                 };
                 switch (key) {
                     case "expires":
-                        push_value(value.toUTCString());
+                        pushValue(value.toUTCString());
                         break;
                     default:
-                        push_value(value);
+                        pushValue(value);
                         break;
                 }
             });
-        document.cookie = `${endString.join("; ")};`;
+        document.cookie = `${cookies.join("; ")};`;
     }
     /**
      * Set the cookies with the values specified to the document.

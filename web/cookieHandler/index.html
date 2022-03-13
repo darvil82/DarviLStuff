@@ -6,85 +6,235 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
 	<script src="cookies.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark-dimmed.min.css">
 	<style>
 		body {
-			margin: 5vh;
-			background-color: rgb(22, 22, 22);
+			margin: 0;
+			background-color: rgb(33, 34, 37);
 			color: white;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		}
 
+		section {
+			padding: 5vh 20vw;
+			background-color: rgb(80, 72, 62);
+		}
+
+		@media screen and (max-width: 1000px) {
+			section {
+				padding-inline: 5vw
+			}
+		}
+
+		h1 {
+			font-size: 2em;
+		}
+
+		h1.title {
+			font-size: 3em;
+		}
+
+		:is(p, h1, h2, h3, h4, h5, h6):first-child {
+			margin-top: 0;
+		}
+
+		:is(p, h1, h2, h3, h4, h5, h6):last-child {
+			margin-bottom: 0;
+		}
+
+		var {
+			font-style: normal;
+			font-family: monospace;
+			background-color: rgb(49, 50, 65);
+			padding: .25em .5em;
+			border-radius: 5px;
+		}
+
 		code {
-			font-weight: bold;
+			/* font-weight: bold; */
 			display: block;
 			width: max-content;
-			padding: 1.25em;
-			padding-inline: 3em;
-			padding-top: 0;
+			padding: 1.25em !important;
+			padding-inline: 3em !important;
 			border-radius: 5px;
-			background-color: rgb(41, 42, 48);
-			border-bottom: 2px solid rgb(88, 89, 102);
-			white-space: pre-line;
+			border-bottom: 2px solid rgb(64, 65, 83);
+			white-space: pre;
+			word-break: break-all;
+		}
+
+		.example {
+			border: 2px solid rgba(73, 76, 92, 0.404);
+			padding: 1.5em;
+			border-radius: 10px;
+			background-color: rgb(30, 30, 37);
 		}
 	</style>
 </head>
 <body>
-	<h1>Cookies Handling</h1>
-	<p>
-		If you ever worked with Cookies, you may know that it is pretty ugly.
-		At that time when they added Cookies, they thought that using a "string" as a
-		way to add cookies was not confusing at all.
-	</p>
-	<p>
-		It's understandable that Cookies are very old now, but the system for handling these
-		could be improved without breaking backwards compatibility, like implementing a simple
-		Cookie object that can be used to handle them easier.
-	</p>
-	<p>
-		So that's what I did (and what many, many millions of people probably already done).
-	</p>
-	<h2>Usage</h2>
-	<code>
-		const cookies = new Cookies()
-		cookies.set({ user: { name: "Aster", age: 21 } })
-	</code>
-	<p>
-		This will add a new cookie with that object. Of course, this object will be
-		converted into an stringified JSON.
-	</p>
-	<p>
-		Not only objects can be used. Pretty much any value can be saved.
-		It is also possible to supply options for the cookie, like its expire date,
-		path, etc...
-	</p>
-	<h2>Getting the cookie value</h2>
-	<p>
-		After that, in order to get the value:
-	</p>
-	<code>
-		cookies.get("user")
-	</code>
-	<p>
-		This will return the original object.
-	</p>
-	<h2>Deleting cookies</h2>
-	<p>
-		In order to remove a cookie, you just need to:
-	</p>
-	<code>
+	<section>
+		<h1 class="title">Cookies Handler 🍪</h1>
+		<p>
+			If you ever worked with Cookies, you may know that it is pretty ugly.
+			At that time when they added Cookies, they thought that using a "string" as a
+			way to add cookies was not confusing at all.
+		</p>
+		<p>
+			It's understandable that Cookies are very old now, but the system for handling these
+			could be improved without breaking backwards compatibility, like implementing a simple
+			Cookie object that can be used to handle them easier.
+		</p>
+		<p>
+			So that's what I did (and what many, many millions of people probably already done).
+			This is written in TypeScript, just in case you wanted to use proper typing.
+		</p>
+	</section>
+
+
+	<section style="background-color: rgb(20, 23, 29);">
+		<h1>Usage</h1>
+		<h3>Setting a cookie</h3>
+		<p>
+			Setting a cookie value is very easy!
+		</p>
+		<code>
+// There's already an instance of Cookie made for you
+cookies.set({
+	user: {
+		name: "Aster",
+		age: 21
+	}
+})
+		</code>
+		<p>
+			This will add a new cookie with that object. Of course, this object will be
+			converted into an stringified JSON.
+		</p>
+		<p>
+			Not only objects can be used. Pretty much any value can be saved.
+			It is also possible to supply options for the cookie, like its expire date,
+			path, etc...
+		</p>
+		<p>
+			This is the signature of the <var>get</var> method:
+		</p>
+		<code class="language-typescript">
+			set(object: { [key: string]: CookieValue }, options?: CookieOptions)
+		</code>
+		<p>
+			<var>CookieOptions</var> is an interface with the next possible values:
+		</p>
+		<code>
+interface CookieOptions {
+	path?: string,
+	domain?: string,
+	maxAge?: number,
+	expires?: Date,
+	secure?: boolean,
+	samesite?: string
+}
+		</code>
+		<p>
+			Which refer to the
+			<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie#write_a_new_cookie">official documentation.</a>
+		</p>
+		<div class="example">
+			<h2>Example</h2>
+			<p> Setting a few cookies with some options: </p>
+			<code class="language-typescript">
+cookies.set({
+	user: {
+		name: "Endercheif",
+		age: 19,
+		popup: {
+			shown: true,
+			lastShown: new Date(),
+			color: "#66002f"
+		}
+	},
+	accent: "#66002f",
+	theme: "dark",
+	language: "en"
+}, { expires: new Date(2025, 10, 5) })
+			</code>
+			<p> It's important to note that all the entries will have those options applied. </p>
+		</div>
+		<h2>Getting the cookie value</h2>
+		<p>
+			After that, in order to get the value:
+		</p>
+		<code>
+// This returns back the original object!
+cookies.get("user")
+		</code>
+		<p>
+			This will return the original object. If no name is specified on the <var>get</var> method,
+			an object will all the cookies will be returned.
+		</p>
+		<div class="example">
+			<h2>Example</h2>
+			<p> This is the object returned by the <var>get</var> method when no name is specified. </p>
+			<code>
+{
+	accent: "#66002f",
+	theme: "dark",
+	language: "en",
+	user: {
+		name: "Enderchief",
+		age: 19,
+		popup: {
+			shown: true,
+			lastShown: "2022-03-13T03:34:49.085Z",
+			color: "#66002f"
+		}
+	}
+}
+			</code>
+			<p>
+				Oh, by the way! This is how <var>document.cookie</var>
+				looks (formatted into multiple lines), in case you were curious:
+			</p>
+			<code>
+accent=%2366002f;
+theme=dark;
+language=en;
+user=%7B%22name%22%3A%22Enderchief%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
+	shown%22%3Atrue%2C%22lastShown%22%3A%222022-03-13T03%3A39%3A51.543Z%22%2C
+	%22color%22%3A%22%2366002f%22%7D%7D
+			</code>
+		</div>
+		<h2>Deleting cookies</h2>
+		<p>
+			In order to remove a cookie, you just need to:
+		</p>
+		<code>
 		cookies.remove("user")
-	</code>
-	<h2>Try it out!</h2>
-	<p>
-		The script has been included in this html, so feel free to try this
-		by just opening the console.
-	</p>
-	<h1>Using it</h1>
-	<p>
-		Wanna use it on your site? If that's the case (thank you) you can just include it like this:
-	</p>
-	<code>
+		</code>
+	</section>
+
+
+	<section style="background-color: rgb(52, 61, 59);">
+		<h1>Try it out!</h1>
+		<p>
+			The script has been included in this html, so feel free to try this
+			by just opening the console.
+		</p>
+		<h1>Using it</h1>
+		<p>
+			Wanna use this super simple script in your site?
+			If that's the case (thank you) you can just include it like this:
+		</p>
+		<code>
 		&lt;script src="https://darvil82.github.io/DarviLStuff/web/cookieHandler/cookies.js"&gt;&lt;/script&gt;
-	</code>
+		</code>
+	</section>
 </body>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+<script>
+	document.querySelectorAll("code").forEach(e => {
+		e.textContent = e.textContent.replaceAll("\t", "    ").trim()
+		hljs.highlightElement(e)
+	})
+</script>
 </html>

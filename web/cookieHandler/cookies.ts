@@ -73,7 +73,7 @@ class Cookies {
 
 		if (options)
 			Object.entries(options).forEach(([key, value]) => {
-				const push_value = (value: string | true) => {
+				const pushValue = (value: string | true) => {
 					endString.push(camelToKebab(key) +
 						(value !== true
 							? `=${value}`
@@ -83,10 +83,10 @@ class Cookies {
 
 				switch (key) {
 					case "expires":
-						push_value(value.toUTCString())
+						pushValue(value.toUTCString())
 						break;
 					default:
-						push_value(value)
+						pushValue(value)
 						break;
 				}
 			})

@@ -120,7 +120,7 @@ function saveTodos() {
 }
 
 function getTodos(): Object {
-	return JSON.parse(localStorage.getItem("todos"))
+	return JSON.parse(localStorage.getItem("todos")) || {}
 }
 
 Object.entries(getTodos()).forEach(([, { title, body, color }]) => addTodo(title, body, color))

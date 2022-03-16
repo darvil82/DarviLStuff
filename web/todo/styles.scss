@@ -23,6 +23,7 @@ body {
 
 	padding: 1em;
 	display: flex;
+	flex-wrap: wrap;
 	gap: .5em;
 	align-items: center;
 	top: 0;
@@ -134,13 +135,21 @@ button {
 	transition: .5s;
 
 	.title {
-		font-size: 2em;
+		font-size: 2.5em;
 		font-weight: bold;
 	}
 
 	.date {
-		color: #999;
-		font-size: .9em;
+		color: rgba(255, 255, 255, 0.267);
+		font-size: .75em;
+		font-weight: bold;
+		margin-top: auto;
+		// align-self: flex-end;
+	}
+
+	.body {
+		font-size: 1.25em;
+		color: rgba(255, 255, 255, 0.795);
 	}
 
 	&.in {

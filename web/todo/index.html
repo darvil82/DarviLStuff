@@ -9,14 +9,24 @@
 </head>
 <body>
 	<template data-todo-template>
-		<div class="todo">
+		<div class="todo" data-todo-name>
 			<span class="title"></span>
 			<span class="date">Lorem ipsum dolor sit amet.</span>
 			<span class="body">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia voluptatem unde similique sed ducimus debitis repellat recusandae esse corporis optio.</span>
 		</div>
 	</template>
 
-	<input type="text" data-input>
+	<div class="options">
+		<input type="text" data-input-title placeholder="Title">
+		<input type="text" data-input-body placeholder="Body">
+		<input type="color" data-input-color>
+
+		<!-- Dummy div to push the rest to the right -->
+		<div style="margin-left: auto;"></div>
+
+		<button class="select-all" data-input-all>Toggle All</button>
+		<button class="remove" data-input-remove>Remove</button>
+	</div>
 
 	<div class="todos-container">
 

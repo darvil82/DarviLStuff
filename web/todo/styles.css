@@ -1,8 +1,115 @@
-body {
-  background-color: #000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+* {
+  scroll-behavior: smooth;
+}
+
+:root {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
+}
+
+body {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.options {
+  padding: 1em;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: .5em;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  top: 0;
+  z-index: 9999;
+  background-color: rgba(12, 12, 12, 0.5);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+.options.error {
+  -webkit-animation: pulse 1s alternate;
+          animation: pulse 1s alternate;
+}
+
+@-webkit-keyframes pulse {
+  from {
+    background-color: rgba(129, 20, 20, 0.5);
+  }
+}
+
+@keyframes pulse {
+  from {
+    background-color: rgba(129, 20, 20, 0.5);
+  }
+}
+
+input {
+  color: white;
+  font-size: .9em;
+  background-color: #252525;
+  border: none;
+  padding: .5em 1em;
+  border-radius: 5px;
+  -webkit-box-shadow: inset 0 0 10px -2px black;
+          box-shadow: inset 0 0 10px -2px black;
+  border: 1px solid rgba(70, 70, 70, 0.137);
+}
+
+input[type="color"] {
+  padding: .1em;
+}
+
+button {
+  display: inline-block;
+  background-color: #252525;
+  border: none;
+  color: white;
+  font-size: 1em;
+  padding: 0.4em 1.75em;
+  border-radius: 5px;
+  font-weight: bold;
+  text-decoration: none;
+  -webkit-transition: background-color 0.25s, color 0.25s, -webkit-box-shadow 1s;
+  transition: background-color 0.25s, color 0.25s, -webkit-box-shadow 1s;
+  transition: background-color 0.25s, box-shadow 1s, color 0.25s;
+  transition: background-color 0.25s, box-shadow 1s, color 0.25s, -webkit-box-shadow 1s;
+  top: 1em;
+  right: 1em;
+}
+
+button:hover {
+  background-color: var(--color-hover, #77dba4);
+  -webkit-box-shadow: 0 0 10px 1px rgba(36, 36, 36, 0.63);
+          box-shadow: 0 0 10px 1px rgba(36, 36, 36, 0.63);
+  color: black;
+  cursor: pointer;
+}
+
+button:active, button:focus-visible {
+  background-color: var(--color-active, #ceffe4);
+  -webkit-transition: 0.1s;
+  transition: 0.1s;
+  -webkit-transform: scale(1.1);
+          transform: scale(1.1);
+  color: black;
+}
+
+button.remove {
+  --color-hover: #d44;
+  --color-active: rgb(236, 218, 218);
+}
+
+button.select-all {
+  --color-hover: rgb(219, 221, 68);
+  --color-active: rgb(248, 243, 212);
 }
 
 .todos-container {
@@ -13,7 +120,7 @@ body {
       flex-wrap: wrap;
   color: white;
   gap: 1em;
-  margin-top: 2em;
+  margin: 1em;
 }
 
 .todo {
@@ -35,14 +142,13 @@ body {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
-  max-width: 300px;
   min-height: 150px;
+  min-width: 15vw;
   -webkit-transition: .5s;
   transition: .5s;
   overflow: hidden;
   z-index: 1;
-  -webkit-animation: enter .5s forwards;
-          animation: enter .5s forwards;
+  outline: 0 solid transparent;
   transition: .5s;
 }
 
@@ -56,7 +162,26 @@ body {
   font-size: .9em;
 }
 
+.todo.in {
+  -webkit-animation: slide .5s forwards;
+          animation: slide .5s forwards;
+}
+
+.todo.selected {
+  outline: 3px solid #b14d4d;
+  outline-offset: -3px;
+  background-position: right;
+  --bg-color: #b14d4d !important;
+  -webkit-animation: selected 500ms alternate infinite;
+          animation: selected 500ms alternate infinite;
+}
+
+.todo.remove {
+  animation: slide .25s reverse forwards;
+}
+
 .todo:hover {
+  cursor: pointer;
   background-position: left;
 }
 
@@ -68,19 +193,65 @@ body {
   background-image: linear-gradient(320deg, transparent, rgba(0, 0, 0, 0.486));
 }
 
-@-webkit-keyframes enter {
-  0% {
+@-webkit-keyframes slide {
+  from {
     -webkit-transform: translateY(50%) scale(0.25);
             transform: translateY(50%) scale(0.25);
     opacity: 0;
   }
 }
 
-@keyframes enter {
-  0% {
+@keyframes slide {
+  from {
     -webkit-transform: translateY(50%) scale(0.25);
             transform: translateY(50%) scale(0.25);
     opacity: 0;
+  }
+}
+
+@-webkit-keyframes selected {
+  0% {
+    -webkit-transform: translate(0.03em, -0.03em);
+            transform: translate(0.03em, -0.03em);
+  }
+  25% {
+    -webkit-transform: translate(0, 0.03em);
+            transform: translate(0, 0.03em);
+  }
+  50% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+  75% {
+    -webkit-transform: translate(-0.03em, -0.03em);
+            transform: translate(-0.03em, -0.03em);
+  }
+  100% {
+    -webkit-transform: translate(0.03em, 0.03em);
+            transform: translate(0.03em, 0.03em);
+  }
+}
+
+@keyframes selected {
+  0% {
+    -webkit-transform: translate(0.03em, -0.03em);
+            transform: translate(0.03em, -0.03em);
+  }
+  25% {
+    -webkit-transform: translate(0, 0.03em);
+            transform: translate(0, 0.03em);
+  }
+  50% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+  75% {
+    -webkit-transform: translate(-0.03em, -0.03em);
+            transform: translate(-0.03em, -0.03em);
+  }
+  100% {
+    -webkit-transform: translate(0.03em, 0.03em);
+            transform: translate(0.03em, 0.03em);
   }
 }
 /*# sourceMappingURL=styles.css.map */

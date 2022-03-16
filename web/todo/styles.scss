@@ -1,0 +1,63 @@
+body {
+	background-color: #000;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	box-sizing: border-box;
+}
+
+
+.todos-container {
+	display: flex;
+	flex-wrap: wrap;
+	color: white;
+	gap: 1em;
+	margin-top: 2em;
+}
+
+.todo {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	background-image: linear-gradient(-150deg, #222, var(--bg-color, rgb(68, 202, 146)));
+	background-size: 175%;
+	background-position: right;
+	box-shadow: inset 0 0 70px -5px rgba(0, 0, 0, 0.61);
+	padding: 1em;
+	border-radius: 10px;
+	flex-grow: 1;
+	max-width: 300px;
+	min-height: 150px;
+	transition: .5s;
+	overflow: hidden;
+	z-index: 1;
+	animation: enter .5s forwards;
+	transition: .5s;
+
+	.title {
+		font-size: 2em;
+		font-weight: bold;
+	}
+
+	.date {
+		color: #999;
+		font-size: .9em;
+	}
+
+	&:hover {
+		background-position: left;
+	}
+
+	&:before {
+		z-index: -1;
+		position: absolute;
+		content: "";
+		inset: 0;
+		background-image: linear-gradient(320deg, transparent, rgba(0, 0, 0, 0.486));
+	}
+
+	@keyframes enter {
+		0% {
+			transform: translateY(50%) scale(.25);
+			opacity: 0;
+		}
+	}
+}

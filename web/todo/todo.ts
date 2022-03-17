@@ -32,9 +32,105 @@ interface TodoInfo {
 }[]
 
 /**
- * This is all the data of each of all the todos that are currently in the container
+ * All the todos that we have in the container
  */
-const currentTodos: TodoInfo[] = []
+const currentTodos: Todo[] = []
+
+
+class Todo {
+	private element: HTMLDivElement
+	private _options: TodoInfo	// this needs to be private because options should only be changed by the update method
+	private isEditing: boolean = false
+
+	constructor(options: TodoInfo) {
+		this.element = getTodoTemplate()
+		this.update(options)
+		this.show()
+		this.setEvents()
+		this.element.tabIndex = 0
+		this.save()
+	}
+
+	private update(options: TodoInfo) {
+		Object.entries(options).forEach(function([key, value]) { this[key] = value }, this)
+		this._options = options
+	}
+
+	public remove() {
+		this.element.classList.add("remove")
+		currentTodos.splice(currentTodos.indexOf(this), 1)
+		// dont remove until "remove" animation ends
+		this.element.addEventListener("animationend", () => this.element.remove())
+	}
+
+
+	public edit() {
+		// remove the selected class
+		this.element.classList.remove("selected")
+
+		// add the edit class
+		this.element.classList.toggle("edit")
+
+
+		this.isEditing = !this.isEditing
+	}
+
+	public select() {
+		console.log(this)
+		if (this.isEditing) return
+		this.element.classList.toggle("selected")
+	}
+
+
+	private setEvents() {
+		this.element.addEventListener("click", this.select.bind(this))
+		this.element.addEventListener("dblclick", this.edit.bind(this))
+		this.element.querySelector(".save-btn")
+			.addEventListener("click", this.save.bind(this))
+	}
+
+	public show() {
+		// play the animation and remove it after .5s
+		this.element.classList.add("in")
+		setTimeout(() => this.element.classList.remove("in"), 500)
+
+		// add the element to the container with all the todos
+		container.prepend(this.element)
+	}
+
+	public save() {
+		// save this todo data to the todos array.
+		currentTodos.push(this)
+		saveTodos()
+	}
+
+
+	// -------------------- Setters --------------------
+	public set title(content: string) {
+		this.element.querySelector(".title").textContent = content.trim()
+	}
+
+	public set body(content: string) {
+		this.element.querySelector(".body").textContent = content.trim()
+	}
+
+	public set date(date: Date | string) {
+		this.element.querySelector(".date").textContent = date.toLocaleString()
+	}
+
+	public set color(color: string) {
+		this.element.style.setProperty("--bg-color", color)
+	}
+	// -------------------------------------------------
+
+	public get isSelected() {
+		return this.element.classList.contains("selected")
+	}
+
+	public get options() {
+		return this._options
+	}
+}
 
 
 /**
@@ -45,39 +141,9 @@ const currentTodos: TodoInfo[] = []
 function addTodo(
 	options: TodoInfo,
 	triggerSave = true
-): boolean {
-	let { title, body, date = new Date(), color } = options
-
-	title = title.trim()
-
-	if (!title) return false;
-
-	const todo = getTodoTemplate()
-
-	// set all the content of the todo
-	if (color) todo.style.setProperty("--bg-color", color)
-	todo.querySelector(".title").textContent = title
-	todo.querySelector(".date").textContent = date.toLocaleString()
-	todo.querySelector(".body").textContent = body
-	todo.tabIndex = 0
-	todo.dataset.todoNumber = `${currentTodos.length}`
-
-	// add the click event to select it
-	todo.addEventListener("keyup", e => { if (e.key == "Enter") todo.classList.toggle("selected") })
-	todo.addEventListener("click", () => todo.classList.toggle("selected"))
-
-	// play the animation and remove it after .5s
-	todo.classList.add("in")
-	setTimeout(() => todo.classList.remove("in"), 500)
-
-	// add the element to the container with all the todos
-	container.prepend(todo)
-
-	// save this todo data to the todos array.
-	// hack to use the good format for the date
-	currentTodos.push({ ...options, ...{ date: date.toLocaleString() } })
-
-	if (triggerSave) saveTodos()
+) {
+	if (!options.title.trim()) return false
+	new Todo(options)
 	return true
 }
 
@@ -110,28 +176,20 @@ function addTodo(
 
 // Remove all the selected todos
 opts.delButton.addEventListener("click", () => {
-	document.querySelectorAll(".todo.selected").forEach((e: HTMLDivElement) => {
-		e.classList.add("remove")
-		// currentTodos.splice(parseInt(e.dataset.todoNumber), 1) // remove from the array
-		delete currentTodos[parseInt(e.dataset.todoNumber)] // remove from the array
-		// dont remove until "remove" animation ends
-		e.addEventListener("animationend", () => {
-			e.remove()
-		})
-	})
+	currentTodos.filter(t => t.isSelected).forEach(t => t.remove())
 	saveTodos()
 })
 
 
 // Toggle the selected class of all the todos
 opts.allButton.addEventListener("click", () => {
-	const todos = [...document.querySelectorAll(".todo")]
+	const todos = currentTodos
 	todos.forEach((todo, i) => {
-		setTimeout(() => todo.classList.toggle("selected"), i*(
+		setTimeout(() => todo.select(), i * (
 			// if we have more than 25 todos, just dont do any fancy delaying
 			todos.length < 25
-			? 250/todos.length
-			: 0
+				? 250 / todos.length
+				: 0
 		))
 	})
 })
@@ -143,8 +201,7 @@ opts.allButton.addEventListener("click", () => {
 function saveTodos() {
 	localStorage.setItem(
 		"todos",
-		// make sure we remove null values
-		JSON.stringify(currentTodos.filter(e => e != null))
+		JSON.stringify(currentTodos.map(t => t.options))
 	)
 }
 

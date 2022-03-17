@@ -158,6 +158,7 @@ class Todo {
 	}
 
 	public set color(color: string) {
+		if (!color.startsWith("#")) throw new Error("Color must be in hex format")
 		this.element.style.setProperty("--bg-color", color)
 		this.element.querySelector<HTMLInputElement>(".color-btn").value = color
 	}

@@ -119,6 +119,8 @@ class Todo {
         this.element.querySelector(".date").textContent = date.toLocaleString();
     }
     set color(color) {
+        if (!color.startsWith("#"))
+            throw new Error("Color must be in hex format");
         this.element.style.setProperty("--bg-color", color);
         this.element.querySelector(".color-btn").value = color;
     }

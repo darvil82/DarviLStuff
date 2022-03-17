@@ -112,7 +112,8 @@ function addTodo(
 opts.delButton.addEventListener("click", () => {
 	document.querySelectorAll(".todo.selected").forEach((e: HTMLDivElement) => {
 		e.classList.add("remove")
-		currentTodos.splice(parseInt(e.dataset.todoNumber), 1) // remove from the array
+		// currentTodos.splice(parseInt(e.dataset.todoNumber), 1) // remove from the array
+		delete currentTodos[parseInt(e.dataset.todoNumber)] // remove from the array
 		// dont remove until "remove" animation ends
 		e.addEventListener("animationend", () => {
 			e.remove()
@@ -155,7 +156,7 @@ function getTodos(): TodoInfo[] {
 
 
 // Insert the todos from the local storage
-getTodos().forEach(options => addTodo(options))
+getTodos().forEach(options => { if (options) addTodo(options)})
 
 // If we have no todos, add the default one
 if (!Object.keys(currentTodos).length)

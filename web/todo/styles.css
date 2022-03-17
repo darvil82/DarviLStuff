@@ -155,12 +155,17 @@ button.select-all {
       -ms-flex-positive: 1;
           flex-grow: 1;
   min-height: 150px;
-  min-width: 15vw;
+  min-width: 20vw;
   -webkit-transition: .5s;
   transition: .5s;
   overflow: hidden;
   z-index: 1;
   outline: 0 solid transparent;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  outline-offset: -3px;
   transition: .5s;
 }
 
@@ -181,6 +186,18 @@ button.select-all {
   color: rgba(255, 255, 255, 0.795);
 }
 
+.todo .save-btn {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  top: calc(100% - 3em);
+  -webkit-transform: translateY(200%);
+          transform: translateY(200%);
+  -webkit-transition: .5s;
+  transition: .5s;
+  visibility: hidden;
+}
+
 .todo.in {
   -webkit-animation: slide .5s forwards;
           animation: slide .5s forwards;
@@ -188,11 +205,22 @@ button.select-all {
 
 .todo.selected {
   outline: 3px solid #b14d4d;
-  outline-offset: -3px;
   background-position: right;
   --bg-color: #b14d4d !important;
   -webkit-animation: shake 500ms alternate infinite;
           animation: shake 500ms alternate infinite;
+}
+
+.todo.edit {
+  outline: 3px solid #b67b38;
+  background-position: right;
+  --bg-color: #b67b38 !important;
+}
+
+.todo.edit .save-btn {
+  -webkit-transform: translateY(0);
+          transform: translateY(0);
+  visibility: visible;
 }
 
 .todo.remove {

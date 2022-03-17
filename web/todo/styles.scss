@@ -1,5 +1,6 @@
 // the color when the todos are selected
 $color-delete: rgb(177, 77, 77);
+$color-edit: rgb(182, 123, 56);
 
 * {
 	scroll-behavior: smooth;
@@ -130,6 +131,7 @@ body {
 .todo {
 	// how much distance the todo moves when shaking
 	$delete-anim-offset: .03em;
+	$outline-size: 3px;
 
 	display: flex;
 	gap: .25em;
@@ -143,11 +145,13 @@ body {
 	border-radius: 10px;
 	flex-grow: 1;
 	min-height: 150px;
-	min-width: 15vw;
+	min-width: 20vw;
 	transition: .5s;
 	overflow: hidden;
 	z-index: 1;
 	outline: 0 solid transparent;
+	user-select: none;
+	outline-offset: -$outline-size;
 	transition: .5s;
 
 	.title {
@@ -168,18 +172,38 @@ body {
 		color: rgba(255, 255, 255, 0.795);
 	}
 
+	.save-btn {
+		position: absolute;
+		bottom: 1em;
+		right: 1em;
+		top: calc(100% - 3em);
+		transform: translateY(200%);
+		transition: .5s;
+		// we dont want this button to be focusable now
+		visibility: hidden;
+	}
+
 	&.in {
 		animation: slide .5s forwards;
 	}
 
 	// shaking
 	&.selected {
-		$line-size: 3px;
-		outline: $line-size solid $color-delete;
-		outline-offset: -$line-size;
+		outline: $outline-size solid $color-delete;
 		background-position: right;
 		--bg-color: #{$color-delete} !important;
 		animation: shake 500ms alternate infinite;
+	}
+
+	&.edit {
+		outline: $outline-size solid $color-edit;
+		background-position: right;
+		--bg-color: #{$color-edit} !important;
+
+		.save-btn {
+			transform: translateY(0);
+			visibility: visible;
+		}
 	}
 
 	&.remove {

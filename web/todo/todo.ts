@@ -128,8 +128,8 @@ opts.allButton.addEventListener("click", () => {
 	const todos = [...document.querySelectorAll(".todo")]
 	todos.forEach((todo, i) => {
 		setTimeout(() => todo.classList.toggle("selected"), i*(
-			// if we have more than 50 todos, just dont do any fancy delaying
-			todos.length < 50
+			// if we have more than 25 todos, just dont do any fancy delaying
+			todos.length < 25
 			? 250/todos.length
 			: 0
 		))

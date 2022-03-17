@@ -1,5 +1,7 @@
 * {
   scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -10,10 +12,9 @@
 body {
   scroll-behavior: smooth;
   scroll-padding-top: 100px;
-  margin: 0;
-  padding: 0;
   background-color: #000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
 }
 
 .options {
@@ -43,17 +44,17 @@ body {
 
 @-webkit-keyframes pulse {
   from {
-    background-color: rgba(129, 20, 20, 0.5);
+    background-color: rgba(100, 40, 40, 0.5);
   }
 }
 
 @keyframes pulse {
   from {
-    background-color: rgba(129, 20, 20, 0.5);
+    background-color: rgba(100, 40, 40, 0.5);
   }
 }
 
-input {
+input, .color-picker {
   color: white;
   font-size: .9em;
   background-color: #252525;
@@ -62,11 +63,19 @@ input {
   border-radius: 5px;
   -webkit-box-shadow: inset 0 0 10px -2px black;
           box-shadow: inset 0 0 10px -2px black;
-  border: 1px solid rgba(70, 70, 70, 0.137);
+  border: 1px solid #2b2b2b;
 }
 
-input[type="color"] {
+input[type="color"], .color-picker[type="color"] {
   padding: .1em;
+}
+
+input.color-picker, .color-picker.color-picker {
+  padding: .1em;
+}
+
+input.color-picker input, .color-picker.color-picker input {
+  visibility: hidden;
 }
 
 button {
@@ -129,6 +138,7 @@ button.select-all {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  gap: .25em;
   position: relative;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
@@ -181,17 +191,21 @@ button.select-all {
   outline-offset: -3px;
   background-position: right;
   --bg-color: #b14d4d !important;
-  -webkit-animation: selected 500ms alternate infinite;
-          animation: selected 500ms alternate infinite;
+  -webkit-animation: shake 500ms alternate infinite;
+          animation: shake 500ms alternate infinite;
 }
 
 .todo.remove {
   animation: slide .25s reverse forwards;
 }
 
-.todo:hover {
+.todo:hover, .todo:focus-visible {
   cursor: pointer;
   background-position: left;
+}
+
+.todo:hover:focus-visible, .todo:focus-visible:focus-visible {
+  outline: 2px solid white;
 }
 
 .todo:before {
@@ -218,7 +232,7 @@ button.select-all {
   }
 }
 
-@-webkit-keyframes selected {
+@-webkit-keyframes shake {
   0% {
     -webkit-transform: translate(0.03em, -0.03em);
             transform: translate(0.03em, -0.03em);
@@ -241,7 +255,7 @@ button.select-all {
   }
 }
 
-@keyframes selected {
+@keyframes shake {
   0% {
     -webkit-transform: translate(0.03em, -0.03em);
             transform: translate(0.03em, -0.03em);

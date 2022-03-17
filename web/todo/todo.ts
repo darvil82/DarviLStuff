@@ -156,7 +156,7 @@ function getTodos(): TodoInfo[] {
 
 
 // Insert the todos from the local storage
-getTodos().forEach(options => { if (options) addTodo(options)})
+getTodos().forEach(options => addTodo(options))
 
 // If we have no todos, add the default one
 if (!Object.keys(currentTodos).length)

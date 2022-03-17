@@ -105,18 +105,20 @@ opts.allButton.addEventListener("click", () => {
  * Save the current todos to the local storage
  */
 function saveTodos() {
-    localStorage.setItem("todos", JSON.stringify(currentTodos));
+    localStorage.setItem("todos", 
+    // make sure we remove null values
+    JSON.stringify(currentTodos.filter(e => e != null)));
 }
 /**
  * Load the todos from the local storage and return them
  */
 function getTodos() {
-    return JSON.parse(localStorage.getItem("todos")) || {};
+    return JSON.parse(localStorage.getItem("todos"));
 }
 // Insert the todos from the local storage
 getTodos().forEach(options => addTodo(options));
 // If we have no todos, add the default one
-if (!Object.keys(currentTodos).length)
+if (!currentTodos.length)
     addTodo({
         title: "Welcome to my Todos!",
         body: `So, yeah... This is a Todo! You can add more,

@@ -172,7 +172,7 @@ body {
 		color: rgba(255, 255, 255, 0.795);
 	}
 
-	.save-btn {
+	.color-btn {
 		position: absolute;
 		bottom: 1em;
 		right: 1em;
@@ -181,6 +181,12 @@ body {
 		transition: .5s;
 		// we dont want this button to be focusable now
 		visibility: hidden;
+	}
+
+	[contentEditable="true"] {
+		background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.479), transparent);
+		border-radius: 5px;
+		padding: .1em;
 	}
 
 	&.in {
@@ -200,7 +206,7 @@ body {
 		background-position: right;
 		--bg-color: #{$color-edit} !important;
 
-		.save-btn {
+		.color-btn {
 			transform: translateY(0);
 			visibility: visible;
 		}

@@ -186,7 +186,7 @@ button.select-all {
   color: rgba(255, 255, 255, 0.795);
 }
 
-.todo .save-btn {
+.todo .color-btn {
   position: absolute;
   bottom: 1em;
   right: 1em;
@@ -196,6 +196,13 @@ button.select-all {
   -webkit-transition: .5s;
   transition: .5s;
   visibility: hidden;
+}
+
+.todo [contentEditable="true"] {
+  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.479)), to(transparent));
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.479), transparent);
+  border-radius: 5px;
+  padding: .1em;
 }
 
 .todo.in {
@@ -217,7 +224,7 @@ button.select-all {
   --bg-color: #b67b38 !important;
 }
 
-.todo.edit .save-btn {
+.todo.edit .color-btn {
   -webkit-transform: translateY(0);
           transform: translateY(0);
   visibility: visible;

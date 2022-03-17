@@ -18,6 +18,12 @@ const opts = {
     allButton: document.querySelector("[data-input='all']")
 };
 [];
+const defaultOptions = {
+    title: "",
+    body: "",
+    date: new Date(),
+    color: "#00CED1",
+};
 /**
  * All the todos that we have in the container
  */
@@ -26,41 +32,65 @@ class Todo {
     constructor(options) {
         this.isEditing = false;
         this.element = getTodoTemplate();
-        this.update(options);
         this.show();
         this.setEvents();
         this.element.tabIndex = 0;
-        this.save();
+        this.update({ ...defaultOptions, ...options });
+        currentTodos.push(this);
+        saveTodos();
     }
+    /**
+     * Update the todo with the given options
+     */
     update(options) {
-        Object.entries(options).forEach(function ([key, value]) { this[key] = value; }, this);
-        this._options = options;
+        Object.entries(options)
+            .forEach(function ([key, value]) { this[key] = value; }, this);
+        this._options = { ...this._options, ...options };
+        saveTodos();
     }
+    /**
+     * Set the events for the todo
+     */
+    setEvents() {
+        this.element.addEventListener("click", this.toggleSelect.bind(this));
+        this.element.addEventListener("dblclick", this.toggleEdit.bind(this));
+        this.element.querySelector(".color-btn")
+            .addEventListener("click", this.updateFromElements.bind(this));
+    }
+    /**
+     * Remove the todo
+     */
     remove() {
         this.element.classList.add("remove");
         currentTodos.splice(currentTodos.indexOf(this), 1);
         // dont remove until "remove" animation ends
         this.element.addEventListener("animationend", () => this.element.remove());
     }
-    edit() {
+    /**
+     * Toggle the todo editing mode
+     */
+    toggleEdit() {
         // remove the selected class
         this.element.classList.remove("selected");
-        // add the edit class
-        this.element.classList.toggle("edit");
+        if (this.isEditing) {
+            this.updateFromElements();
+        }
+        this.element.classList.toggle("edit", !this.isEditing);
+        this.element.querySelectorAll(".title, .body")
+            .forEach(e => e.contentEditable = this.isEditing ? "false" : "true");
         this.isEditing = !this.isEditing;
     }
-    select() {
-        console.log(this);
+    /**
+     * Toggle the todo selection
+     */
+    toggleSelect() {
         if (this.isEditing)
             return;
         this.element.classList.toggle("selected");
     }
-    setEvents() {
-        this.element.addEventListener("click", this.select.bind(this));
-        this.element.addEventListener("dblclick", this.edit.bind(this));
-        this.element.querySelector(".save-btn")
-            .addEventListener("click", this.save.bind(this));
-    }
+    /**
+     * Show the todo in the container
+     */
     show() {
         // play the animation and remove it after .5s
         this.element.classList.add("in");
@@ -68,10 +98,15 @@ class Todo {
         // add the element to the container with all the todos
         container.prepend(this.element);
     }
-    save() {
-        // save this todo data to the todos array.
-        currentTodos.push(this);
-        saveTodos();
+    /**
+     * Update the todo using the data from the elements in it
+     */
+    updateFromElements() {
+        this.update({
+            title: this.element.querySelector(".title").textContent,
+            body: this.element.querySelector(".body").textContent,
+            color: this.element.querySelector(".color-btn").value
+        });
     }
     // -------------------- Setters --------------------
     set title(content) {
@@ -85,21 +120,22 @@ class Todo {
     }
     set color(color) {
         this.element.style.setProperty("--bg-color", color);
+        this.element.querySelector(".color-btn").value = color;
     }
-    // -------------------------------------------------
+    // -------------------- Getters --------------------
     get isSelected() {
         return this.element.classList.contains("selected");
     }
     get options() {
-        return this._options;
+        // we need to make sure we save the date in the great format... Ugly!
+        return { ...this._options, ...{ date: this._options.date.toLocaleString() } };
     }
 }
 /**
  * Inserts a Todo into the container
  * @param options The options of the Todo
- * @param triggerSave Automatically save the todos after inserting
  */
-function addTodo(options, triggerSave = true) {
+function addTodo(options) {
     if (!options.title.trim())
         return false;
     new Todo(options);
@@ -132,9 +168,9 @@ opts.delButton.addEventListener("click", () => {
 });
 // Toggle the selected class of all the todos
 opts.allButton.addEventListener("click", () => {
-    const todos = currentTodos;
+    const todos = currentTodos.reverse();
     todos.forEach((todo, i) => {
-        setTimeout(() => todo.select(), i * (
+        setTimeout(() => todo.toggleSelect(), i * (
         // if we have more than 25 todos, just dont do any fancy delaying
         todos.length < 25
             ? 250 / todos.length
@@ -160,7 +196,7 @@ if (!currentTodos.length)
     addTodo({
         title: "Welcome to my Todos!",
         body: `So, yeah... This is a Todo! You can add more,
-		remove them, and huhhh... That's pretty much it I guess.
+		remove them, and huhhh... That's pretty much it I guess...
 		Oh yeah they get saved! (Well, unless you clear your cache or remove them)`
     });
 // set up the "fancy" color picker

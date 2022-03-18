@@ -29,8 +29,10 @@ const defaultOptions = {
  */
 const currentTodos = [];
 class Todo {
+    element;
+    _options; // this needs to be private because options should only be changed by the update method
+    isEditing = false;
     constructor(options) {
-        this.isEditing = false;
         this.element = getTodoTemplate();
         this.show();
         this.setEvents();
@@ -107,6 +109,8 @@ class Todo {
             body: this.element.querySelector(".body").textContent,
             color: this.element.querySelector(".color-btn").value
         });
+    }
+    shake() {
     }
     // -------------------- Setters --------------------
     set title(content) {
@@ -208,4 +212,5 @@ document.querySelectorAll(".color-picker").forEach((picker) => {
     input.addEventListener("input", updateInput);
     updateInput();
 });
+currentTodos[0].shake();
 //# sourceMappingURL=todo.js.map

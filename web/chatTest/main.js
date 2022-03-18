@@ -2,9 +2,13 @@
  * The main chat class.
  */
 class Chat {
+    element;
+    observer;
+    msgCounterEl;
+    msgsContainer;
+    msgsCounter = 0;
     constructor(element) {
         this.element = element;
-        this.msgsCounter = 0;
         // this observer will remove the message from the DOM when it's out of view
         this.observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -37,6 +41,11 @@ class Chat {
  * A message in the chat.
  */
 class Message {
+    user;
+    text;
+    userColor;
+    isMentioned;
+    date;
     constructor(user, text, userColor, isMentioned = false) {
         this.user = user;
         this.text = text;
@@ -81,6 +90,8 @@ class Message {
  * Helper for setting intervals.
  */
 class Interval {
+    callback;
+    currentIntervalId;
     constructor(callback) {
         this.callback = callback;
     }

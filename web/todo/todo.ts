@@ -135,12 +135,16 @@ class Todo {
 	/**
 	 * Update the todo using the data from the elements in it
 	 */
-	public updateFromElements() {
+	private updateFromElements() {
 		this.update({
 			title: this.element.querySelector(".title").textContent,
 			body: this.element.querySelector(".body").textContent,
 			color: this.element.querySelector<HTMLInputElement>(".color-btn").value
 		})
+	}
+
+	public shake() {
+
 	}
 
 
@@ -275,3 +279,5 @@ document.querySelectorAll(".color-picker").forEach((picker: HTMLDivElement) => {
 	input.addEventListener("input", updateInput)
 	updateInput()
 })
+
+currentTodos[0].shake()

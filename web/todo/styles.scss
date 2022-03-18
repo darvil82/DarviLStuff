@@ -6,9 +6,6 @@ $color-edit: rgb(182, 123, 56);
 	scroll-behavior: smooth;
 	margin: 0;
 	padding: 0;
-}
-
-:root {
 	box-sizing: border-box;
 }
 
@@ -144,7 +141,7 @@ body {
 	padding: 1em;
 	border-radius: 10px;
 	flex-grow: 1;
-	min-height: 150px;
+	min-height: 200px;
 	min-width: 20vw;
 	overflow: hidden;
 	z-index: 1;

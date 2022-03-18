@@ -354,9 +354,11 @@ class PromptSpacer implements PromptItem {
 	genElement(isVertical: boolean) {
 		let div = document.createElement("div")
 		if (isVertical) {
+			// @ts-ignore
 			div.style.marginBlock = this.width
 			div.style.height = this.shapeWidth
 		} else {
+			// @ts-ignore
 			div.style.marginInline = this.width
 			div.style.width = this.shapeWidth
 		}

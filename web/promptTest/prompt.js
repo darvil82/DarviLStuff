@@ -77,12 +77,6 @@ function setTabIndex(value = true) {
 }
 /** A prompt window that may have some properties like text and items */
 class Prompt {
-    title;
-    body;
-    itemsArray;
-    isVertical;
-    accent;
-    static itemCounter = 0; // used to give each prompt item a unique ID
     /**
      * @param title - The title of the prompt window
      * @param body - The body of the prompt window
@@ -131,14 +125,10 @@ class Prompt {
     }
     static getNextItemID() { return `prompt-item-${Prompt.itemCounter++}`; }
 }
+Prompt.itemCounter = 0; // used to give each prompt item a unique ID
 /** A prompt button that can be pressed by the user.
  *  When the user presses it, the callback supplied will be called. */
 class PromptButton {
-    text;
-    colorsArray;
-    callback;
-    width;
-    closePromptOnPress;
     /**
      * @param {string} text - The text to display on the button
      * @param {Array} colorsArray - CSS colors to use for the gradient of the button background
@@ -177,11 +167,6 @@ class PromptButton {
 /** A prompt input that lets the user enter text.
  *  The value entered can be obtained through the `value` property. */
 class PromptInput {
-    placeholder;
-    defaultText;
-    width;
-    callback;
-    id;
     /**
      * @param {string} placeholder - The placeholder text to display in the input
      * @param {string} defaultText - The default text value inside the input
@@ -219,11 +204,6 @@ class PromptInput {
  *  The value entered can be obtained through the `value` property, and the index
  *  of it in the options array with the `index` property. */
 class PromptOptionList {
-    optList;
-    selectedIndex;
-    width;
-    callback;
-    id;
     /**
      * @param {Array} optList - An array of options (strings) to display in the list
      * @param {string} selectedIndex - The index of the selected option by default. Default value is 0.
@@ -270,9 +250,6 @@ class PromptOptionList {
 /** A prompt spacer that basically just adds a little
  *  space between the prompt items. */
 class PromptSpacer {
-    width;
-    shapeWidth;
-    shapeColor;
     /**
      * @param {string} width - The CSS width of the spacer
      * @param {string} shapeWidth - The CSS width of the spacer shape
@@ -295,10 +272,12 @@ class PromptSpacer {
     genElement(isVertical) {
         let div = document.createElement("div");
         if (isVertical) {
+            // @ts-ignore
             div.style.marginBlock = this.width;
             div.style.height = this.shapeWidth;
         }
         else {
+            // @ts-ignore
             div.style.marginInline = this.width;
             div.style.width = this.shapeWidth;
         }

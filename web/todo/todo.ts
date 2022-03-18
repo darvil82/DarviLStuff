@@ -51,17 +51,11 @@ class Todo {
 	private element: HTMLDivElement
 	private _options: TodoInfo	// this needs to be private because options should only be changed by the update method
 	private isEditing: boolean = false
-	private subElements: { [key: string]: HTMLElement } = {}
+	private subElements: { [key: string]: any } = {}
 
 
 	constructor(options: TodoInfo) {
 		this.element = getTodoTemplate()
-		this.show()
-		this.setEvents()
-		this.update({ ...defaultOptions, ...options })
-		currentTodos.push(this)
-		saveTodos()
-
 		this.element.tabIndex = 0
 		this.subElements = {
 			title: this.element.querySelector(".title") as HTMLSpanElement,
@@ -69,16 +63,21 @@ class Todo {
 			color: this.element.querySelector(".color-btn") as HTMLInputElement,
 			date: this.element.querySelector(".date") as HTMLSpanElement
 		}
+
+		this.setEvents()
+		this.update({ ...defaultOptions, ...options }, false)
+		currentTodos.push(this)
+		this.show()
 	}
 
 	/**
 	 * Update the todo with the given options
 	 */
-	private update(options: TodoInfo) {
+	private update(options: TodoInfo, autoSave: boolean = true) {
 		Object.entries(options)
 			.forEach(function([key, value]) { this[key] = value }, this)
 		this._options = { ...this._options, ...options}
-		saveTodos()
+		if (autoSave) saveTodos()
 	}
 
 	/**
@@ -119,17 +118,20 @@ class Todo {
 	public toggleEdit() {
 		// remove the selected class
 		this.element.classList.remove("selected")
+		const isEditing = this.isEditing
 
-		if (this.isEditing) {
+		if (isEditing) {
 			if (!this.updateFromElements()) return;
 		}
 
-		this.element.classList.toggle("edit", !this.isEditing)
+		this.element.classList.toggle("edit", !isEditing);
 
-		this.element.querySelectorAll<HTMLSpanElement>(".title, .body")
-			.forEach(e => e.contentEditable = this.isEditing ? "false" : "true")
+		[this.subElements.title, this.subElements.body].forEach(
+			e => e.contentEditable = isEditing ? "false" : "true"
+		)
+		this.subElements.color.disabled = isEditing
 
-		this.isEditing = !this.isEditing
+		this.isEditing = !isEditing
 	}
 
 	/**
@@ -156,44 +158,53 @@ class Todo {
 	 * Update the todo using the data from the elements in it
 	 */
 	private updateFromElements(): boolean {
-		const title = this.element.querySelector(".title").textContent.trim()
+		const [title, body, color] = [
+			this.subElements.title.textContent.trim(),
+			this.subElements.body.textContent.trim(),
+			this.subElements.color.value
+		]
 
 		if (!title) {
 			this.shake()
+			// we reset the contents to prevent the user from typing newlines
+			this.subElements.title.textContent = title
+			this.subElements.body.textContent = body
 			return false
 		}
 
 		this.update({
 			title,
-			body: this.element.querySelector(".body").textContent,
-			color: this.element.querySelector<HTMLInputElement>(".color-btn").value
+			body,
+			color
 		})
 		return true
 	}
 
 	public shake() {
 		this.element.classList.add("shake")
-		this.element.addEventListener("animationend", () => this.element.classList.remove("shake"))
+		this.element.addEventListener(
+			"animationend", () => this.element.classList.remove("shake")
+		)
 	}
 
 
 	// -------------------- Setters --------------------
 	public set title(content: string) {
-		this.element.querySelector(".title").textContent = content.trim()
+		this.subElements.title.textContent = content.trim()
 	}
 
 	public set body(content: string) {
-		this.element.querySelector(".body").textContent = content.trim()
+		this.subElements.body.textContent = content.trim()
 	}
 
 	public set date(date: Date | string) {
-		this.element.querySelector(".date").textContent = date.toLocaleString()
+		this.subElements.date.textContent = date.toLocaleString()
 	}
 
 	public set color(color: string) {
 		if (!color.startsWith("#")) throw new Error("Color must be in hex format")
 		this.element.style.setProperty("--bg-color", color)
-		this.element.querySelector<HTMLInputElement>(".color-btn").value = color
+		this.subElements.color.value = color
 	}
 
 
@@ -221,29 +232,32 @@ function addTodo(options: TodoInfo) {
 
 
 // Handle the inputs on the options bar
-[opts.inputTitle, opts.inputBody].forEach(input => input.addEventListener("keyup", (event: KeyboardEvent) => {
-	if (event.key != "Enter") return
+[opts.inputTitle, opts.inputBody].forEach(input =>
+	input.addEventListener("keyup", (event: KeyboardEvent) => {
+		if (event.key != "Enter") return
 
-	const title = opts.inputTitle.value.trim()
+		const title = opts.inputTitle.value.trim()
 
-	if (!addTodo({
-		title,
-		body: opts.inputBody.value,
-		color: opts.inputColor.value,
-		date: new Date()
-	})) {
-		// insertion failed, so we play a "pulse" animation
-		optionsBar.classList.add("error")
-		optionsBar.addEventListener("animationend", () =>
-			optionsBar.classList.remove("error")
-		)
-		return
+		if (!addTodo({
+			title,
+			body: opts.inputBody.value,
+			color: opts.inputColor.value,
+			date: new Date()
+		})) {
+			// insertion failed, so we play a "pulse" animation
+			optionsBar.classList.add("error")
+			optionsBar.addEventListener("animationend", () =>
+				optionsBar.classList.remove("error")
+			)
+			return
+		}
+
+		// insertion succeeded, so we reset the inputs and scroll up
+		scrollTo(0, 0);
+		[opts.inputTitle, opts.inputBody].forEach(e => e.value = "")
+		saveTodos()
 	}
-
-	// insertion succeeded, so we reset the inputs and scroll up
-	scrollTo(0, 0);
-	[opts.inputTitle, opts.inputBody].forEach(e => e.value = "")
-}))
+))
 
 
 // Remove all the selected todos
@@ -255,14 +269,15 @@ opts.delButton.addEventListener("click", () => {
 
 // Toggle the selected class of all the todos
 opts.allButton.addEventListener("click", () => {
-	currentTodos.reverse().forEach((todo, i) => {
-		setTimeout(() => todo.toggleSelect(), i * (
-			// if we have more than 25 todos, just dont do any fancy delaying
-			currentTodos.length < 25
-				? 250 / currentTodos.length
-				: 0
-		))
-	})
+	// if we have more than 25 todos, just dont do any fancy delaying
+	if (currentTodos.length > 25) {
+		currentTodos.forEach(t => t.toggleSelect())
+		return
+	}
+
+	currentTodos.reverse().forEach((todo, i) => setTimeout(() =>
+		todo.toggleSelect(), i * (250/currentTodos.length)
+	))
 })
 
 
@@ -274,6 +289,7 @@ function saveTodos() {
 		"todos",
 		JSON.stringify(currentTodos.map(t => t.options))
 	)
+	console.log("Saved todos: ", currentTodos)
 }
 
 
@@ -289,6 +305,7 @@ function getTodos(): TodoInfo[] {
 
 // Insert the todos from the local storage
 getTodos().forEach(options => addTodo(options))
+saveTodos()
 
 // If we have no todos, add the default one
 if (!currentTodos.length) {

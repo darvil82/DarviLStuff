@@ -79,7 +79,7 @@ class Todo {
 	private setEvents() {
 		this.element.addEventListener("click", this.toggleSelect.bind(this))
 		this.element.addEventListener("dblclick", this.toggleEdit.bind(this))
-		document.addEventListener("keyup", function(event: KeyboardEvent) {
+		document.addEventListener("keydown", function(event: KeyboardEvent) {
 			if (
 				(
 					event.target === this.element.querySelector(".title")

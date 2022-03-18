@@ -225,6 +225,7 @@ button.select-all {
   outline: 3px solid #b67b38;
   background-position: right;
   --bg-color: #b67b38 !important;
+  background-position: left;
 }
 
 .todo.edit .color-btn {
@@ -256,7 +257,7 @@ button.select-all {
   outline: 2px solid white;
 }
 
-.todo:before {
+.todo::before {
   z-index: -1;
   position: absolute;
   content: "";

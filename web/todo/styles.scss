@@ -206,6 +206,7 @@ body {
 		outline: $outline-size solid $color-edit;
 		background-position: right;
 		--bg-color: #{$color-edit} !important;
+		background-position: left;
 
 		.color-btn {
 			transform: translateY(0);
@@ -237,7 +238,7 @@ body {
 	}
 
 	// this darkens the todo a bit to make it easier to read
-	&:before {
+	&::before {
 		z-index: -1;
 		position: absolute;
 		content: "";

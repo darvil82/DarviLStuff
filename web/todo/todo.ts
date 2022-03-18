@@ -51,16 +51,24 @@ class Todo {
 	private element: HTMLDivElement
 	private _options: TodoInfo	// this needs to be private because options should only be changed by the update method
 	private isEditing: boolean = false
+	private subElements: { [key: string]: HTMLElement } = {}
 
 
 	constructor(options: TodoInfo) {
 		this.element = getTodoTemplate()
 		this.show()
 		this.setEvents()
-		this.element.tabIndex = 0
 		this.update({ ...defaultOptions, ...options })
 		currentTodos.push(this)
 		saveTodos()
+
+		this.element.tabIndex = 0
+		this.subElements = {
+			title: this.element.querySelector(".title") as HTMLSpanElement,
+			body: this.element.querySelector(".body") as HTMLSpanElement,
+			color: this.element.querySelector(".color-btn") as HTMLInputElement,
+			date: this.element.querySelector(".date") as HTMLSpanElement
+		}
 	}
 
 	/**
@@ -78,12 +86,17 @@ class Todo {
 	 */
 	private setEvents() {
 		this.element.addEventListener("click", this.toggleSelect.bind(this))
+		this.element.addEventListener("keydown", function(e: KeyboardEvent) {
+			if (e.key == "Enter") this.toggleSelect()
+			if (e.key == " ") this.toggleEdit()
+		}.bind(this))
+
 		this.element.addEventListener("dblclick", this.toggleEdit.bind(this))
 		document.addEventListener("keydown", function(event: KeyboardEvent) {
 			if (
 				(
-					event.target === this.element.querySelector(".title")
-					|| event.target === this.element.querySelector(".body")
+					event.target === this.subElements.title
+					|| event.target === this.subElements.body
 				)
 				&& event.key === "Enter"
 			) this.toggleEdit()

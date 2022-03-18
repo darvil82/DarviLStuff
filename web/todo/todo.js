@@ -205,7 +205,7 @@ function saveTodos() {
  * Load the todos from the local storage and return them
  */
 function getTodos() {
-    return JSON.parse(localStorage.getItem("todos"));
+    return JSON.parse(localStorage.getItem("todos")) || [];
 }
 // Insert the todos from the local storage
 getTodos().forEach(options => addTodo(options));

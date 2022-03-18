@@ -130,7 +130,7 @@ body {
 
 .todo {
 	// how much distance the todo moves when shaking
-	$delete-anim-offset: .03em;
+	--shake-anim-offset: .03em;
 	$outline-size: 3px;
 
 	display: flex;
@@ -146,13 +146,15 @@ body {
 	flex-grow: 1;
 	min-height: 150px;
 	min-width: 20vw;
-	transition: .5s;
 	overflow: hidden;
 	z-index: 1;
 	outline: 0 solid transparent;
 	user-select: none;
 	outline-offset: -$outline-size;
-	transition: .5s;
+
+	&, * {
+		transition: .5s;
+	}
 
 	.title {
 		font-size: 2.5em;
@@ -184,7 +186,7 @@ body {
 	}
 
 	[contentEditable="true"] {
-		background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.479), transparent);
+		background-image: linear-gradient(90deg, var(--editable-color, rgba(0, 0, 0, 0.479)), transparent);
 		border-radius: 5px;
 		padding: .1em;
 	}
@@ -193,7 +195,6 @@ body {
 		animation: slide .5s forwards;
 	}
 
-	// shaking
 	&.selected {
 		outline: $outline-size solid $color-delete;
 		background-position: right;
@@ -215,6 +216,16 @@ body {
 	&.remove {
 		animation: slide .25s reverse forwards;
 	}
+
+	&.shake {
+		--shake-anim-offset: .25em;
+		animation: shake 350ms alternate;
+
+		.title {
+			--editable-color: rgba(131, 33, 33, 0.479);
+		}
+	}
+
 
 	&:hover, &:focus-visible {
 		cursor: pointer;
@@ -242,20 +253,23 @@ body {
 	}
 
 	@keyframes shake {
-		0% {
-			transform: translate($delete-anim-offset, -$delete-anim-offset);
+		15% {
+			transform: translate(0, var(--shake-anim-offset));
 		}
-		25% {
-			transform: translate(0, $delete-anim-offset);
-		}
-		50% {
+		30% {
 			transform: translate(0, 0)
 		}
-		75% {
-			transform: translate(-$delete-anim-offset, -$delete-anim-offset)
+		45% {
+			transform: translate(var(--shake-anim-offset), calc(var(--shake-anim-offset) * -1))
 		}
-		100% {
-			transform: translate($delete-anim-offset, $delete-anim-offset)
+		60% {
+			transform: translate(calc(var(--shake-anim-offset) * -1), 0)
+		}
+		75% {
+			transform: translate(0, var(--shake-anim-offset))
+		}
+		90% {
+			transform: translate(var(--shake-anim-offset), var(--shake-anim-offset))
 		}
 	}
 }

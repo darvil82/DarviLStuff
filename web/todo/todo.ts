@@ -79,8 +79,15 @@ class Todo {
 	private setEvents() {
 		this.element.addEventListener("click", this.toggleSelect.bind(this))
 		this.element.addEventListener("dblclick", this.toggleEdit.bind(this))
-		this.element.querySelector(".color-btn")
-			.addEventListener("click", this.updateFromElements.bind(this))
+		document.addEventListener("keyup", function(event: KeyboardEvent) {
+			if (
+				(
+					event.target === this.element.querySelector(".title")
+					|| event.target === this.element.querySelector(".body")
+				)
+				&& event.key === "Enter"
+			) this.toggleEdit()
+		}.bind(this))
 	}
 
 	/**
@@ -101,7 +108,7 @@ class Todo {
 		this.element.classList.remove("selected")
 
 		if (this.isEditing) {
-			this.updateFromElements()
+			if (!this.updateFromElements()) return;
 		}
 
 		this.element.classList.toggle("edit", !this.isEditing)
@@ -135,16 +142,25 @@ class Todo {
 	/**
 	 * Update the todo using the data from the elements in it
 	 */
-	private updateFromElements() {
+	private updateFromElements(): boolean {
+		const title = this.element.querySelector(".title").textContent.trim()
+
+		if (!title) {
+			this.shake()
+			return false
+		}
+
 		this.update({
-			title: this.element.querySelector(".title").textContent,
+			title,
 			body: this.element.querySelector(".body").textContent,
 			color: this.element.querySelector<HTMLInputElement>(".color-btn").value
 		})
+		return true
 	}
 
 	public shake() {
-
+		this.element.classList.add("shake")
+		this.element.addEventListener("animationend", () => this.element.classList.remove("shake"))
 	}
 
 
@@ -226,12 +242,11 @@ opts.delButton.addEventListener("click", () => {
 
 // Toggle the selected class of all the todos
 opts.allButton.addEventListener("click", () => {
-	const todos = currentTodos.reverse()
-	todos.forEach((todo, i) => {
+	currentTodos.reverse().forEach((todo, i) => {
 		setTimeout(() => todo.toggleSelect(), i * (
 			// if we have more than 25 todos, just dont do any fancy delaying
-			todos.length < 25
-				? 250 / todos.length
+			currentTodos.length < 25
+				? 250 / currentTodos.length
 				: 0
 		))
 	})
@@ -263,13 +278,21 @@ function getTodos(): TodoInfo[] {
 getTodos().forEach(options => addTodo(options))
 
 // If we have no todos, add the default one
-if (!currentTodos.length)
+if (!currentTodos.length) {
+	addTodo({
+		title: "Another note",
+		body: `Adding a todo is simple! Just type the contents up there and press enter.
+		Editing them? Even easier! Just double click on any todo to enable the edit mode.
+		Once finished, double click again!`,
+		color: "#483cb5",
+	})
 	addTodo({
 		title: "Welcome to my Todos!",
-		body: `So, yeah... This is a Todo! You can add more,
-		remove them, and huhhh... That's pretty much it I guess...
+		body: `So, yeah... This is a Todo! You can add,
+		remove, and edit them! That's pretty much it I guess...
 		Oh yeah they get saved! (Well, unless you clear your cache or remove them)`
 	})
+}
 
 // set up the "fancy" color picker
 document.querySelectorAll(".color-picker").forEach((picker: HTMLDivElement) => {
@@ -279,5 +302,3 @@ document.querySelectorAll(".color-picker").forEach((picker: HTMLDivElement) => {
 	input.addEventListener("input", updateInput)
 	updateInput()
 })
-
-currentTodos[0].shake()

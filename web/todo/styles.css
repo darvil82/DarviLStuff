@@ -135,6 +135,7 @@ button.select-all {
 }
 
 .todo {
+  --shake-anim-offset: .03em;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -156,8 +157,6 @@ button.select-all {
           flex-grow: 1;
   min-height: 150px;
   min-width: 20vw;
-  -webkit-transition: .5s;
-  transition: .5s;
   overflow: hidden;
   z-index: 1;
   outline: 0 solid transparent;
@@ -166,6 +165,10 @@ button.select-all {
       -ms-user-select: none;
           user-select: none;
   outline-offset: -3px;
+}
+
+.todo, .todo * {
+  -webkit-transition: .5s;
   transition: .5s;
 }
 
@@ -199,8 +202,8 @@ button.select-all {
 }
 
 .todo [contentEditable="true"] {
-  background-image: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.479)), to(transparent));
-  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.479), transparent);
+  background-image: -webkit-gradient(linear, left top, right top, from(var(--editable-color, rgba(0, 0, 0, 0.479))), to(transparent));
+  background-image: linear-gradient(90deg, var(--editable-color, rgba(0, 0, 0, 0.479)), transparent);
   border-radius: 5px;
   padding: .1em;
 }
@@ -232,6 +235,16 @@ button.select-all {
 
 .todo.remove {
   animation: slide .25s reverse forwards;
+}
+
+.todo.shake {
+  --shake-anim-offset: .25em;
+  -webkit-animation: shake 350ms alternate;
+          animation: shake 350ms alternate;
+}
+
+.todo.shake .title {
+  --editable-color: rgba(131, 33, 33, 0.479);
 }
 
 .todo:hover, .todo:focus-visible {
@@ -268,48 +281,56 @@ button.select-all {
 }
 
 @-webkit-keyframes shake {
-  0% {
-    -webkit-transform: translate(0.03em, -0.03em);
-            transform: translate(0.03em, -0.03em);
+  15% {
+    -webkit-transform: translate(0, var(--shake-anim-offset));
+            transform: translate(0, var(--shake-anim-offset));
   }
-  25% {
-    -webkit-transform: translate(0, 0.03em);
-            transform: translate(0, 0.03em);
-  }
-  50% {
+  30% {
     -webkit-transform: translate(0, 0);
             transform: translate(0, 0);
   }
-  75% {
-    -webkit-transform: translate(-0.03em, -0.03em);
-            transform: translate(-0.03em, -0.03em);
+  45% {
+    -webkit-transform: translate(var(--shake-anim-offset), calc(var(--shake-anim-offset) * -1));
+            transform: translate(var(--shake-anim-offset), calc(var(--shake-anim-offset) * -1));
   }
-  100% {
-    -webkit-transform: translate(0.03em, 0.03em);
-            transform: translate(0.03em, 0.03em);
+  60% {
+    -webkit-transform: translate(calc(var(--shake-anim-offset) * -1), 0);
+            transform: translate(calc(var(--shake-anim-offset) * -1), 0);
+  }
+  75% {
+    -webkit-transform: translate(0, var(--shake-anim-offset));
+            transform: translate(0, var(--shake-anim-offset));
+  }
+  90% {
+    -webkit-transform: translate(var(--shake-anim-offset), var(--shake-anim-offset));
+            transform: translate(var(--shake-anim-offset), var(--shake-anim-offset));
   }
 }
 
 @keyframes shake {
-  0% {
-    -webkit-transform: translate(0.03em, -0.03em);
-            transform: translate(0.03em, -0.03em);
+  15% {
+    -webkit-transform: translate(0, var(--shake-anim-offset));
+            transform: translate(0, var(--shake-anim-offset));
   }
-  25% {
-    -webkit-transform: translate(0, 0.03em);
-            transform: translate(0, 0.03em);
-  }
-  50% {
+  30% {
     -webkit-transform: translate(0, 0);
             transform: translate(0, 0);
   }
-  75% {
-    -webkit-transform: translate(-0.03em, -0.03em);
-            transform: translate(-0.03em, -0.03em);
+  45% {
+    -webkit-transform: translate(var(--shake-anim-offset), calc(var(--shake-anim-offset) * -1));
+            transform: translate(var(--shake-anim-offset), calc(var(--shake-anim-offset) * -1));
   }
-  100% {
-    -webkit-transform: translate(0.03em, 0.03em);
-            transform: translate(0.03em, 0.03em);
+  60% {
+    -webkit-transform: translate(calc(var(--shake-anim-offset) * -1), 0);
+            transform: translate(calc(var(--shake-anim-offset) * -1), 0);
+  }
+  75% {
+    -webkit-transform: translate(0, var(--shake-anim-offset));
+            transform: translate(0, var(--shake-anim-offset));
+  }
+  90% {
+    -webkit-transform: translate(var(--shake-anim-offset), var(--shake-anim-offset));
+            transform: translate(var(--shake-anim-offset), var(--shake-anim-offset));
   }
 }
 /*# sourceMappingURL=styles.css.map */

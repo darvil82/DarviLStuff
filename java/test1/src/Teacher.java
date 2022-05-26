@@ -63,11 +63,11 @@ public class Teacher extends Person {
 		this.salary = salary;
 	}
 
-	public byte getAntiguedad() {
+	public byte getSeniority() {
 		return seniority;
 	}
 
-	public void setAntiguedad(byte seniority) {
+	public void setSeniority(byte seniority) {
 		this.seniority = seniority;
 	}
 }

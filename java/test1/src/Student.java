@@ -48,7 +48,7 @@ public class Student extends Person {
 	}
 
 	public String toMySql() {
-		return "INSERT INTO alumnos VALUES ('" + this.id + "', '" + this.name + "', '" + this.surname + "', '"
+		return "INSERT INTO students VALUES ('" + this.id + "', '" + this.name + "', '" + this.surname + "', '"
 				+ this.course + "', " + this.classroom + ");";
 	}
 

@@ -62,15 +62,15 @@ public class Student extends Person {
 		return course;
 	}
 
-	public void setCourse(String curso) {
-		this.course = curso;
+	public void setCourse(String course) {
+		this.course = course;
 	}
 
 	public int getClassroom() {
 		return classroom;
 	}
 
-	public void setClassroom(int aula) {
-		this.classroom = aula;
+	public void setClassroom(int classroom) {
+		this.classroom = classroom;
 	}
 }

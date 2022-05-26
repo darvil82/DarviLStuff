@@ -4,5 +4,6 @@
 		"**/*.css.map": true,
 		"**/*.js": { "when": "$(basename).ts" },
 		"**/*.js.map": true,
-	}
+	},
+	"java.format.enabled": false
 }

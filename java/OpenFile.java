@@ -6,7 +6,7 @@ import java.util.Iterator;
 /**
  * File iterable which, when iterated over, will return an {@link EnumeratedItem} with
  * each line and index pair.
- *
+ * <br><br>
  * When the iteration starts, the {@link BufferedReader} in use is closed automatically.
  */
 public class OpenFile implements Iterable<EnumeratedItem<String>> {
@@ -14,8 +14,9 @@ public class OpenFile implements Iterable<EnumeratedItem<String>> {
 
 	/**
 	 * Open a file with a given charset.
+	 *
 	 * @param filename the file name
-	 * @param charset the charset
+	 * @param charset  the charset
 	 * @throws FileNotFoundException if the file is not found
 	 */
 	public OpenFile(String filename, Charset charset) throws FileNotFoundException {
@@ -29,6 +30,7 @@ public class OpenFile implements Iterable<EnumeratedItem<String>> {
 
 	/**
 	 * Open a file with the default charset (UTF-8).
+	 *
 	 * @param filename the file name
 	 * @throws FileNotFoundException if the file is not found
 	 */
@@ -38,6 +40,7 @@ public class OpenFile implements Iterable<EnumeratedItem<String>> {
 
 	/**
 	 * Open a file with a given buffered reader.
+	 *
 	 * @param br the buffered reader
 	 */
 	public OpenFile(BufferedReader br) {

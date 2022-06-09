@@ -59,7 +59,7 @@ class FileIterator implements Iterator<EnumeratedItem<String>> {
 
 	@Override
 	public boolean hasNext() {
-		return lines.length > currentLine;
+		return lines.length >= currentLine + 1;
 	}
 
 	@Override

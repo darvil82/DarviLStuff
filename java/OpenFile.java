@@ -6,6 +6,8 @@ import java.util.Iterator;
 /**
  * File iterable which, when iterated over, will return an {@link EnumeratedItem} with
  * each line and index pair.
+ *
+ * When the iteration starts, the {@link BufferedReader} in use is closed automatically.
  */
 public class OpenFile implements Iterable<EnumeratedItem<String>> {
 	public final BufferedReader br;
@@ -46,6 +48,12 @@ public class OpenFile implements Iterable<EnumeratedItem<String>> {
 	public FileIterator iterator() {
 		return new FileIterator(this);
 	}
+
+	// We don't want to give warnings to the user about closing the file.
+	// This is why Closeable is not being implemented.
+	public void close() throws IOException {
+		br.close();
+	}
 }
 
 
@@ -55,6 +63,11 @@ class FileIterator implements Iterator<EnumeratedItem<String>> {
 
 	public FileIterator(OpenFile fi) {
 		lines = fi.br.lines().toArray(String[]::new);
+		try {
+			fi.br.close();
+		} catch (IOException e) {
+			// already closed?
+		}
 	}
 
 	@Override

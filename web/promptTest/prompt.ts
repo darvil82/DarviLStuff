@@ -5,11 +5,12 @@
  * Wiki available at https://github.com/DarviL82/DarviLStuff/wiki/prompt.js
  */
 
-(function() {
+;(function () {
 	// Get the stylesheet for the prompt and add it to the head
 	let linkCSS = document.createElement("link")
 	linkCSS.rel = "stylesheet"
-	linkCSS.href = "https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
+	linkCSS.href =
+		"https://darvil82.github.io/DarviLStuff/web/promptTest/prompt.css"
 	document.querySelector("head").appendChild(linkCSS)
 
 	// add the prompt elements to the body
@@ -28,19 +29,19 @@
 
 	// hack to prevent the prompt from appearing for a small amount of time on load
 	container.style.transition = "all 0s"
-	setTimeout(() => {container.style.transition = ""}, 200);
+	setTimeout(() => {
+		container.style.transition = ""
+	}, 200)
 })()
 
-
 // Constants pointing to the elements that we'll use.
-const CONTAINER = document.querySelector('.prompt-container');
+const CONTAINER = document.querySelector(".prompt-container")
 const WPROMPT = {
 	window: <HTMLDivElement>document.querySelector(".prompt-window"),
-	header: <HTMLHeadingElement>document.querySelector('.prompt-header'),
-	text: <HTMLParagraphElement>document.querySelector('.prompt-text'),
-	items: <HTMLDivElement>document.querySelector(".prompt-items")
+	header: <HTMLHeadingElement>document.querySelector(".prompt-header"),
+	text: <HTMLParagraphElement>document.querySelector(".prompt-text"),
+	items: <HTMLDivElement>document.querySelector(".prompt-items"),
 }
-
 
 /**
  * Gets keyboard-focusable elements in the body
@@ -48,16 +49,19 @@ const WPROMPT = {
  * @returns {Element[]} The array of elements
  */
 function getKeyboardFocusableElements(excludeParent?: Element): Element[] {
-	return [...document.querySelector("body").querySelectorAll(
-		'a[href], button, input, textarea, select, details, [tabindex]'
-	)]
-	.filter(
-		el => !el.hasAttribute("disabled")
-		&& !el.getAttribute("aria-hidden")
-		&& !el.parentElement.isSameNode(excludeParent)
+	return [
+		...document
+			.querySelector("body")
+			.querySelectorAll(
+				"a[href], button, input, textarea, select, details, [tabindex]"
+			),
+	].filter(
+		el =>
+			!el.hasAttribute("disabled") &&
+			!el.getAttribute("aria-hidden") &&
+			!el.parentElement.isSameNode(excludeParent)
 	)
 }
-
 
 /**
  * Returns a computed color array from the given CSS color string.
@@ -66,7 +70,7 @@ function getKeyboardFocusableElements(excludeParent?: Element): Element[] {
  */
 function getColorArray(color: string): number[] {
 	const dummy = document.createElement("dummy")
-	document.body.appendChild(dummy)	// this is needed to get the computed style
+	document.body.appendChild(dummy) // this is needed to get the computed style
 
 	dummy.style.backgroundColor = color
 	const value = getComputedStyle(dummy).backgroundColor
@@ -76,34 +80,28 @@ function getColorArray(color: string): number[] {
 	return value.match(/\d+/g).map(v => parseInt(v))
 }
 
-
-
-
-
-
 const ELEMENTS_TAB_INDEX = { globalState: true }
 /** Sets the tabIndex of all the elements in the DOM, except the ones inside the prompt container */
-function setTabIndex(value=true) {
-	const elements = <Array<HTMLElement>>getKeyboardFocusableElements(WPROMPT.items)
+function setTabIndex(value = true) {
+	const elements = <Array<HTMLElement>>(
+		getKeyboardFocusableElements(WPROMPT.items)
+	)
 
 	if (value) {
 		// @ts-ignore
-		elements.forEach(e => e.tabIndex = ELEMENTS_TAB_INDEX[e])
+		elements.forEach(e => (e.tabIndex = ELEMENTS_TAB_INDEX[e]))
 		ELEMENTS_TAB_INDEX.globalState = true
 	} else if (ELEMENTS_TAB_INDEX.globalState) {
 		// @ts-ignore
-		elements.forEach(e => ELEMENTS_TAB_INDEX[e] = e.tabIndex)
-		elements.forEach(e => e.tabIndex = -1)
+		elements.forEach(e => (ELEMENTS_TAB_INDEX[e] = e.tabIndex))
+		elements.forEach(e => (e.tabIndex = -1))
 		ELEMENTS_TAB_INDEX.globalState = false
 	}
 }
 
-
-
-
 /** A prompt window that may have some properties like text and items */
 class Prompt {
-	private static itemCounter = 0; // used to give each prompt item a unique ID
+	private static itemCounter = 0 // used to give each prompt item a unique ID
 
 	/**
 	 * @param title - The title of the prompt window
@@ -121,20 +119,24 @@ class Prompt {
 	) {
 		this.title = title || ""
 		this.body = body || ""
-		this.itemsArray = itemsArray || [ new PromptButton("Ok") ]
-		this.isVertical = isVertical || window.innerWidth < 600 	// If the window is small, display the items vertically
+		this.itemsArray = itemsArray || [new PromptButton("Ok")]
+		this.isVertical = isVertical || window.innerWidth < 600 // If the window is small, display the items vertically
 		this.accent = accent || "white"
 	}
 
 	/** Generate the prompt window with all the elements, and show it */
 	show() {
-		WPROMPT.header.innerHTML = this.title;
-		WPROMPT.text.innerHTML = this.body;
-		WPROMPT.items.style.flexDirection = (this.isVertical) ? "column" : "row"
-		WPROMPT.window.style.outlineColor = `rgba(${getColorArray(this.accent).join(", ")}, 0.21)`
+		WPROMPT.header.innerHTML = this.title
+		WPROMPT.text.innerHTML = this.body
+		WPROMPT.items.style.flexDirection = this.isVertical ? "column" : "row"
+		WPROMPT.window.style.outlineColor = `rgba(${getColorArray(this.accent).join(
+			", "
+		)}, 0.21)`
 
 		// remove all the buttons and set the new ones
-		Array.from(WPROMPT.items.children).forEach(e => WPROMPT.items.removeChild(e))
+		Array.from(WPROMPT.items.children).forEach(e =>
+			WPROMPT.items.removeChild(e)
+		)
 		this.itemsArray.forEach(e => {
 			WPROMPT.items.appendChild(e.genElement(this.isVertical))
 		})
@@ -143,7 +145,9 @@ class Prompt {
 	}
 
 	/** Return the state of the window */
-	static get isShown() { return (CONTAINER.classList.contains("shown")) }
+	static get isShown() {
+		return CONTAINER.classList.contains("shown")
+	}
 
 	/** Shows the prompt window with the elements already added */
 	static display() {
@@ -159,18 +163,14 @@ class Prompt {
 		setTabIndex(true)
 	}
 
-	static getNextItemID() { return `prompt-item-${Prompt.itemCounter++}` }
+	static getNextItemID() {
+		return `prompt-item-${Prompt.itemCounter++}`
+	}
 }
-
-
-
 
 interface PromptItem {
 	genElement(isVertical?: boolean): HTMLElement
 }
-
-
-
 
 /** A prompt button that can be pressed by the user.
  *  When the user presses it, the callback supplied will be called. */
@@ -181,7 +181,7 @@ class PromptButton implements PromptItem {
 	 * @param {function} callback - The function to call when the button is pressed
 	 * @param {string} width - CSS width of the button
 	 * @param {boolean} closePromptOnPress - Will the prompt be closed when the button is pressed?
-	**/
+	 **/
 	constructor(
 		public text: string,
 		public colorsArray?: string[],
@@ -209,18 +209,15 @@ class PromptButton implements PromptItem {
 
 	/** Call the callback function and hide the prompt if the closePromptOnPress property is true */
 	press() {
-		if (this.closePromptOnPress)
-			Prompt.hide()
+		if (this.closePromptOnPress) Prompt.hide()
 		this.callback()
 	}
 }
 
-
-
 /** A prompt input that lets the user enter text.
  *  The value entered can be obtained through the `value` property. */
 class PromptInput implements PromptItem {
-	private id: string;
+	private id: string
 
 	/**
 	 * @param {string} placeholder - The placeholder text to display in the input
@@ -256,26 +253,28 @@ class PromptInput implements PromptItem {
 		return i
 	}
 
-	private get element() { return <HTMLInputElement>document.getElementById(this.id) }
+	private get element() {
+		return <HTMLInputElement>document.getElementById(this.id)
+	}
 
 	/** Return the value entered by the user */
-	get value() { return this.element.value }
+	get value() {
+		return this.element.value
+	}
 }
-
-
 
 /** A prompt input that lets the user select an option from a list of options.
  *  The value entered can be obtained through the `value` property, and the index
  *  of it in the options array with the `index` property. */
 class PromptOptionList implements PromptItem {
-	private id: string;
+	private id: string
 
 	/**
 	 * @param {Array} optList - An array of options (strings) to display in the list
 	 * @param {string} selectedIndex - The index of the selected option by default. Default value is 0.
 	 * @param {string} width - CSS width of the input box
 	 * @param {function} callback - The function to call with the value and index when the value is changed
-	*/
+	 */
 	constructor(
 		public optList: string[],
 		public selectedIndex?: number,
@@ -306,25 +305,31 @@ class PromptOptionList implements PromptItem {
 		return i
 	}
 
-	private get element() { return <HTMLSelectElement>document.getElementById(this.id) }
+	private get element() {
+		return <HTMLSelectElement>document.getElementById(this.id)
+	}
 
 	/** Return the option elements from the options array */
 	static getOptionElements(optList: string[]): HTMLOptionElement[] {
-		return [...optList.map(opt => {
-			let e = document.createElement("option")
-			e.innerHTML = opt
-			return e
-		})]
+		return [
+			...optList.map(opt => {
+				let e = document.createElement("option")
+				e.innerHTML = opt
+				return e
+			}),
+		]
 	}
 
 	/** Return the value entered by the user */
-	get value() { return this.element.value }
+	get value() {
+		return this.element.value
+	}
 
 	/** Return the index of the selected option on the options */
-	get index() { return this.element.selectedIndex }
+	get index() {
+		return this.element.selectedIndex
+	}
 }
-
-
 
 /** A prompt spacer that basically just adds a little
  *  space between the prompt items. */
@@ -367,20 +372,15 @@ class PromptSpacer implements PromptItem {
 	}
 }
 
-
-
-
 // Easy to use functions like the alert() and prompt() built-ins.
-
 
 /** A prompt window that will display a message to the user.
  * @param {string} title - The title of the prompt
  * @param {string} body - The body of the prompt
  */
 function showAlert(title: string, body: string) {
-	new Prompt(title, body, [ new PromptButton("Ok") ]).show()
+	new Prompt(title, body, [new PromptButton("Ok")]).show()
 }
-
 
 /** A prompt window that will ask the user to input a value.
  * @param {string} title - The title of the prompt
@@ -388,21 +388,26 @@ function showAlert(title: string, body: string) {
  * @param {function} callback - The function to call with the value of the input when the user presses the OK button
  * @param {string} defaultValue - The default value of the input
  */
-function showPrompt(title: string, body: string, callback: (value: string) => void, defaultValue?: string) {
-	let inputText = new PromptInput(null, defaultValue, null, () => okButton.press())
-	let okButton = new PromptButton("Ok", ["lime", "green"], () => { callback(inputText.value) })
+function showPrompt(
+	title: string,
+	body: string,
+	callback: (value: string) => void,
+	defaultValue?: string
+) {
+	let inputText = new PromptInput(null, defaultValue, null, () =>
+		okButton.press()
+	)
+	let okButton = new PromptButton("Ok", ["lime", "green"], () => {
+		callback(inputText.value)
+	})
 
-	new Prompt(
-		title, body,
-		[
-			inputText,
-			new PromptSpacer(),
-			new PromptButton("Cancel"),
-			okButton
-		]
-	).show()
+	new Prompt(title, body, [
+		inputText,
+		new PromptSpacer(),
+		new PromptButton("Cancel"),
+		okButton,
+	]).show()
 }
-
 
 /** A prompt window that will ask the user to select the Ok or Cancel button.
  * @param {string} title - The title of the prompt
@@ -410,12 +415,14 @@ function showPrompt(title: string, body: string, callback: (value: string) => vo
  * @param {function} okCallback - The function to call when the user presses the OK button
  * @param {function} cancelCallback - The function to call when the user presses the Cancel button
  */
-function showConfirm(title: string, body: string, okCallback: () => void, cancelCallback?: () => void) {
-	new Prompt(
-		title, body,
-		[
-			new PromptButton("Cancel", ["red", "darkred"], cancelCallback),
-			new PromptButton("Ok", ["lime", "green"], okCallback)
-		]
-	).show()
+function showConfirm(
+	title: string,
+	body: string,
+	okCallback: () => void,
+	cancelCallback?: () => void
+) {
+	new Prompt(title, body, [
+		new PromptButton("Cancel", ["red", "darkred"], cancelCallback),
+		new PromptButton("Ok", ["lime", "green"], okCallback),
+	]).show()
 }

@@ -3,7 +3,7 @@ use test2::*;
 fn main() {
     let mut cfg = Config::new("shit", "alright");
     cfg.add_arg(Arg::new("num", Value::Number(23), "hell nah"));
-    cfg.add_arg(Arg::new("str", Value::String("balls"), "balls"));
+    cfg.add_arg(Arg::new("str", Value::String("balls".into()), "balls"));
     cfg.add_arg(Arg::new("bool", Value::Bool, "what th hell"));
 
     let parsed_args = cfg.parse_args();

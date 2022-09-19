@@ -48,7 +48,6 @@ class BitSlice {
 	}
 
 public:
-	class iterator;
 
     BitSlice(size_t size = 1): BitSlice((char)0) {}
 

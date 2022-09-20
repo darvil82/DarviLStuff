@@ -14,20 +14,12 @@ std::string char_to_hex(unsigned char data) {
 	return ss.str();
 }
 
-
-
-
-struct IndexOutOfBoundsError : std::exception {
-	const char* what() const noexcept override {
-		return "Index is out of bounds";
-	}
-};
-
 struct ResizeCustomPointerError : std::exception {
 	const char* what() const noexcept override {
 		return "Cannot resize custom pointer";
 	}
 };
+
 
 
 
@@ -40,16 +32,10 @@ class BitSlice {
 	char* bits;
 
 	void check_in_bounds(size_t index, bool is_bit_index = true) const {
-		if (is_bit_index) {
-			size_t byte_index = byte_index_from_bit(index);
+		size_t byte_index = is_bit_index ? byte_index_from_bit(index) : index;
 
-			if (byte_index + 1 > this->size || byte_index < 0) {
-				throw IndexOutOfBoundsError();
-			}
-		} else {
-			if (index > this->size - 1 || index < 0) {
-				throw IndexOutOfBoundsError();
-			}
+		if (byte_index >= this->size || byte_index < 0) {
+			throw std::invalid_argument("Index is out of bounds");
 		}
 	}
 

@@ -75,20 +75,22 @@ public:
 		memcpy(this->bits, &value, this->size);
 	}
 
+	BitSlice(const char* value, bool include_null_terminator = false):
+		bits{(char*)value},
+		own_ptr{false}
+	{
+		this->set_size(strlen(value) + (include_null_terminator ? 1 : 0));
+	}
+
 	template<typename T>
 	BitSlice(T* value):
 		bits{(char*)value},
 		own_ptr{false}
 	{
-		set_size(sizeof(*value));
+		this->set_size(sizeof(*value));
 	}
 
-	template<typename T>
-	BitSlice(T* value, size_t size):
-		BitSlice(value)
-	{
-		set_size(size);
-	}
+
 
 	BitSlice(const BitSlice& bs):
 		bits{bs.bits},
@@ -156,7 +158,7 @@ public:
 		size_t bits = this->size * 8;
 
 		for (size_t byte = 0; byte < this->size; byte++) {
-			char current_byte = this->bits[reverse ? (this->size - byte - 1) : byte];
+			unsigned char current_byte = this->bits[reverse ? (this->size - byte - 1) : byte];
 
 			if (show_separator)
 				temp_str += '|';
@@ -169,9 +171,8 @@ public:
 				temp_str += std::string(":") += std::to_string(current_byte);
 
 			if (show_hex_values)
-				temp_str += std::string(":") + char_to_hex((unsigned char) current_byte);
+				temp_str += std::string(":") + char_to_hex(current_byte);
 		}
-
 
 		return std::string("0b") += temp_str;
 	}
@@ -190,16 +191,15 @@ int main() {
 	test thing;
 
 	BitSlice bss[] = {
-		BitSlice("hello!", 7),
-		BitSlice(12),
-		BitSlice(&thing),
+		{"hola"},
+		{12},
+		{&thing},
 		BitSlice::from_size(1),
-		BitSlice((char)200),
+		{167},
 	};
 
 	for (BitSlice& bs : bss) {
-		std::cout << bs.to_string(true, true) << std::endl;
+		std::cout << bs.to_string(true, true, true) << std::endl;
 	}
 
-	std::cout << bss[0].to_string(true, true, false, true) << std::endl;
 }

@@ -199,7 +199,6 @@ int main() {
 	};
 
 	for (BitSlice& bs : bss) {
-		std::cout << bs.to_string(true, true, true) << std::endl;
+		std::cout << bs.to_string(true, true, false, true) << std::endl;
 	}
-
 }

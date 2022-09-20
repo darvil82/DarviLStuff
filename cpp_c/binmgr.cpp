@@ -8,7 +8,7 @@
 #define SET_BIT(value, index, new_bit_value) (value & ~(1UL << index - 1)) | (new_bit_value << index - 1)
 
 
-inline std::string char_to_hex(unsigned char data) {
+std::string char_to_hex(unsigned char data) {
 	std::stringstream ss;
 	ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data);
 	return ss.str();

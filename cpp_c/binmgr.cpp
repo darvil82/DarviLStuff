@@ -166,7 +166,6 @@ public:
 
 
 class test {
-private:
 	unsigned char value = 120;
 	unsigned char value2 = 0;
 	unsigned char value3 = 50;

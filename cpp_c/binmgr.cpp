@@ -65,7 +65,7 @@ public:
 		bits{(char*)value},
 		own_ptr{false}
 	{
-		this->set_size(strlen(value) + (include_null_terminator ? 1 : 0));
+		this->set_size(strlen(value) + include_null_terminator);
 	}
 
 	template<typename T>

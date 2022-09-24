@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 
-#define GET_BIT(value, index) (value >> index) & 1UL
-#define SET_BIT(value, index, new_bit_value)                                   \
+#define binmgr__GET_BIT(value, index) (value >> index) & 1UL
+#define binmgr__SET_BIT(value, index, new_bit_value)                                   \
 	(value & ~(1UL << index)) | (new_bit_value << index)
 
 typedef unsigned char byte;
@@ -159,12 +159,12 @@ public:
 		binmgr__CHECK_BIT_IN_BOUNDS;
 		size_t byte_index = index / 8;
 		this->bits[byte_index] =
-			SET_BIT(this->bits[byte_index], index % 8, value);
+			binmgr__SET_BIT(this->bits[byte_index], index % 8, value);
 	}
 
 	bool get_bit(size_t index) const {
 		binmgr__CHECK_BIT_IN_BOUNDS;
-		return GET_BIT(this->bits[index / 8], index % 8);
+		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
 	}
 
 	std::string to_string(
@@ -182,7 +182,7 @@ public:
 
 			// show each bit
 			for (size_t bit = 8; bit > 0; bit--) {
-				temp_str += std::to_string(GET_BIT(current_byte, bit - 1));
+				temp_str += std::to_string(binmgr__GET_BIT(current_byte, bit - 1));
 			}
 
 			if (show_decimal_values)

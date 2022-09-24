@@ -4,7 +4,7 @@
 #include <string>
 
 #define binmgr__GET_BIT(value, index) (value >> index) & 1UL
-#define binmgr__SET_BIT(value, index, new_bit_value)                                   \
+#define binmgr__SET_BIT(value, index, new_bit_value)                           \
 	(value & ~(1UL << index)) | (new_bit_value << index)
 
 typedef unsigned char byte;
@@ -141,10 +141,6 @@ public:
 		return this->size;
 	}
 
-	bool operator[](size_t index) const {
-		return this->get_bit(index);
-	}
-
 	byte get_byte(size_t index) const {
 		binmgr__CHECK_BYTE_IN_BOUNDS;
 		return this->bits[index];
@@ -162,7 +158,11 @@ public:
 			binmgr__SET_BIT(this->bits[byte_index], index % 8, value);
 	}
 
-	bool get_bit(size_t index) const {
+	Bit operator[](size_t index) {
+		return {*this, index};
+	}
+
+	bool get_bit(size_t index) {
 		binmgr__CHECK_BIT_IN_BOUNDS;
 		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
 	}
@@ -182,7 +182,8 @@ public:
 
 			// show each bit
 			for (size_t bit = 8; bit > 0; bit--) {
-				temp_str += std::to_string(binmgr__GET_BIT(current_byte, bit - 1));
+				temp_str +=
+					std::to_string(binmgr__GET_BIT(current_byte, bit - 1));
 			}
 
 			if (show_decimal_values)

@@ -99,8 +99,8 @@ public:
 		memcpy(this->bits, &value, this->size);
 	}
 
-	BitSlice(const char* value, bool include_null_terminator = false)
-		: bits{(byte*)value}, own_ptr{false} {
+	BitSlice(const char* value, bool include_null_terminator = false) :
+		bits{(byte*)value}, own_ptr{false} {
 		this->set_size(strlen(value) + include_null_terminator);
 	}
 
@@ -109,10 +109,8 @@ public:
 		this->set_size(sizeof(*value));
 	}
 
-
-
-	BitSlice(const BitSlice& bs)
-		: bits{bs.bits}, own_ptr{bs.own_ptr}, size{bs.size} {
+	BitSlice(const BitSlice& bs) :
+		bits{bs.bits}, own_ptr{bs.own_ptr}, size{bs.size} {
 	}
 
 	~BitSlice() {
@@ -164,6 +162,10 @@ public:
 	bool get_bit(size_t index) {
 		binmgr__CHECK_BIT_IN_BOUNDS;
 		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
+	}
+
+	byte* get_underlying_value() const {
+		return this->bits;
 	}
 
 	std::string to_string(

@@ -49,25 +49,6 @@ class BitSlice {
 
 
 
-	class Bit;
-
-	class BitIterator {
-		size_t current = 0;
-		BitSlice& bs;
-
-	public:
-		BitIterator(BitSlice& bs, size_t index = 0) : bs{bs}, current{index} {}
-
-		Bit operator*() const { return {bs, current}; }
-
-		void operator++() { current++; }
-
-		bool operator!=(BitIterator& bi) const {
-			return this->current != bi.current;
-		}
-	};
-
-
 	class Bit {
 		BitSlice& bs;
 		const size_t index;
@@ -87,6 +68,24 @@ class BitSlice {
 		size_t get_index() const { return this->index; }
 
 		bool get_value() const { return bs.get_bit(this->index); }
+	};
+
+
+
+	class BitIterator {
+		size_t current = 0;
+		BitSlice& bs;
+
+	public:
+		BitIterator(BitSlice& bs, size_t index = 0) : bs{bs}, current{index} {}
+
+		Bit operator*() const { return {bs, current}; }
+
+		void operator++() { current++; }
+
+		bool operator!=(BitIterator& bi) const {
+			return this->current != bi.current;
+		}
 	};
 
 

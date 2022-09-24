@@ -164,10 +164,6 @@ public:
 		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
 	}
 
-	byte* get_underlying_value() const {
-		return this->bits;
-	}
-
 	std::string to_string(
 		bool show_separator = false, bool reverse = false,
 		bool show_decimal_values = false, bool show_hex_values = false) const {

@@ -29,6 +29,6 @@ int main() {
 		bit = bit.get_index() % 2;
 	}
 
-	std::cout << a.to_string(true, false, true) << "\n";
+	std::cout << a.to_string(true) << std::endl;
 }
 

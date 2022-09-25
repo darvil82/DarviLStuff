@@ -66,7 +66,12 @@
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
 		"variant": "cpp",
-		"iomanip": "cpp"
+		"iomanip": "cpp",
+		"optional": "cpp",
+		"fstream": "cpp",
+		"ranges": "cpp",
+		"span": "cpp",
+		"valarray": "cpp"
 	},
 	"editor.formatOnSave": true
 }

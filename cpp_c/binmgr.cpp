@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #define binmgr__GET_BIT(value, index) (value >> index) & 1UL
 #define binmgr__SET_BIT(value, index, new_bit_value)                           \
@@ -47,52 +48,117 @@ class BitSlice {
 		this->size = new_size;
 	}
 
+	// methods for getting just a byte or a bool. Used by the iterators
+	byte get_byte_primitive(size_t index) const {
+		binmgr__CHECK_BYTE_IN_BOUNDS;
+		return this->bits[index];
+	}
+
+	bool get_bit_primitive(size_t index) {
+		binmgr__CHECK_BIT_IN_BOUNDS;
+		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
+	}
 
 
-	class Bit {
-		BitSlice& bs;
-		const size_t index;
-
-	public:
-		Bit(BitSlice& bs, size_t index) : bs{bs}, index{index} {}
-
-		bool operator=(bool new_value) const {
-			bs.set_bit(this->index, new_value);
-			return new_value;
-		}
-
-		bool operator*() const { return this->get_value(); }
-
-		operator bool() const { return this->get_value(); }
-
-		size_t get_index() const { return this->index; }
-
-		bool get_value() const { return bs.get_bit(this->index); }
-	};
-
-
-
-	class BitIterator {
+	template<class TValue> class BitSliceIterator {
+	protected:
 		size_t current = 0;
 		BitSlice& bs;
 
 	public:
-		BitIterator(BitSlice& bs, size_t index = 0) : bs{bs}, current{index} {}
+		BitSliceIterator(BitSlice& bs, size_t index = 0) :
+			bs{bs}, current{index} {}
 
-		Bit operator*() const { return {bs, current}; }
+		virtual TValue operator*() const {
+			return TValue{this->bs, this->current};
+		};
 
 		void operator++() { current++; }
 
-		bool operator!=(BitIterator& bi) const {
-			return this->current != bi.current;
+		bool operator!=(const BitSliceIterator& other) const {
+			return this->current != other.current;
+		}
+	};
+
+	// this is something that can modify the bitslice indirectly
+	template<class TInnerValue> class ModifiableValueBase {
+	protected:
+		BitSlice& bs;
+		size_t index;
+
+	public:
+		ModifiableValueBase(BitSlice& bs, size_t index) :
+			bs{bs}, index{index} {}
+
+		TInnerValue operator*() const { return this->get_value(); }
+
+		operator TInnerValue() const { return this->get_value(); }
+
+		size_t get_index() const { return this->index; }
+
+		virtual TInnerValue get_value() const = 0;
+
+		virtual TInnerValue operator=(TInnerValue new_value) const = 0;
+	};
+
+
+	class BitWrapper : public ModifiableValueBase<bool> {
+		using ModifiableValueBase::ModifiableValueBase;
+
+	public:
+		bool get_value() const override {
+			return this->bs.get_bit_primitive(index);
+		}
+
+		bool operator=(bool new_value) const override {
+			this->bs.set_bit(index, new_value);
+			return new_value;
 		}
 	};
 
 
+	class ByteWrapper : public ModifiableValueBase<byte> {
+		using ModifiableValueBase::ModifiableValueBase;
+
+		// bytes should also be iterable in its 8 units range
+		class ByteIterator : public BitSliceIterator<BitWrapper> {
+		public:
+			// we want to multiply by 8 here because we want to get the bit
+			ByteIterator(BitSlice& bs, size_t index = 0) :
+				BitSliceIterator{bs, index * 8} {}
+
+			BitWrapper operator*() const override {
+				return {this->bs, this->current};
+			}
+		};
+
+	public:
+		byte get_value() const override {
+			return this->bs.get_byte_primitive(index);
+		}
+
+		byte operator=(byte new_value) const override {
+			this->bs.set_byte(index, new_value);
+			return new_value;
+		}
+
+		BitWrapper operator[](size_t bit_index) const {
+			if (bit_index >= 8 || bit_index < 0) {
+				throw std::invalid_argument(
+					"Bit index is out of bounds of the current byte");
+			}
+			return {this->bs, this->index * 8 + bit_index};
+		}
+
+		ByteIterator begin() { return ByteIterator{this->bs, this->index}; }
+		ByteIterator end() { return ByteIterator{this->bs, this->index + 1}; }
+	};
+
+
+
 
 public:
-	BitSlice() : BitSlice((byte)0) {
-	}
+	BitSlice() : BitSlice((byte)0) {}
 
 	template<typename T>
 	BitSlice(T value) : size{sizeof(value)}, bits{new byte[this->size]} {
@@ -110,8 +176,7 @@ public:
 	}
 
 	BitSlice(const BitSlice& bs) :
-		bits{bs.bits}, own_ptr{bs.own_ptr}, size{bs.size} {
-	}
+		bits{bs.bits}, own_ptr{bs.own_ptr}, size{bs.size} {}
 
 	~BitSlice() {
 		if (this->own_ptr)
@@ -134,13 +199,11 @@ public:
 		this->bits = (byte*)realloc(this->bits, this->size);
 	}
 
-	size_t get_size() const {
-		return this->size;
-	}
+	size_t get_size() const { return this->size; }
 
-	byte get_byte(size_t index) const {
+	ByteWrapper get_byte(size_t index) {
 		binmgr__CHECK_BYTE_IN_BOUNDS;
-		return this->bits[index];
+		return {*this, index};
 	}
 
 	void set_byte(size_t index, byte value) {
@@ -155,13 +218,33 @@ public:
 			binmgr__SET_BIT(this->bits[byte_index], index % 8, value);
 	}
 
-	Bit operator[](size_t index) {
+	BitWrapper operator[](size_t index) { return {*this, index}; }
+
+	BitWrapper get_bit(size_t index) {
+		binmgr__CHECK_BIT_IN_BOUNDS;
 		return {*this, index};
 	}
 
-	bool get_bit(size_t index) {
-		binmgr__CHECK_BIT_IN_BOUNDS;
-		return binmgr__GET_BIT(this->bits[index / 8], index % 8);
+	std::vector<ByteWrapper> get_bytes_in_range(size_t start, size_t end) {
+		this->check_in_bounds(start, false);
+		this->check_in_bounds(end, false);
+
+		std::vector<ByteWrapper> bytes;
+		for (size_t i = start; i <= end; i++) {
+			bytes.push_back(this->get_byte(i));
+		}
+		return bytes;
+	}
+
+	std::vector<BitWrapper> get_bits_in_range(size_t start, size_t end) {
+		this->check_in_bounds(start);
+		this->check_in_bounds(end);
+
+		std::vector<BitWrapper> bits;
+		for (size_t i = start; i <= end; i++) {
+			bits.push_back((*this)[i]);
+		}
+		return bits;
 	}
 
 	std::string to_string(
@@ -193,11 +276,8 @@ public:
 		return std::string("0b") += temp_str;
 	}
 
-	BitIterator begin() {
-		return {*this};
-	}
-
-	BitIterator end() {
-		return {*this, this->size * 8};
-	}
+	BitSliceIterator<BitWrapper> begin() { return {*this}; }
+	BitSliceIterator<BitWrapper> end() { return {*this, this->size * 8}; }
+	BitSliceIterator<ByteWrapper> begin_bytes() { return {*this}; }
+	BitSliceIterator<ByteWrapper> end_bytes() { return {*this, this->size}; }
 };

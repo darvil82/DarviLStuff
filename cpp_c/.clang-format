@@ -38,3 +38,5 @@ UseTab: Always
 BreakConstructorInitializers: AfterColon
 AllowAllConstructorInitializersOnNextLine: "true"
 ConstructorInitializerAllOnOneLineOrOnePerLine: "true"
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: All

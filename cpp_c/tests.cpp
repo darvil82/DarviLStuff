@@ -34,6 +34,13 @@ int main() {
 		bit = bit.get_index() % 2;
 	}
 
-	std::cout << a.to_string(true) << std::endl;
+	std::cout << a.to_string(true, false, true) << std::endl;
+
+	for (auto x = a.begin_bytes(); x != a.end_bytes(); ++x) {
+		printf("byte n: %d\n", (*x).get_index());
+		for (auto bit : *x) {
+			printf("\tbit n: %d = %d\n", bit.get_index(), bit.get_value());
+		}
+	}
 }
 

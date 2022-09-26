@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Cookies Handler</title>
 	<script src="cookies.js"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark-dimmed.min.css">
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/github-dark-dimmed.min.css">
 	<style>
 		body {
 			overflow-x: hidden;
@@ -28,30 +30,30 @@
 		}
 
 		/* Headings */
-			h1 {
-				font-size: 2em;
-			}
+		h1 {
+			font-size: 2em;
+		}
 
-			h1.title {
-				font-size: 3em;
-			}
+		h1.title {
+			font-size: 3em;
+		}
 
-			:is(p, h1, h2, h3, h4, h5, h6):first-child {
-				margin-top: 0;
-			}
+		:is(p, h1, h2, h3, h4, h5, h6):first-child {
+			margin-top: 0;
+		}
 
-			:is(p, h1, h2, h3, h4, h5, h6):last-child {
-				margin-bottom: 0;
-			}
+		:is(p, h1, h2, h3, h4, h5, h6):last-child {
+			margin-bottom: 0;
+		}
 
 		/* Links */
-			a {
-				color: rgb(0, 255, 170);
-			}
+		a {
+			color: rgb(0, 255, 170);
+		}
 
-			a:visited {
-				color: rgb(1, 153, 133);
-			}
+		a:visited {
+			color: rgb(1, 153, 133);
+		}
 
 		var {
 			font-style: normal;
@@ -87,6 +89,7 @@
 		}
 	</style>
 </head>
+
 <body>
 	<section>
 		<h1 class="title">Cookies Handler 🍪</h1>
@@ -114,8 +117,7 @@
 			Setting a cookie value is very easy!
 		</p>
 		<code>
-// There's already an instance of Cookie made for you
-cookies.set({
+Cookies.set({
 	user: {
 		name: "Aster",
 		age: 21
@@ -152,13 +154,15 @@ interface CookieOptions {
 		</code>
 		<p>
 			Which refer to the
-			<a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie#write_a_new_cookie">official documentation.</a>
+			<a target="_blank"
+				href="https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie#write_a_new_cookie">official
+				documentation.</a>
 		</p>
 		<div class="example">
 			<h2>Example</h2>
 			<p> Setting a few cookies with some options: </p>
 			<code>
-cookies.set({
+Cookies.set({
 	user: {
 		name: "Endercheif",
 		age: 19,
@@ -181,7 +185,7 @@ cookies.set({
 		</p>
 		<code>
 // This returns back the original object!
-cookies.get("user")
+Cookies.get("user")
 		</code>
 		<p>
 			This will return the original object. If no name is specified on the <var>get</var> method,
@@ -224,7 +228,7 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 			In order to remove a cookie, you just need to:
 		</p>
 		<code>
-		cookies.remove("user")
+		Cookies.remove("user")
 		</code>
 	</section>
 
@@ -244,7 +248,9 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 		&lt;script src="https://darvil82.github.io/DarviLStuff/web/cookieHandler/cookies.js"&gt;&lt;/script&gt;
 		</code>
 		<h1>Source</h1>
-		<p> And of course, as always, the source is available on <a target="_blank" href="https://github.com/DarviL82/DarviLStuff/blob/master/web/cookieHandler/cookies.ts">my repository.</a> </p>
+		<p> And of course, as always, the source is available on <a target="_blank"
+				href="https://github.com/DarviL82/DarviLStuff/blob/master/web/cookieHandler/cookies.ts">my
+				repository.</a> </p>
 	</section>
 </body>
 
@@ -263,4 +269,5 @@ user=%7B%22name%22%3A%22Endercheif%22%2C%22age%22%3A19%2C%22popup%22%3A%7B%22
 		e.parentNode.insertBefore(wrapper, e).appendChild(e)
 	})
 </script>
+
 </html>

@@ -220,6 +220,8 @@ public:
 		return true;
 	}
 
+
+
 	void resize(size_t size) {
 		if (!this->own_ptr) {
 			throw ResizeCustomPointerError();
@@ -247,7 +249,7 @@ public:
 			binmgr__SET_BIT(this->bits[byte_index], index % 8, value);
 	}
 
-	BitWrapper operator[](size_t index) { return {*this, index}; }
+	ByteWrapper operator[](size_t index) { return this->get_byte(index); }
 
 	BitWrapper get_bit(size_t index) {
 		binmgr__CHECK_BIT_IN_BOUNDS;
@@ -279,7 +281,7 @@ public:
 
 		std::vector<BitWrapper> bits;
 		for (size_t i = start; i <= end; i++) {
-			bits.push_back((*this)[i]);
+			bits.push_back(this->get_bit(i));
 		}
 		return bits;
 	}

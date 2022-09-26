@@ -17,7 +17,8 @@ int main() {
 		{thing2}, {12}, {&thing}, BitSlice::from_size(1), {167},
 	};
 
-	bss[0][16] = 1;
+	// set the first bit of the third byte of "thing2" to 1.
+	bss[0][2][0] = true;
 
 	for (BitSlice& bs : bss) {
 		std::cout << bs.to_string(true, true, false, true) << std::endl;

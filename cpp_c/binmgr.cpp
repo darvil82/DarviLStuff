@@ -91,13 +91,14 @@ class BitSlice {
 			bs{bs}, index{index} {}
 
 		TInnerValue operator*() const { return this->get_value(); }
-
 		operator TInnerValue() const { return this->get_value(); }
-
 		size_t get_index() const { return this->index; }
+		void flip() { this->operator=(~this->get_value()); }
+		bool operator==(const ModifiableValueBase<TInnerValue>& other) const {
+			return this->get_value() == other.get_value();
+		}
 
 		virtual TInnerValue get_value() const = 0;
-
 		virtual TInnerValue operator=(TInnerValue new_value) const = 0;
 	};
 
@@ -150,6 +151,24 @@ class BitSlice {
 			return {this->bs, this->index * 8 + bit_index};
 		}
 
+		std::string
+			to_string(bool show_decimal = false, bool show_hex = false) const {
+			std::string temp_str;
+
+			for (size_t i = 0; i < 8; i++) {
+				temp_str += std::to_string((*this)[i]);
+			}
+
+			if (show_decimal)
+				temp_str += std::string(":") +=
+					std::to_string(this->get_value());
+
+			if (show_hex)
+				temp_str += std::string(":0x") += byte_to_hex(this->get_value());
+
+			return temp_str;
+		}
+
 		ByteIterator begin() { return ByteIterator{this->bs, this->index}; }
 		ByteIterator end() { return ByteIterator{this->bs, this->index + 1}; }
 	};
@@ -189,7 +208,17 @@ public:
 		return bs;
 	}
 
+	bool operator==(const BitSlice& other) const {
+		if (this->size != other.size)
+			return false;
 
+		for (size_t i = 0; i < this->size; i++) {
+			if (this->get_byte_primitive(i) != other.get_byte_primitive(i))
+				return false;
+		}
+
+		return true;
+	}
 
 	void resize(size_t size) {
 		if (!this->own_ptr) {
@@ -225,6 +254,14 @@ public:
 		return {*this, index};
 	}
 
+	void set_all(byte value) { memset(this->bits, value, this->size); }
+
+	void flip_all() {
+		for (auto x = this->begin_bytes(); x != this->end_bytes(); ++x) {
+			(*x).flip();
+		}
+	}
+
 	std::vector<ByteWrapper> get_bytes_in_range(size_t start, size_t end) {
 		this->check_in_bounds(start, false);
 		this->check_in_bounds(end, false);
@@ -248,8 +285,8 @@ public:
 	}
 
 	std::string to_string(
-		bool show_separator = false, bool reverse = false,
-		bool show_decimal_values = false, bool show_hex_values = false) const {
+		bool reverse = false, bool show_decimal = false, bool show_hex = false,
+		bool show_separator = false) {
 		std::string temp_str;
 
 		for (size_t byte_ = 0; byte_ < this->size; byte_++) {
@@ -257,20 +294,12 @@ public:
 				this->bits[reverse ? (this->size - byte_ - 1) : byte_];
 
 			// display a separator between bytes
-			if (show_separator)
+			if ((show_decimal || show_hex) || show_separator) {
 				temp_str += '|';
-
-			// show each bit
-			for (size_t bit = 8; bit > 0; bit--) {
-				temp_str +=
-					std::to_string(binmgr__GET_BIT(current_byte, bit - 1));
 			}
 
-			if (show_decimal_values)
-				temp_str += std::string(":") += std::to_string(current_byte);
-
-			if (show_hex_values)
-				temp_str += std::string(":") + byte_to_hex(current_byte);
+			// show each bit
+			temp_str += this->get_byte(byte_).to_string(show_decimal, show_hex);
 		}
 
 		return std::string("0b") += temp_str;

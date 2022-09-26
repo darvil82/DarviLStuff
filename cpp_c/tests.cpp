@@ -34,7 +34,7 @@ int main() {
 		bit = bit.get_index() % 2;
 	}
 
-	std::cout << a.to_string(true, false, true) << std::endl;
+	std::cout << a.to_string() << std::endl;
 
 	for (auto x = a.begin_bytes(); x != a.end_bytes(); ++x) {
 		printf("byte n: %d\n", (*x).get_index());

@@ -127,10 +127,6 @@ class BitSlice {
 			// we want to multiply by 8 here because we want to get the bit
 			ByteIterator(BitSlice& bs, size_t index = 0) :
 				BitSliceIterator{bs, index * 8} {}
-
-			BitWrapper operator*() const override {
-				return {this->bs, this->current};
-			}
 		};
 
 	public:
@@ -164,7 +160,8 @@ class BitSlice {
 					std::to_string(this->get_value());
 
 			if (show_hex)
-				temp_str += std::string(":0x") += byte_to_hex(this->get_value());
+				temp_str += std::string(":0x") +=
+					byte_to_hex(this->get_value());
 
 			return temp_str;
 		}
@@ -184,13 +181,13 @@ public:
 		memcpy(this->bits, &value, this->size);
 	}
 
-	BitSlice(const char* value, bool include_null_terminator = false) :
-		bits{(byte*)value}, own_ptr{false} {
+	BitSlice(char* value, bool include_null_terminator = false) :
+		bits{reinterpret_cast<byte*>(value)}, own_ptr{false} {
 		this->set_size(strlen(value) + include_null_terminator);
 	}
 
 	template<typename T>
-	BitSlice(T* value) : bits{(byte*)value}, own_ptr{false} {
+	BitSlice(T* value) : bits{reinterpret_cast<byte*>(value)}, own_ptr{false} {
 		this->set_size(sizeof(*value));
 	}
 

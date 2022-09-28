@@ -11,7 +11,7 @@ class test {
 
 int main() {
 	test thing;
-	const char thing2[] = "hello";
+	char thing2[] = "hello";
 
 	BitSlice bss[] = {
 		{thing2}, {12}, {&thing}, BitSlice::from_size(1), {167},
@@ -44,4 +44,3 @@ int main() {
 		}
 	}
 }
-

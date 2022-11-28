@@ -217,14 +217,23 @@ public:
 		return true;
 	}
 
-
-
 	void resize(size_t size) {
 		if (!this->own_ptr) {
 			throw ResizeCustomPointerError();
 		}
+
+		// if the size is the same, we don't need to do anything
+		if (this->size == size)
+			return;
+
+		size_t prev_size = this->size;
+
 		this->set_size(size);
-		this->bits = (byte*)realloc(this->bits, this->size);
+		this->bits = static_cast<byte*>(realloc(this->bits, size));
+
+		// if the size is bigger, we need to clear the new memory
+		if (size > prev_size)
+			memset(this->bits + prev_size, 0, size - prev_size);
 	}
 
 	size_t get_size() const { return this->size; }

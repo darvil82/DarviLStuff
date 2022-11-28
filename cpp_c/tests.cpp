@@ -14,7 +14,7 @@ int main() {
 	char thing2[] = "hello";
 
 	BitSlice bss[] = {
-		{thing2}, {12}, {&thing}, BitSlice::from_size(1), {167},
+		{thing2}, {12}, {&thing}, BitSlice::from_size(5), {167},
 	};
 
 	// set the first bit of the third byte of "thing2" to 1.
@@ -38,9 +38,9 @@ int main() {
 	std::cout << a.to_string() << std::endl;
 
 	for (auto x = a.begin_bytes(); x != a.end_bytes(); ++x) {
-		printf("byte n: %d\n", (*x).get_index());
+		printf("byte n: %zu\n", (*x).get_index());
 		for (auto bit : *x) {
-			printf("\tbit n: %d = %d\n", bit.get_index(), bit.get_value());
+			printf("\tbit n: %zu = %d\n", bit.get_index(), bit.get_value());
 		}
 	}
 }
